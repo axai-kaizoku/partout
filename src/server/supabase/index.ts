@@ -6,14 +6,14 @@ const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
-  return createServerClient(supabaseUrl!, supabaseKey!, {
+  return createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
-      getAll() {
-        return cookieStore.getAll();
+      async getAll() {
+        return (await cookieStore).getAll();
       },
       setAll(cookiesToSet) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          cookiesToSet.forEach(async ({ name, value, options }) => (await cookieStore).set(name, value, options));
         } catch {
           // The `setAll` method was called from a Server Component.
           // This can be ignored if you have middleware refreshing
@@ -22,4 +22,15 @@ export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
       },
     },
   });
+};
+
+export const getUser = async () => {
+  const supabase = createClient(cookies());
+  try {
+    const data = await supabase.auth.getUser();
+    return data;
+  } catch (error) {
+    console.error("[Supabase Session Error]:", error);
+    return null;
+  }
 };

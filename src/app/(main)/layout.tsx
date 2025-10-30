@@ -1,16 +1,19 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
-import { AuthProvider } from "@/hooks/use-auth";
+import { UserProvider } from "@/lib/providers/user-provider";
+import { getUser } from "@/server/supabase";
 import type { PropsWithChildren } from "react";
 
-export default function Layout({ children }: PropsWithChildren) {
+export default async function Layout({ children }: PropsWithChildren) {
+  const data = await getUser();
+
   return (
-    <AuthProvider>
+    <UserProvider user={data?.data?.user ?? null}>
       <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="max-w-7xl mx-auto p-5 grow bg-background ">{children}</main>
+        <main className="max-w-7xl mx-auto p-5 grow bg-background">{children}</main>
         <BottomNav />
       </div>
-    </AuthProvider>
+    </UserProvider>
   );
 }

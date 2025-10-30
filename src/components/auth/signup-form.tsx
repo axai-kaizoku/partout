@@ -2,26 +2,29 @@
 
 import type React from "react";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog as Alert, DialogDescription as AlertDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabaseBrowserClient } from "@/lib/supabase/client";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import { useAuth } from "@/hooks/use-auth"
+import { useState } from "react";
+import { useUser } from "@/hooks/use-user";
 
 export function SignupForm() {
   const router = useRouter();
+  const supabase = supabaseBrowserClient();
   // const { login } = useAuth()
+  const user = useUser();
+  console.log(user);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -48,13 +51,23 @@ export function SignupForm() {
 
     try {
       // Mock registration - in real app this would call an API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      const user = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.fullName,
+          },
+        },
+      });
+      console.log(user);
 
       // login({
       //   id: Date.now(),
-      //   name: `${formData.firstName} ${formData.lastName}`,
+      //   name: `${formData.fullName}`,
       //   email: formData.email,
-      //   avatar: `/placeholder.svg?height=40&width=40&text=${formData.firstName[0]}${formData.lastName[0]}`,
+      //   avatar: `/placeholder.svg?height=40&width=40&text=${formData.fullName[0]}${formData.lastName[0]}`,
       //   verified: false,
       //   memberSince: new Date().getFullYear().toString(),
       // })
@@ -78,27 +91,15 @@ export function SignupForm() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">First Name</Label>
-          <Input
-            id="firstName"
-            placeholder="John"
-            value={formData.firstName}
-            onChange={(e) => handleChange("firstName", e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input
-            id="lastName"
-            placeholder="Doe"
-            value={formData.lastName}
-            onChange={(e) => handleChange("lastName", e.target.value)}
-            required
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="fullName">Full Name</Label>
+        <Input
+          id="fullName"
+          placeholder="John"
+          value={formData.fullName}
+          onChange={(e) => handleChange("fullName", e.target.value)}
+          required
+        />
       </div>
 
       <div className="space-y-2">

@@ -236,7 +236,7 @@ export function PartsGrid() {
           >
             <div className="relative">
               <img
-                src={part.image || "/placeholder.svg"}
+                src={part.image || "/media/placeholder.svg"}
                 alt={part.title}
                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />

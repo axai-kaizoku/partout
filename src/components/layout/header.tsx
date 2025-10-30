@@ -15,12 +15,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-// import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
+import { supabaseBrowserClient } from "@/lib/supabase/client";
 
 const user = { name: "", avatar: "" };
 export function Header() {
   const router = useRouter();
+  const supabase = supabaseBrowserClient();
   const [searchQuery, setSearchQuery] = useState("");
   // const { user, logout } = useAuth();
 
@@ -31,8 +32,8 @@ export function Header() {
     }
   };
 
-  const handleLogout = () => {
-    // logout();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     router.push("/");
   };
 
@@ -91,7 +92,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                      <AvatarImage src={user.avatar || "/media/placeholder.svg"} alt={user.name} />
                       <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </Button>

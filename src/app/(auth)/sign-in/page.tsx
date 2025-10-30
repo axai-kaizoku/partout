@@ -1,22 +1,22 @@
-import { SignupForm } from "@/components/auth/signup-form";
+import { LoginForm } from "@/components/auth/login-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-export default function SignupPage() {
+export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="font-playfair text-2xl font-bold">Join Partout.com</CardTitle>
-            <CardDescription>Create your account to start buying and selling auto parts</CardDescription>
+            <CardTitle className="font-playfair text-2xl font-bold">Welcome Back</CardTitle>
+            <CardDescription>Sign in to your Partout.com account to continue shopping</CardDescription>
           </CardHeader>
           <CardContent>
-            <SignupForm />
+            <LoginForm />
             <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">Already have an account? </span>
-              <Link href="/auth/login" className="text-accent hover:underline font-medium">
-                Sign in
+              <span className="text-muted-foreground">Don't have an account? </span>
+              <Link href="/sign-up" className="text-accent hover:underline font-medium">
+                Sign up
               </Link>
             </div>
           </CardContent>

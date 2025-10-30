@@ -3,7 +3,6 @@
 import { Home, Search, ShoppingCart, User, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
-// import { useAuth } from "@/hooks/use-auth"
 
 export function BottomNav() {
   const router = useRouter();

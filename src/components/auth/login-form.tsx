@@ -10,11 +10,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog as Alert, DialogDescription as AlertDescription } from "@/components/ui/dialog";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import { useAuth } from "@/hooks/use-auth";
+import { supabaseBrowserClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
   const router = useRouter();
-  // const { login } = useAuth();
+  const supabase = supabaseBrowserClient();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,21 +30,13 @@ export function LoginForm() {
     setError("");
 
     try {
-      // Mock authentication - in real app this would call an API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      if (formData.email === "demo@partout.com" && formData.password === "password") {
-        // login({
-        //   id: 1,
-        //   name: "Demo User",
-        //   email: formData.email,
-        //   avatar: "/placeholder.svg?height=40&width=40&text=DU",
-        //   verified: true,
-        //   memberSince: "2023",
-        // });
+      if (!res.error) {
         router.push("/");
-      } else {
-        setError("Invalid email or password");
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
