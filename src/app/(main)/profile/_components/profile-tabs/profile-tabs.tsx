@@ -1,5 +1,8 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { OrderHistory } from "./order-history";
+import { FavoritesList } from "./favorites-list";
+import { AccountSettings } from "./account-settings";
 // import { OrderHistory } from "./order-history"
 // import { FavoritesList } from "./favorites-list"
 // import { AccountSettings } from "./account-settings"
@@ -14,18 +17,15 @@ export function ProfileTabs() {
       </TabsList>
 
       <TabsContent value="orders" className="mt-6">
-        {/* <OrderHistory /> */}
-        order history
+        <OrderHistory />
       </TabsContent>
 
       <TabsContent value="favorites" className="mt-6">
-        {/* <FavoritesList /> */}
-        FavoritesList
+        <FavoritesList />
       </TabsContent>
 
       <TabsContent value="settings" className="mt-6">
-        {/* <AccountSettings /> */}
-        AccountSettings
+        <AccountSettings />
       </TabsContent>
     </Tabs>
   );

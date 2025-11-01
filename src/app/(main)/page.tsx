@@ -10,7 +10,6 @@ import { MapPin, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return <div>Hey</div>;
   return (
     <div className="pb-20">
       {/* Hero Section */}

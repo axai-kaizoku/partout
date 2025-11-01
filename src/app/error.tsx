@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Error() {
+  const router = useRouter();
   return (
     <div className="h-full min-h-[90dvh] w-full flex  flex-col gap-0 justify-center items-center">
       <div className="text-9xl text-neutral-800/10">Error</div>
@@ -14,10 +15,8 @@ export default function Error() {
         or go back to safety.
       </p>
 
-      <Button asChild size={"sm"} className="mt-4 mb-3">
-        <Link prefetch={false} href={"/"}>
-          Reload
-        </Link>
+      <Button onClick={() => router.refresh()} size={"sm"} className="mt-4 mb-3">
+        Reload
       </Button>
     </div>
   );

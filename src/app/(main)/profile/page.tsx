@@ -2,7 +2,7 @@
 import { getUser } from "@/server/supabase";
 import { unauthorized } from "next/navigation";
 import { ProfileHeader } from "./_components/profile-header";
-import { ProfileTabs } from "./_components/profile-tabs";
+import { ProfileTabs } from "./_components/profile-tabs/profile-tabs";
 // import { AuthGuard } from "@/components/auth-guard"
 
 export default async function Page() {
