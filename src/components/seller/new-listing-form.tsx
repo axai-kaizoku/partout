@@ -24,7 +24,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,11 +37,32 @@ import { Upload, X, Package, DollarSign, Car, Camera, Loader2 } from "lucide-rea
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 
+// Types for image handling
+interface ImagePreview {
+  id: string;
+  file: File;
+  preview: string;
+  uploaded?: {
+    url: string;
+    reducedUrl: string;
+    key: string;
+  };
+  isUploading?: boolean;
+}
+
 export function NewListingForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<ImagePreview[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => URL.revokeObjectURL(img.preview));
+    };
+  }, [images]);
   const [formData, setFormData] = useState({
     // Basic Info (matches parts table)
     title: "",
@@ -118,12 +139,28 @@ export function NewListingForm() {
   const materials = ["Ceramic", "Metal", "Plastic", "Rubber", "Carbon Fiber", "Aluminum", "Steel"];
   const warranties = ["No Warranty", "30 Days", "90 Days", "6 Months", "1 Year", "2 Years", "3 Years", "Lifetime"];
 
-  const uploadMutation = api.image.uploadPartImageToBucket.useMutation({
-    onSuccess: (data) => {
-      console.log("Image uploaded successfully:", data);
+  // Image upload mutation
+  const uploadImageMutation = api.image.uploadTempImage.useMutation({
+    onSuccess: (data, variables) => {
+      // Update the image in state with upload result
+      setImages((prev) =>
+        prev.map((img) =>
+          img.id === variables.fileName
+            ? {
+                ...img,
+                uploaded: data,
+                isUploading: false,
+              }
+            : img
+        )
+      );
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       console.error("Failed to upload image:", error);
+      // Show user-friendly error message
+      alert(`Failed to upload image: ${error.message || "Unknown error"}`);
+      // Remove failed upload from state
+      setImages((prev) => prev.filter((img) => img.id !== variables.fileName));
     },
   });
 
@@ -132,16 +169,73 @@ export function NewListingForm() {
     setIsLoading(true);
 
     try {
+      // Validate that all images are uploaded
+      const uploadedImages = images.filter((img) => img.uploaded && !img.isUploading);
+      if (images.length > 0 && uploadedImages.length !== images.length) {
+        alert("Please wait for all images to finish uploading before submitting.");
+        setIsLoading(false);
+        return;
+      }
+
       // TODO: Implement API call to create part listing
-      // This should call a tRPC mutation that:
-      // 1. Creates the part record in the parts table
-      // 2. Creates part images in partImages table
-      // 3. Creates compatibility records in partCompatibility table
-      // 4. Creates or links to shipping profile in shippingProfiles table
-      // 5. Updates seller stats if needed
+      // Example API payload structure with uploaded images:
+      const apiPayload = {
+        // Parts table data
+        part: {
+          title: formData.title,
+          description: formData.description,
+          categoryId: formData.categoryId,
+          partNumber: formData.partNumber,
+          oem: formData.oem,
+          brand: formData.brand,
+          condition: formData.condition,
+          price: parseFloat(formData.price),
+          originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
+          currency: formData.currency,
+          isNegotiable: formData.isNegotiable,
+          quantity: parseInt(formData.quantity),
+          weight: formData.weight ? parseFloat(formData.weight) : null,
+          dimensions: formData.dimensions,
+          warranty: formData.warranty,
+          material: formData.material,
+          specifications: formData.specifications,
+        },
+        // Part images data (from uploaded images)
+        images: uploadedImages.map((img, index) => ({
+          url: img.uploaded!.url,
+          sortOrder: index,
+          isPrimary: index === 0,
+          altText: `${formData.title} - Image ${index + 1}`,
+        })),
+        // Part compatibility data
+        compatibility: {
+          makeId: formData.makeId,
+          modelId: formData.modelId,
+          yearStart: parseInt(formData.yearStart),
+          yearEnd: parseInt(formData.yearEnd),
+          engine: formData.engine,
+          trim: formData.trim,
+        },
+        // Shipping profile data
+        shipping: {
+          baseCost: parseFloat(formData.shippingCost),
+          freeShippingThreshold: formData.freeShippingThreshold ? parseFloat(formData.freeShippingThreshold) : null,
+          estimatedDaysMin: formData.estimatedDaysMin ? parseInt(formData.estimatedDaysMin) : null,
+          estimatedDaysMax: formData.estimatedDaysMax ? parseInt(formData.estimatedDaysMax) : null,
+          carrier: formData.carrier,
+        },
+      };
+
+      // This should call a tRPC mutation like:
+      // await api.parts.create.mutate(apiPayload);
 
       // Mock API call for now
+      console.log("API Payload:", apiPayload);
       await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Clean up image preview URLs
+      images.forEach((img) => URL.revokeObjectURL(img.preview));
+
       router.push("/sell");
     } catch (error) {
       console.error("Failed to create listing:", error);
@@ -155,20 +249,78 @@ export function NewListingForm() {
   };
 
   const addImage = () => {
-    // TODO: Implement real image upload
-    // This should:
-    // 1. Open file picker
-    // 2. Upload to cloud storage (S3, Cloudinary, etc.)
-    // 3. Store URLs for later insertion into partImages table
-    // 4. Handle image optimization and multiple sizes
-
-    // Mock image upload for now
-    const newImage = `/placeholder.svg?height=200&width=200&text=Part+Image+${images.length + 1}`;
-    setImages((prev) => [...prev, newImage]);
+    fileInputRef.current?.click();
   };
 
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+    for (const file of Array.from(files)) {
+      // Validate file type
+      if (!validImageTypes.includes(file.type)) {
+        alert(`${file.name} is not a valid image format. Please use JPEG, PNG, WebP, or GIF.`);
+        continue;
+      }
+
+      // Validate file size
+      if (file.size > maxFileSize) {
+        alert(`${file.name} is too large. Please use images smaller than 10MB.`);
+        continue;
+      }
+
+      // Check if we already have 4 images
+      if (images.length >= 4) {
+        alert("You can only upload up to 4 images.");
+        break;
+      }
+
+      // Create preview
+      const preview = URL.createObjectURL(file);
+      const imageId = `${Date.now()}-${file.name}`;
+
+      const newImage: ImagePreview = {
+        id: imageId,
+        file,
+        preview,
+        isUploading: true,
+      };
+
+      // Add to state immediately for preview
+      setImages((prev) => [...prev, newImage]);
+
+      // Convert to base64 and upload
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+
+        uploadImageMutation.mutate({
+          imageData: base64Data,
+          fileName: imageId,
+          contentType: file.type,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removeImage = (imageId: string) => {
+    setImages((prev) => {
+      const imageToRemove = prev.find((img) => img.id === imageId);
+      if (imageToRemove) {
+        // Clean up preview URL to prevent memory leaks
+        URL.revokeObjectURL(imageToRemove.preview);
+      }
+      return prev.filter((img) => img.id !== imageId);
+    });
   };
 
   const nextStep = () => {
@@ -193,7 +345,11 @@ export function NewListingForm() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
-            <div key={step.number} className="flex items-center">
+            <div
+              key={step.number}
+              className="flex items-center cursor-pointer"
+              onClick={() => setCurrentStep(index + 1)}
+            >
               <div
                 className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                   currentStep >= step.number
@@ -498,44 +654,98 @@ export function NewListingForm() {
               <CardTitle>Photos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {images.map((image, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={image || "/placeholder.svg"}
-                      alt={`Part image ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-md"
-                    />
+                  <div key={image.id} className="relative group">
+                    <div className="relative w-full h-32 rounded-md overflow-hidden bg-gray-100">
+                      <img src={image.preview} alt={`Part image ${index + 1}`} className="w-full h-full object-cover" />
+
+                      {/* Upload status overlay */}
+                      {image.isUploading && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <Loader2 className="h-6 w-6 text-white animate-spin" />
+                        </div>
+                      )}
+
+                      {/* Success indicator */}
+                      {image.uploaded && !image.isUploading && (
+                        <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full p-1">
+                          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Primary image indicator */}
+                      {index === 0 && (
+                        <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                          Primary
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Remove button */}
                     <Button
                       type="button"
                       variant="destructive"
                       size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+                      onClick={() => removeImage(image.id)}
+                      disabled={image.isUploading}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3 w-3" />
                     </Button>
                   </div>
                 ))}
 
+                {/* Add photo button */}
                 {images.length < 8 && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-32 border-dashed bg-transparent"
+                    className="h-32 border-dashed bg-transparent hover:bg-gray-50"
                     onClick={addImage}
+                    disabled={uploadImageMutation.isPending}
                   >
                     <div className="flex flex-col items-center gap-2">
-                      <Upload className="h-6 w-6" />
-                      <span className="text-sm">Add Photo</span>
+                      {uploadImageMutation.isPending ? (
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      ) : (
+                        <Upload className="h-6 w-6" />
+                      )}
+                      <span className="text-sm">{uploadImageMutation.isPending ? "Uploading..." : "Add Photo"}</span>
                     </div>
                   </Button>
                 )}
               </div>
 
-              <p className="text-sm text-muted-foreground">
-                Add up to 8 photos. The first photo will be used as the main image.
-              </p>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Add up to 8 photos. The first photo will be used as the main image.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Supported formats: JPEG, PNG, WebP, GIF. Max size: 10MB per image.
+                </p>
+                {images.length > 0 && (
+                  <p className="text-xs text-green-600">
+                    {images.filter((img) => img.uploaded).length} of {images.length} images uploaded successfully
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
