@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { api } from "@/trpc/react";
 
 export default function Home() {
   return (
@@ -214,6 +215,11 @@ export function PartsGrid() {
     },
   ];
 
+  const parts = api.part.getHomePageParts.useQuery(undefined, {
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  });
   const handlePartClick = (partId: number) => {
     router.push(`/parts/${partId}`);
   };

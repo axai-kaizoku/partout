@@ -2,6 +2,7 @@
 import { env } from "@/env";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -25,7 +26,7 @@ export const createClient = async (cookieStore: ReturnType<typeof cookies>) => {
   });
 };
 
-export const getUser = async () => {
+export const getUser = cache(async () => {
   const supabase = await createClient(cookies());
   try {
     const data = await supabase.auth.getUser();
@@ -34,4 +35,4 @@ export const getUser = async () => {
     console.error("[Supabase Session Error]:", error);
     return null;
   }
-};
+});
