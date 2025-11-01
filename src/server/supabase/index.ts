@@ -1,3 +1,4 @@
+"use server";
 import { env } from "@/env";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
@@ -5,7 +6,7 @@ import { cookies } from "next/headers";
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
+export const createClient = async (cookieStore: ReturnType<typeof cookies>) => {
   return createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       async getAll() {
@@ -25,7 +26,7 @@ export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
 };
 
 export const getUser = async () => {
-  const supabase = createClient(cookies());
+  const supabase = await createClient(cookies());
   try {
     const data = await supabase.auth.getUser();
     return data;

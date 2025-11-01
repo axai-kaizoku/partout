@@ -61,7 +61,12 @@ export function SignupForm() {
           },
         },
       });
-      console.log(user);
+
+      if (!user.error) {
+        router.push("/");
+      } else {
+        setError(user.error.message);
+      }
 
       // login({
       //   id: Date.now(),
@@ -71,7 +76,6 @@ export function SignupForm() {
       //   verified: false,
       //   memberSince: new Date().getFullYear().toString(),
       // })
-      router.push("/");
     } catch (err) {
       setError("An error occurred. Please try again.");
     } finally {

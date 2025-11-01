@@ -6,7 +6,7 @@ export default {
   schema: "./src/server/db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: env.NEXT_PUBLIC_SUPABASE_URL,
+    url: env.DATABASE_URL,
   },
   tablesFilter: ["partout_*"],
 } satisfies Config;

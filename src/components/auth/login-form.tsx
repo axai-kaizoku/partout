@@ -37,6 +37,8 @@ export function LoginForm() {
 
       if (!res.error) {
         router.push("/");
+      } else {
+        setError(res.error.message);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
