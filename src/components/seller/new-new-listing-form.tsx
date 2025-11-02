@@ -1,27 +1,3 @@
-"use client";
-
-/**
- * New Listing Form Component
- *
- * This form creates new part listings and requires the following API endpoints:
- *
- * 1. GET /api/categories - Fetch categories for dropdown (categories table)
- * 2. GET /api/vehicle-makes - Fetch vehicle makes (vehicleMakes table)
- * 3. GET /api/vehicle-models?makeId=X - Fetch models by make (vehicleModels table)
- * 4. POST /api/parts - Create new part listing with:
- *    - Part record (parts table)
- *    - Part images (partImages table)
- *    - Compatibility records (partCompatibility table)
- *    - Shipping profile (shippingProfiles table)
- * 5. POST /api/upload - Handle image uploads to cloud storage
- *
- * Form data maps to schema as follows:
- * - Basic info → parts table
- * - Vehicle compatibility → partCompatibility table
- * - Images → partImages table
- * - Shipping → shippingProfiles table
- */
-
 import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
@@ -37,8 +13,9 @@ import { Upload, X, Package, DollarSign, Car, Camera, Loader2 } from "lucide-rea
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
+import { useAppForm } from "../form";
+import z from "zod";
 
-// Types for image handling
 interface ImagePreview {
   id: string;
   file: File;
@@ -51,287 +28,161 @@ interface ImagePreview {
   isUploading?: boolean;
 }
 
-export function NewListingForm() {
+// const UserSchema = z.object({
+//   name: z
+//     .string()
+//     .regex(/^[A-Z]/, "Name must start with a capital letter")
+//     .min(3, "Name must be at least 3 characters long"),
+//   surname: z
+//     .string()
+//     .min(3, "Surname must be at least 3 characters long")
+//     .regex(/^[A-Z]/, "Surname must start with a capital letter"),
+//   isAcceptingTerms: z.boolean().refine((val) => val, {
+//     message: "You must accept the terms and conditions",
+//   }),
+//   contact: z.object({
+//     email: z.string().email("Invalid email address"),
+//     phone: z.string().optional(),
+//     preferredContactMethod: ContactMethod,
+//   }),
+// });
+// type User = z.infer<typeof UserSchema>;
+
+// title: "",
+// description: "",
+// categoryId: "", // References categories.id
+// partNumber: "",
+// oem: "", // Original Equipment Manufacturer
+// brand: "",
+// condition: "", // New, Used, Refurbished
+
+// // Pricing (matches parts table)
+// price: "",
+// originalPrice: "",
+// currency: "USD",
+// isNegotiable: false,
+// quantity: "1",
+
+// // Physical properties (matches parts table)
+// weight: "", // in lbs
+// dimensions: "", // "12.5 x 5.2 x 0.8 inches"
+// warranty: "", // "2 Years", "90 Days", etc.
+// material: "", // "Ceramic", "Metal", etc.
+
+// // Vehicle Compatibility (matches partCompatibility table)
+// makeId: "", // References vehicleMakes.id
+// modelId: "", // References vehicleModels.id
+// yearStart: "",
+// yearEnd: "",
+// engine: "", // "2.5L", "3.0L V6", etc.
+// trim: "", // "Base", "Sport", "M3", etc.
+
+// // Shipping (matches shippingProfiles table)
+// shippingCost: "",
+// freeShippingThreshold: "",
+// estimatedDaysMin: "",
+// estimatedDaysMax: "",
+// carrier: "", // "UPS", "FedEx", "USPS"
+
+// // Additional specifications as JSON (matches parts.specifications)
+// specifications: {} as Record<string, string>,
+
+const PartSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters long"),
+  description: z.string().min(10, "Description must be at least 10 characters long"),
+  categoryId: z.string().min(1, "Category is required"),
+  partNumber: z.string().min(1, "Part number is required"),
+  oem: z.string().min(1, "OEM is required"),
+  brand: z.string().min(1, "Brand is required"),
+  condition: z.string().min(1, "Condition is required"),
+  //
+  price: z.string().min(1, "Price is required"),
+  originalPrice: z.string().optional(),
+  currency: z.string().min(1, "Currency is required"),
+  isNegotiable: z.boolean().optional(),
+  quantity: z.string().min(1, "Quantity is required"),
+
+  //
+  weight: z.string().optional(),
+  dimensions: z.string().optional(),
+  warranty: z.string().optional(),
+  material: z.string().optional(),
+
+  //
+  makeId: z.string().optional(),
+  modelId: z.string().optional(),
+  yearStart: z.string().optional(),
+  yearEnd: z.string().optional(),
+  engine: z.string().optional(),
+  trim: z.string().optional(),
+
+  //
+  shippingCost: z.string().optional(),
+  freeShippingThreshold: z.string().optional(),
+  estimatedDaysMin: z.string().optional(),
+  estimatedDaysMax: z.string().optional(),
+  carrier: z.string().optional(),
+  specifications: z.record(z.string(), z.string()).optional(),
+});
+
+type Part = z.infer<typeof PartSchema>;
+
+const defaultPart = {
+  title: "",
+  description: "",
+  categoryId: "", // References categories.id
+  partNumber: "",
+  oem: "", // Original Equipment Manufacturer
+  brand: "",
+  condition: "", // New, Used, Refurbished
+
+  // Pricing (matches parts table)
+  price: "",
+  originalPrice: "",
+  currency: "USD",
+  isNegotiable: false,
+  quantity: "1",
+
+  // Physical properties (matches parts table)
+  weight: "", // in lbs
+  dimensions: "", // "12.5 x 5.2 x 0.8 inches"
+  warranty: "", // "2 Years", "90 Days", etc.
+  material: "", // "Ceramic", "Metal", etc.
+
+  // Vehicle Compatibility (matches partCompatibility table)
+  makeId: "", // References vehicleMakes.id
+  modelId: "", // References vehicleModels.id
+  yearStart: "",
+  yearEnd: "",
+  engine: "", // "2.5L", "3.0L V6", etc.
+  trim: "", // "Base", "Sport", "M3", etc.
+
+  // Shipping (matches shippingProfiles table)
+  shippingCost: "",
+  freeShippingThreshold: "",
+  estimatedDaysMin: "",
+  estimatedDaysMax: "",
+  carrier: "", // "UPS", "FedEx", "USPS"
+
+  // Additional specifications as JSON (matches parts.specifications)
+  specifications: {} as Record<string, string>,
+};
+
+export function NewNewListingForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+
   const [currentStep, setCurrentStep] = useState(1);
-  const [images, setImages] = useState<ImagePreview[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Cleanup preview URLs on unmount
-  useEffect(() => {
-    return () => {
-      images.forEach((img) => URL.revokeObjectURL(img.preview));
-    };
-  }, [images]);
-  const [formData, setFormData] = useState({
-    // Basic Info (matches parts table)
-    title: "",
-    description: "",
-    categoryId: "", // References categories.id
-    partNumber: "",
-    oem: "", // Original Equipment Manufacturer
-    brand: "",
-    condition: "", // New, Used, Refurbished
-
-    // Pricing (matches parts table)
-    price: "",
-    originalPrice: "",
-    currency: "USD",
-    isNegotiable: false,
-    quantity: "1",
-
-    // Physical properties (matches parts table)
-    weight: "", // in lbs
-    dimensions: "", // "12.5 x 5.2 x 0.8 inches"
-    warranty: "", // "2 Years", "90 Days", etc.
-    material: "", // "Ceramic", "Metal", etc.
-
-    // Vehicle Compatibility (matches partCompatibility table)
-    makeId: "", // References vehicleMakes.id
-    modelId: "", // References vehicleModels.id
-    yearStart: "",
-    yearEnd: "",
-    engine: "", // "2.5L", "3.0L V6", etc.
-    trim: "", // "Base", "Sport", "M3", etc.
-
-    // Shipping (matches shippingProfiles table)
-    shippingCost: "",
-    freeShippingThreshold: "",
-    estimatedDaysMin: "",
-    estimatedDaysMax: "",
-    carrier: "", // "UPS", "FedEx", "USPS"
-
-    // Additional specifications as JSON (matches parts.specifications)
-    specifications: {} as Record<string, string>,
-  });
-
-  const categories = [
-    "Engine Parts",
-    "Brake System",
-    "Electrical",
-    "Body Parts",
-    "Suspension",
-    "Exhaust",
-    "Interior",
-    "Exterior",
-    "Tools",
-    "Accessories",
-  ];
-
-  const brands = [
-    "BMW",
-    "Mercedes-Benz",
-    "Audi",
-    "Toyota",
-    "Honda",
-    "Ford",
-    "Chevrolet",
-    "Nissan",
-    "Hyundai",
-    "Volkswagen",
-    "Jeep",
-    "Subaru",
-  ];
-
-  const conditions = ["New", "Used", "Refurbished"];
-  const currencies = ["USD", "CAD", "EUR", "GBP"];
-  const carriers = ["UPS", "FedEx", "USPS", "DHL"];
-  const materials = ["Ceramic", "Metal", "Plastic", "Rubber", "Carbon Fiber", "Aluminum", "Steel"];
-  const warranties = ["No Warranty", "30 Days", "90 Days", "6 Months", "1 Year", "2 Years", "3 Years", "Lifetime"];
-
-  // Image upload mutation
-  const uploadImageMutation = api.image.uploadTempImage.useMutation({
-    onSuccess: (data, variables) => {
-      // Update the image in state with upload result
-      setImages((prev) =>
-        prev.map((img) =>
-          img.id === variables.fileName
-            ? {
-                ...img,
-                uploaded: data,
-                isUploading: false,
-              }
-            : img
-        )
-      );
+  const form = useAppForm({
+    defaultValues: defaultPart,
+    validators: {
+      onChange: PartSchema,
     },
-    onError: (error, variables) => {
-      console.error("Failed to upload image:", error);
-      // Show user-friendly error message
-      alert(`Failed to upload image: ${error.message || "Unknown error"}`);
-      // Remove failed upload from state
-      setImages((prev) => prev.filter((img) => img.id !== variables.fileName));
+    onSubmit: ({ value }) => {
+      console.log("Form submitted:", value);
     },
   });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      // Validate that all images are uploaded
-      const uploadedImages = images.filter((img) => img.uploaded && !img.isUploading);
-      if (images.length > 0 && uploadedImages.length !== images.length) {
-        alert("Please wait for all images to finish uploading before submitting.");
-        setIsLoading(false);
-        return;
-      }
-
-      // TODO: Implement API call to create part listing
-      // Example API payload structure with uploaded images:
-      const apiPayload = {
-        // Parts table data
-        part: {
-          title: formData.title,
-          description: formData.description,
-          categoryId: formData.categoryId,
-          partNumber: formData.partNumber,
-          oem: formData.oem,
-          brand: formData.brand,
-          condition: formData.condition,
-          price: parseFloat(formData.price),
-          originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-          currency: formData.currency,
-          isNegotiable: formData.isNegotiable,
-          quantity: parseInt(formData.quantity),
-          weight: formData.weight ? parseFloat(formData.weight) : null,
-          dimensions: formData.dimensions,
-          warranty: formData.warranty,
-          material: formData.material,
-          specifications: formData.specifications,
-        },
-        // Part images data (from uploaded images)
-        images: uploadedImages.map((img, index) => ({
-          url: img.uploaded!.url,
-          sortOrder: index,
-          isPrimary: index === 0,
-          altText: `${formData.title} - Image ${index + 1}`,
-        })),
-        // Part compatibility data
-        compatibility: {
-          makeId: formData.makeId,
-          modelId: formData.modelId,
-          yearStart: parseInt(formData.yearStart),
-          yearEnd: parseInt(formData.yearEnd),
-          engine: formData.engine,
-          trim: formData.trim,
-        },
-        // Shipping profile data
-        shipping: {
-          baseCost: parseFloat(formData.shippingCost),
-          freeShippingThreshold: formData.freeShippingThreshold ? parseFloat(formData.freeShippingThreshold) : null,
-          estimatedDaysMin: formData.estimatedDaysMin ? parseInt(formData.estimatedDaysMin) : null,
-          estimatedDaysMax: formData.estimatedDaysMax ? parseInt(formData.estimatedDaysMax) : null,
-          carrier: formData.carrier,
-        },
-      };
-
-      // This should call a tRPC mutation like:
-      // await api.parts.create.mutate(apiPayload);
-
-      // Mock API call for now
-      console.log("API Payload:", apiPayload);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Clean up image preview URLs
-      images.forEach((img) => URL.revokeObjectURL(img.preview));
-
-      router.push("/sell");
-    } catch (error) {
-      console.error("Failed to create listing:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = (field: string, value: string | boolean | string[]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const addImage = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
-
-    const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
-    const maxFileSize = 10 * 1024 * 1024; // 10MB
-
-    for (const file of Array.from(files)) {
-      // Validate file type
-      if (!validImageTypes.includes(file.type)) {
-        alert(`${file.name} is not a valid image format. Please use JPEG, PNG, WebP, or GIF.`);
-        continue;
-      }
-
-      // Validate file size
-      if (file.size > maxFileSize) {
-        alert(`${file.name} is too large. Please use images smaller than 10MB.`);
-        continue;
-      }
-
-      // Check if we already have 4 images
-      if (images.length >= 4) {
-        alert("You can only upload up to 4 images.");
-        break;
-      }
-
-      // Create preview
-      const preview = URL.createObjectURL(file);
-      const imageId = `${Date.now()}-${file.name}`;
-
-      const newImage: ImagePreview = {
-        id: imageId,
-        file,
-        preview,
-        isUploading: true,
-      };
-
-      // Add to state immediately for preview
-      setImages((prev) => [...prev, newImage]);
-
-      // Convert to base64 and upload
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64Data = reader.result as string;
-
-        uploadImageMutation.mutate({
-          imageData: base64Data,
-          fileName: imageId,
-          contentType: file.type,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const removeImage = (imageId: string) => {
-    setImages((prev) => {
-      const imageToRemove = prev.find((img) => img.id === imageId);
-      if (imageToRemove) {
-        // Clean up preview URL to prevent memory leaks
-        URL.revokeObjectURL(imageToRemove.preview);
-      }
-      return prev.filter((img) => img.id !== imageId);
-    });
-  };
-
-  const nextStep = () => {
-    // TODO: Add validation for each step before proceeding
-    if (currentStep < 4) setCurrentStep(currentStep + 1);
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
 
   const steps = [
     { number: 1, title: "Basic Info", icon: Package },
