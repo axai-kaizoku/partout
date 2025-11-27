@@ -15,3 +15,7 @@ The form is now ready for:
 - Real-time model filtering based on selected make
 
 The form structure now perfectly aligns with our e-commerce schema and provides a solid foundation for the full implementation.
+
+
+# Current state: 11/27/2025 - 00:21
+- [ ] creating form with tanstack form

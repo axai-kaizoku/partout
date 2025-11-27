@@ -19,7 +19,7 @@ export const SelectField = ({ label, options, placeholder }: SelectFieldProps) =
 
   return (
     <div className="space-y-2">
-      <div className="space-y-1">
+      <div className="space-y-2">
         <Label htmlFor={field.name}>{label}</Label>
         <Select value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
           <SelectTrigger id={field.name} onBlur={field.handleBlur}>
