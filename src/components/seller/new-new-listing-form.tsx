@@ -2,7 +2,7 @@ import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, LoadingButton } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -201,7 +201,7 @@ export function NewNewListingForm() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
-            <div
+            <button
               key={step.number}
               className="flex items-center cursor-pointer"
               onClick={() => {
@@ -231,31 +231,277 @@ export function NewNewListingForm() {
               {index < steps.length - 1 && (
                 <div className={`flex-1 h-0.5 mx-4 ${currentStep > step.number ? "bg-accent" : "bg-border"}`} />
               )}
-            </div>
+            </button>
           ))}
         </div>
       </div>
 
-      <form id="basic-info">
+      <form id="basic-info" onSubmit={(e) => {
+        e.preventDefault();
+        console.log("Form submitted");
+      }}>
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form.AppField name="title" >
-              {(field) => <field.TextField label="Title *" placeholder="e.g., BMW E46 Brake Pads - Front Set" required />}
-            </form.AppField>
-            <form.AppField name="description" >
-              {(field) => <field.TextAreaField label="Description *" placeholder="Describe the part condition, compatibility, and any important details..."
-                required
-              />}
-            </form.AppField>
-            <form.AppField name="categoryId" >
-              {(field) => <field.SelectField label="Category *" placeholder="Select a category" options={categories.map((category) => ({ value: category.id, label: category.name }))} />}
-            </form.AppField>
+            {currentStep === 1 ? (
+              <>
+                <form.AppField name="title" >
+                  {(field) => <field.TextField label="Title *" placeholder="e.g., BMW E46 Brake Pads - Front Set" required />}
+                </form.AppField>
+                <form.AppField name="description" >
+                  {(field) => <field.TextAreaField label="Description *" placeholder="Describe the part condition, compatibility, and any important details..."
+                    required
+                  />}
+                </form.AppField>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <form.AppField name="categoryId" >
+                    {(field) => <field.SelectField label="Category *" placeholder="Select a category" options={[]} />}
+                  </form.AppField>
+                  <form.AppField name="condition" >
+                    {(field) => <field.SelectField label="Condition *" placeholder="Select a condition" options={[]} />}
+                  </form.AppField>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <form.AppField name="partNumber" >
+                    {(field) => <field.TextField label="Part Number *" placeholder="e.g., 34116761280" />}
+                  </form.AppField>
+                  <form.AppField name="oem" >
+                    {(field) => <field.TextField label="OEM *" placeholder="e.g., BMW OEM, Bosch" />}
+                  </form.AppField>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <form.AppField name="material" >
+                    {(field) => <field.SelectField label="Material " placeholder="Select a material" options={[]} />}
+                  </form.AppField>
+                  <form.AppField name="warranty" >
+                    {(field) => <field.SelectField label="Warranty " placeholder="Select a warranty" options={[]} />}
+                  </form.AppField>
+                  <form.AppField name="quantity" >
+                    {(field) => <field.TextField label="Quantity " placeholder="Enter the quantity" defaultValue={1} type="number" min={1} max={100} />}
+                  </form.AppField>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <form.AppField name="weight">
+                    {(field) => <field.TextField label="Weight (lbs)" placeholder="2.5" min={0} max={100} type="number" />}
+                  </form.AppField>
+                  <form.AppField name="dimensions">
+                    {(field) => <field.TextField label="Dimensions" placeholder="e.g., 12.5 x 5.2 x 0.8 inches" />}
+                  </form.AppField>
+                </div>
+              </>
+            ) : currentStep === 2 ?
+
+              <>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <form.AppField name="makeId" >
+                    {(field) => <field.SelectField label="Vehicle Make*" placeholder="Select a vehicle make" options={[]} />}
+                  </form.AppField>
+                  <form.AppField name="modelId" >
+                    {(field) => <field.SelectField label="Vehicle Model*" placeholder="Select a vehicle model" options={[]} />}
+                  </form.AppField>
+                </div>
+
+
+
+
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <form.AppField name="yearStart" >
+                    {(field) => <field.TextField label="Year Start *" placeholder="1999" type="number" min={0} max={new Date().getFullYear()} />}
+                  </form.AppField>
+                  <form.AppField name="yearEnd" >
+                    {(field) => <field.TextField label="Year End *" placeholder="2024" type="number" min={0} max={new Date().getFullYear()} />}
+                  </form.AppField>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <form.AppField name="engine" >
+                    {(field) => <field.TextField label="Engine "
+                      placeholder="e.g., 2.5L, 3.0L V6"
+
+                    />}
+                  </form.AppField>
+                  <form.AppField name="trim" >
+                    {(field) => <field.TextField label="Trim Level"
+
+                      placeholder="e.g., Base, Sport, M3"
+                    />}
+                  </form.AppField>
+                </div>
+
+                <form.AppField name="brand" >
+                  {(field) => <field.TextField label="Part Brand "
+                    placeholder="e.g., BMW, Bosch, Brembo"
+                  />}
+                </form.AppField>
+
+              </> : currentStep === 3 ? <>
+
+
+
+
+
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                // onChange={handleFileSelect}
+                />
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {[].map((image, index) => (
+                    <div key={index} className="relative group">
+                      <div className="relative w-full h-32 rounded-md overflow-hidden bg-gray-100">
+                        <img src={image.preview} alt={`Part image ${index + 1}`} className="w-full h-full object-cover" />
+
+                        {/* Upload status overlay */}
+                        {/* {image.isUploading && ( */}
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <Loader2 className="h-6 w-6 text-white animate-spin" />
+                        </div>
+                        {/* )} */}
+
+                        {/* Success indicator */}
+                        {/* {image.uploaded && !image.isUploading && ( */}
+                        <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full p-1">
+                          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        {/* )} */}
+
+                        {/* Primary image indicator */}
+                        {index === 0 && (
+                          <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                            Primary
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Remove button */}
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+                      // onClick={() => removeImage(image.id)}
+                      // disabled={image.isUploading}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+
+                  {/* Add photo button */}
+                  {[].length < 8 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-32 border-dashed bg-transparent hover:bg-gray-50"
+                    // onClick={addImage}
+                    // disabled={uploadImageMutation.isPending}
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        {/* {uploadImageMutation.isPending ? (
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                        ) : (
+                          <Upload className="h-6 w-6" />
+                        )} */}
+                        {/* <span className="text-sm">{uploadImageMutation.isPending ? "Uploading..." : "Add Photo"}</span> */}
+                        <span className="text-sm">Add Photo</span>
+                      </div>
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Add up to 8 photos. The first photo will be used as the main image.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Supported formats: JPEG, PNG, WebP, GIF. Max size: 10MB per image.
+                  </p>
+                  {[].length > 0 && (
+                    <p className="text-xs text-green-600">
+                      {/* {images.filter((img) => img.uploaded).length} of {images.length} images uploaded successfully */}
+                    </p>
+                  )}
+                </div>
+              </> : currentStep === 4 ? <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <form.AppField name="price" >
+                    {(field) => <field.TextField label="Price *" placeholder="89.99" type="number" min={0} max={1000000} required />}
+                  </form.AppField>
+                  <form.AppField name="originalPrice" >
+                    {(field) => <field.TextField label="Original Price " placeholder="120.00" type="number" min={0} max={1000000} required />}
+                  </form.AppField>
+                  <form.AppField name="currency" >
+                    {(field) => <field.SelectField label="Currency *" placeholder="Select a currency" options={[]} />}
+                  </form.AppField>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <form.AppField name="isNegotiable">
+                    {(field) => <field.CheckboxField label="Price is negotiable" />}
+                  </form.AppField>
+                </div>
+
+                <Separator />
+
+
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <form.AppField name="shippingCost" >
+                    {(field) => <field.TextField label="Shipping Cost *" placeholder="12.90" type="number" min={0} max={1000000} required />}
+                  </form.AppField>
+                  <form.AppField name="freeShippingThreshold" >
+                    {(field) => <field.TextField label="Free Shipping Threshold *" placeholder="100.00" type="number" min={0} max={1000000} required />}
+                  </form.AppField>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <form.AppField name="estimatedDaysMin" >
+                    {(field) => <field.TextField label="Estimated Days Min " placeholder="Enter the estimated days min" type="number" min={0} max={1000000} required />}
+                  </form.AppField>
+                  <form.AppField name="estimatedDaysMax" >
+                    {(field) => <field.TextField label="Estimated Days Max " placeholder="Enter the estimated days max" type="number" min={0} max={1000000} required />}
+                  </form.AppField>
+                  <form.AppField name="carrier" >
+                    {(field) => <field.SelectField label="Carrier " placeholder="Enter the carrier" options={[]} />}
+                  </form.AppField>
+                </div>
+
+              </> : null}
 
           </CardContent>
         </Card>
+
+        <div className="mt-6 flex items-center justify-between">
+          <Button type="button" variant="outline" disabled={currentStep === 1}>
+            Previous
+          </Button>
+
+          <div className="flex gap-2">
+            {currentStep < 4 ? (
+              <Button type="button" >
+                Next
+              </Button>
+            ) : (
+              <LoadingButton type="submit" form="basic-info">
+                Create Listing
+              </LoadingButton>
+            )}
+          </div>
+        </div>
       </form>
 
     </div>
