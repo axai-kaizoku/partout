@@ -15,6 +15,9 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useAppForm } from "../form";
 import z from "zod";
+import { cn } from "@/lib/utils";
+import { carriers, conditions, currencies, materials, warranties } from "@/lib/constants/dropdown-data";
+import Image from "next/image";
 
 interface ImagePreview {
   id: string;
@@ -27,65 +30,6 @@ interface ImagePreview {
   };
   isUploading?: boolean;
 }
-
-// const UserSchema = z.object({
-//   name: z
-//     .string()
-//     .regex(/^[A-Z]/, "Name must start with a capital letter")
-//     .min(3, "Name must be at least 3 characters long"),
-//   surname: z
-//     .string()
-//     .min(3, "Surname must be at least 3 characters long")
-//     .regex(/^[A-Z]/, "Surname must start with a capital letter"),
-//   isAcceptingTerms: z.boolean().refine((val) => val, {
-//     message: "You must accept the terms and conditions",
-//   }),
-//   contact: z.object({
-//     email: z.string().email("Invalid email address"),
-//     phone: z.string().optional(),
-//     preferredContactMethod: ContactMethod,
-//   }),
-// });
-// type User = z.infer<typeof UserSchema>;
-
-// title: "",
-// description: "",
-// categoryId: "", // References categories.id
-// partNumber: "",
-// oem: "", // Original Equipment Manufacturer
-// brand: "",
-// condition: "", // New, Used, Refurbished
-
-// // Pricing (matches parts table)
-// price: "",
-// originalPrice: "",
-// currency: "USD",
-// isNegotiable: false,
-// quantity: "1",
-
-// // Physical properties (matches parts table)
-// weight: "", // in lbs
-// dimensions: "", // "12.5 x 5.2 x 0.8 inches"
-// warranty: "", // "2 Years", "90 Days", etc.
-// material: "", // "Ceramic", "Metal", etc.
-
-// // Vehicle Compatibility (matches partCompatibility table)
-// makeId: "", // References vehicleMakes.id
-// modelId: "", // References vehicleModels.id
-// yearStart: "",
-// yearEnd: "",
-// engine: "", // "2.5L", "3.0L V6", etc.
-// trim: "", // "Base", "Sport", "M3", etc.
-
-// // Shipping (matches shippingProfiles table)
-// shippingCost: "",
-// freeShippingThreshold: "",
-// estimatedDaysMin: "",
-// estimatedDaysMax: "",
-// carrier: "", // "UPS", "FedEx", "USPS"
-
-// // Additional specifications as JSON (matches parts.specifications)
-// specifications: {} as Record<string, string>,
 
 const PartSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters long"),
@@ -184,9 +128,22 @@ export function NewNewListingForm() {
     },
   });
 
+  const { data: categories } = api.partInfo.getCategoriesForDropdown.useQuery();
+  const { data: makes } = api.partInfo.getMakesForDropdown.useQuery();
+  const { mutateAsync: createModelForMake } = api.partInfo.createModelForMake.useMutation();
+
   const handleSubmit = () => {
     //
   }
+
+  const nextStep = () => {
+    // TODO: Add validation for each step before proceeding
+    if (currentStep < 4) setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
 
   const steps = [
     { number: 1, title: "Basic Info", icon: Package },
@@ -203,33 +160,31 @@ export function NewNewListingForm() {
           {steps.map((step, index) => (
             <button
               key={step.number}
-              className="flex items-center cursor-pointer"
+              className="flex cursor-pointer items-center"
               onClick={() => {
                 setCurrentStep(index + 1);
                 toast.success("loading toast this is");
               }}
             >
               <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${currentStep >= step.number
-                  ? "bg-accent text-accent-foreground border-accent"
-                  : "bg-background text-muted-foreground border-border"
-                  }`}
+                className={cn("flex h-10 w-10 items-center justify-center rounded-full border-2", currentStep >= step.number
+                  ? "border-accent bg-accent text-accent-foreground"
+                  : "border-border bg-background text-muted-foreground")}
               >
                 <step.icon className="h-5 w-5" />
               </div>
               <div className="ml-3">
                 <p
-                  className={`text-sm font-medium ${currentStep >= step.number ? "text-foreground" : "text-muted-foreground"
-                    }`}
+                  className={cn("font-medium text-sm", currentStep >= step.number ? "text-foreground" : "text-muted-foreground")}
                 >
                   Step {step.number}
                 </p>
-                <p className={`text-xs ${currentStep >= step.number ? "text-foreground" : "text-muted-foreground"}`}>
+                <p className={cn("text-xs", currentStep >= step.number ? "text-foreground" : "text-muted-foreground")}>
                   {step.title}
                 </p>
               </div>
               {index < steps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-4 ${currentStep > step.number ? "bg-accent" : "bg-border"}`} />
+                <div className={cn("mx-4 h-0.5 flex-1", currentStep > step.number ? "bg-accent" : "bg-border")} />
               )}
             </button>
           ))}
@@ -258,10 +213,16 @@ export function NewNewListingForm() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <form.AppField name="categoryId" >
-                    {(field) => <field.SelectField label="Category *" placeholder="Select a category" options={[]} />}
+                    {(field) => <field.SelectField label="Category *" placeholder="Select a category" options={categories?.map((category) => ({
+                      value: category.id,
+                      label: category.name,
+                    })) ?? []} />}
                   </form.AppField>
                   <form.AppField name="condition" >
-                    {(field) => <field.SelectField label="Condition *" placeholder="Select a condition" options={[]} />}
+                    {(field) => <field.SelectField label="Condition *" placeholder="Select a condition" options={conditions.map((condition) => ({
+                      value: condition,
+                      label: condition,
+                    }))} />}
                   </form.AppField>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -274,10 +235,16 @@ export function NewNewListingForm() {
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <form.AppField name="material" >
-                    {(field) => <field.SelectField label="Material " placeholder="Select a material" options={[]} />}
+                    {(field) => <field.SelectField label="Material " placeholder="Select a material" options={materials.map((material) => ({
+                      value: material,
+                      label: material,
+                    }))} />}
                   </form.AppField>
                   <form.AppField name="warranty" >
-                    {(field) => <field.SelectField label="Warranty " placeholder="Select a warranty" options={[]} />}
+                    {(field) => <field.SelectField label="Warranty " placeholder="Select a warranty" options={warranties.map((warranty) => ({
+                      value: warranty,
+                      label: warranty,
+                    }))} />}
                   </form.AppField>
                   <form.AppField name="quantity" >
                     {(field) => <field.TextField label="Quantity " placeholder="Enter the quantity" defaultValue={1} type="number" min={1} max={100} />}
@@ -293,20 +260,18 @@ export function NewNewListingForm() {
                 </div>
               </>
             ) : currentStep === 2 ?
-
               <>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <form.AppField name="makeId" >
-                    {(field) => <field.SelectField label="Vehicle Make*" placeholder="Select a vehicle make" options={[]} />}
+                    {(field) => <field.SelectField label="Vehicle Make*" placeholder="Select a vehicle make" options={makes?.map((make) => ({
+                      value: make.id,
+                      label: make.name,
+                    })) ?? []} />}
                   </form.AppField>
                   <form.AppField name="modelId" >
-                    {(field) => <field.SelectField label="Vehicle Model*" placeholder="Select a vehicle model" options={[]} />}
+                    {(field) => <field.TextField label="Vehicle Model*" placeholder="Enter the model" />}
                   </form.AppField>
                 </div>
-
-
-
-
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <form.AppField name="yearStart" >
@@ -338,12 +303,6 @@ export function NewNewListingForm() {
                 </form.AppField>
 
               </> : currentStep === 3 ? <>
-
-
-
-
-
-
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -353,22 +312,22 @@ export function NewNewListingForm() {
                 // onChange={handleFileSelect}
                 />
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
                   {[].map((image, index) => (
-                    <div key={index} className="relative group">
-                      <div className="relative w-full h-32 rounded-md overflow-hidden bg-gray-100">
-                        <img src={image.preview} alt={`Part image ${index + 1}`} className="w-full h-full object-cover" />
+                    <div key={index} className="group relative">
+                      <div className="relative h-32 w-full overflow-hidden rounded-md bg-gray-100">
+                        <Image src={image.preview} alt={`Part ${index + 1}`} className="h-full w-full object-cover" />
 
                         {/* Upload status overlay */}
                         {/* {image.isUploading && ( */}
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <Loader2 className="h-6 w-6 text-white animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <Loader2 className="h-6 w-6 animate-spin text-white" />
                         </div>
                         {/* )} */}
 
                         {/* Success indicator */}
                         {/* {image.uploaded && !image.isUploading && ( */}
-                        <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full p-1">
+                        <div className="absolute top-2 left-2 rounded-full bg-green-500 p-1 text-white">
                           <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                             <path
                               fillRule="evenodd"
@@ -381,7 +340,7 @@ export function NewNewListingForm() {
 
                         {/* Primary image indicator */}
                         {index === 0 && (
-                          <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                          <div className="absolute bottom-2 left-2 rounded bg-blue-500 px-2 py-1 text-white text-xs">
                             Primary
                           </div>
                         )}
@@ -392,7 +351,7 @@ export function NewNewListingForm() {
                         type="button"
                         variant="destructive"
                         size="icon"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+                        className="absolute top-2 right-2 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
                       // onClick={() => removeImage(image.id)}
                       // disabled={image.isUploading}
                       >
@@ -424,20 +383,20 @@ export function NewNewListingForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Add up to 8 photos. The first photo will be used as the main image.
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     Supported formats: JPEG, PNG, WebP, GIF. Max size: 10MB per image.
                   </p>
                   {[].length > 0 && (
-                    <p className="text-xs text-green-600">
+                    <p className="text-green-600 text-xs">
                       {/* {images.filter((img) => img.uploaded).length} of {images.length} images uploaded successfully */}
                     </p>
                   )}
                 </div>
               </> : currentStep === 4 ? <>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <form.AppField name="price" >
                     {(field) => <field.TextField label="Price *" placeholder="89.99" type="number" min={0} max={1000000} required />}
                   </form.AppField>
@@ -445,7 +404,10 @@ export function NewNewListingForm() {
                     {(field) => <field.TextField label="Original Price " placeholder="120.00" type="number" min={0} max={1000000} required />}
                   </form.AppField>
                   <form.AppField name="currency" >
-                    {(field) => <field.SelectField label="Currency *" placeholder="Select a currency" options={[]} />}
+                    {(field) => <field.SelectField label="Currency *" placeholder="Select a currency" options={currencies.map((currency) => ({
+                      value: currency,
+                      label: currency,
+                    }))} />}
                   </form.AppField>
                 </div>
 
@@ -476,7 +438,10 @@ export function NewNewListingForm() {
                     {(field) => <field.TextField label="Estimated Days Max " placeholder="Enter the estimated days max" type="number" min={0} max={1000000} required />}
                   </form.AppField>
                   <form.AppField name="carrier" >
-                    {(field) => <field.SelectField label="Carrier " placeholder="Enter the carrier" options={[]} />}
+                    {(field) => <field.SelectField label="Carrier " placeholder="Enter the carrier" options={carriers.map((carrier) => ({
+                      value: carrier,
+                      label: carrier,
+                    }))} />}
                   </form.AppField>
                 </div>
 
@@ -486,13 +451,13 @@ export function NewNewListingForm() {
         </Card>
 
         <div className="mt-6 flex items-center justify-between">
-          <Button type="button" variant="outline" disabled={currentStep === 1}>
+          <Button type="button" variant="outline" onClick={prevStep} disabled={currentStep === 1}>
             Previous
           </Button>
 
           <div className="flex gap-2">
             {currentStep < 4 ? (
-              <Button type="button" >
+              <Button type="button" onClick={nextStep}>
                 Next
               </Button>
             ) : (

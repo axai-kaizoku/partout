@@ -1,8 +1,9 @@
 import z from "zod";
-import { createTRPCRouter, privateProcedure } from "../trpc";
-import { uploadToSupabaseStorage } from "@/lib/supabase/upload-to-supabase-storage";
-import { partImages } from "@/server/db/schema";
 import { STORAGE_BUCKETS } from "@/lib/constants";
+import { uploadToSupabaseStorage } from "@/lib/supabase/upload-to-supabase-storage";
+import { db } from "@/server/db";
+import { partImages } from "@/server/db/schema";
+import { createTRPCRouter, privateProcedure } from "../trpc";
 
 export const imageRouter = createTRPCRouter({
   // Upload image for temporary preview (before part creation)
@@ -12,6 +13,7 @@ export const imageRouter = createTRPCRouter({
         imageData: z.string(), // base64 encoded image
         fileName: z.string(),
         contentType: z.string(),
+        partId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -34,6 +36,11 @@ export const imageRouter = createTRPCRouter({
       if (res.error) {
         throw new Error(`Failed to upload image: ${res.error.message}`);
       }
+
+      await db.insert(partImages).values({
+        partId: input.partId,
+        url: res.publicUrl,
+      });
 
       return {
         url: res.publicUrl,
