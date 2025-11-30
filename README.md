@@ -17,5 +17,6 @@ The form is now ready for:
 The form structure now perfectly aligns with our e-commerce schema and provides a solid foundation for the full implementation.
 
 
-# Current state: 11/27/2025 - 00:21
-- [ ] creating form with tanstack form
+# Current state: 11/30/2025 - 23:52
+- [ ] fix images in new listing form 
+- [ ] store new listing in db

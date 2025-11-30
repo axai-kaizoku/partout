@@ -2,7 +2,7 @@ import { useAppForm } from "@/components/form";
 import { Button, LoadingButton } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/react";
-import { Loader2, X } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import type React from "react";
 import { useRef, useState } from "react";
@@ -27,6 +27,7 @@ interface ImagePreview {
 
 export function NewListingForm() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [images, setImages] = useState<ImagePreview[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const basicInfoForm = useAppForm({
@@ -60,6 +61,108 @@ export function NewListingForm() {
       console.log("Form submitted:", value);
     },
   })
+
+  // Image upload mutation
+  const uploadImageMutation = api.image.uploadTempImage.useMutation({
+    onSuccess: (data, variables) => {
+      // Update the image in state with upload result
+      setImages((prev) =>
+        prev.map((img) =>
+          img.id === variables.fileName
+            ? {
+              ...img,
+              uploaded: data,
+              isUploading: false,
+            }
+            : img
+        )
+      );
+    },
+    onError: (error, variables) => {
+      console.error("Failed to upload image:", error);
+      // Show user-friendly error message
+      alert(`Failed to upload image: ${error.message || "Unknown error"}`);
+      // Remove failed upload from state
+      setImages((prev) => prev.filter((img) => img.id !== variables.fileName));
+    },
+  });
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+    for (const file of Array.from(files)) {
+      // Validate file type
+      if (!validImageTypes.includes(file.type)) {
+        alert(`${file.name} is not a valid image format. Please use JPEG, PNG, WebP, or GIF.`);
+        continue;
+      }
+
+      // Validate file size
+      if (file.size > maxFileSize) {
+        alert(`${file.name} is too large. Please use images smaller than 10MB.`);
+        continue;
+      }
+
+      // Check if we already have 4 images
+      if (images.length >= 4) {
+        alert("You can only upload up to 4 images.");
+        break;
+      }
+
+      // Create preview
+      const preview = URL.createObjectURL(file);
+      const imageId = `${Date.now()}-${file.name}`;
+
+      const newImage: ImagePreview = {
+        id: imageId,
+        file,
+        preview,
+        isUploading: true,
+      };
+
+      // Add to state immediately for preview
+      setImages((prev) => [...prev, newImage]);
+
+      // Convert to base64 and upload
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+
+        uploadImageMutation.mutateAsync({
+          imageData: base64Data,
+          fileName: imageId,
+          contentType: file.type,
+          partId: "",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const addImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeImage = (imageId: string) => {
+    setImages((prev) => {
+      const imageToRemove = prev.find((img) => img.id === imageId);
+      if (imageToRemove) {
+        // Clean up preview URL to prevent memory leaks
+        URL.revokeObjectURL(imageToRemove.preview);
+      }
+      return prev.filter((img) => img.id !== imageId);
+    });
+  };
+
 
   const { mutateAsync: createModelForMake } = api.partInfo.createModelForMake.useMutation();
 
@@ -112,11 +215,11 @@ export function NewListingForm() {
                   accept="image/*"
                   multiple
                   className="hidden"
-                // onChange={handleFileSelect}
+                  onChange={handleFileSelect}
                 />
 
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                  {[].map((image, index) => (
+                  {images.map((image, index) => (
                     <div key={index} className="group relative">
                       <div className="relative h-32 w-full overflow-hidden rounded-md bg-gray-100">
                         <Image src={image.preview} alt={`Part ${index + 1}`} className="h-full w-full object-cover" />
@@ -155,8 +258,8 @@ export function NewListingForm() {
                         variant="destructive"
                         size="icon"
                         className="absolute top-2 right-2 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-                      // onClick={() => removeImage(image.id)}
-                      // disabled={image.isUploading}
+                        onClick={() => removeImage(image.id)}
+                        disabled={image.isUploading}
                       >
                         <X className="h-3 w-3" />
                       </Button>
@@ -169,17 +272,16 @@ export function NewListingForm() {
                       type="button"
                       variant="outline"
                       className="h-32 border-dashed bg-transparent hover:bg-gray-50"
-                    // onClick={addImage}
-                    // disabled={uploadImageMutation.isPending}
+                      onClick={addImage}
+                      disabled={uploadImageMutation.isPending}
                     >
                       <div className="flex flex-col items-center gap-2">
-                        {/* {uploadImageMutation.isPending ? (
+                        {uploadImageMutation.isPending ? (
                           <Loader2 className="h-6 w-6 animate-spin" />
                         ) : (
                           <Upload className="h-6 w-6" />
-                        )} */}
-                        {/* <span className="text-sm">{uploadImageMutation.isPending ? "Uploading..." : "Add Photo"}</span> */}
-                        <span className="text-sm">Add Photo</span>
+                        )}
+                        <span className="text-sm">{uploadImageMutation.isPending ? "Uploading..." : "Add Photo"}</span>
                       </div>
                     </Button>
                   )}
@@ -192,9 +294,9 @@ export function NewListingForm() {
                   <p className="text-muted-foreground text-xs">
                     Supported formats: JPEG, PNG, WebP, GIF. Max size: 10MB per image.
                   </p>
-                  {[].length > 0 && (
+                  {images.length > 0 && (
                     <p className="text-green-600 text-xs">
-                      {/* {images.filter((img) => img.uploaded).length} of {images.length} images uploaded successfully */}
+                      {images.filter((img) => img.uploaded).length} of {images.length} images uploaded successfully
                     </p>
                   )}
                 </div>
