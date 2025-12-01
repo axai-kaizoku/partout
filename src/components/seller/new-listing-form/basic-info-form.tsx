@@ -52,7 +52,7 @@ export function BasicInfoForm({ basicInfoForm }: { basicInfoForm: any }) {
           }))} />}
         </basicInfoForm.AppField>
         <basicInfoForm.AppField name="quantity" >
-          {(field) => <field.TextField label="Quantity " placeholder="Enter the quantity" defaultValue={1} type="number" min={1} max={100} />}
+          {(field) => <field.TextField label="Quantity " placeholder="Enter the quantity" type="number" min={1} max={100} />}
         </basicInfoForm.AppField>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

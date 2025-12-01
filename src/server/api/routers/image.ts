@@ -13,7 +13,6 @@ export const imageRouter = createTRPCRouter({
         imageData: z.string(), // base64 encoded image
         fileName: z.string(),
         contentType: z.string(),
-        partId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -37,14 +36,9 @@ export const imageRouter = createTRPCRouter({
         throw new Error(`Failed to upload image: ${res.error.message}`);
       }
 
-      await db.insert(partImages).values({
-        partId: input.partId,
-        url: res.publicUrl,
-      });
-
       return {
         url: res.publicUrl,
-        reducedUrl: res.reducedSizeUrlData,
+        // reducedUrl: res.reducedSizeUrlData,
         key: res.key,
       };
     }),
@@ -60,8 +54,8 @@ export const imageRouter = createTRPCRouter({
         isPrimary: z.boolean().default(false),
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db.insert(partImages).values({
+    .mutation(async ({ input }) => {
+      const result = await db.insert(partImages).values({
         partId: input.partId,
         url: input.url,
         altText: input.altText,

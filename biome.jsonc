@@ -51,6 +51,15 @@
       "tailwindDirectives": true
     }
   },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "arrowParentheses": "always",
+      "semicolons": "always",
+      "quoteStyle": "double"
+    },
+    "linter": { "enabled": true }
+  },
   "linter": {
     "enabled": true,
     "rules": {

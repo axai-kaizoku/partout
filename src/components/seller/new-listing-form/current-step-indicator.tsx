@@ -5,7 +5,8 @@ export function CurrentStepIndicator({ step, currentStep, setCurrentStep, index 
   return (
     <button
       key={step.number}
-      disabled={currentStep < step.number}
+      type="submit"
+      // disabled={currentStep < step.number}
       className="flex cursor-pointer items-center"
       onClick={() => {
         setCurrentStep(index + 1);

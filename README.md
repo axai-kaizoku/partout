@@ -17,6 +17,8 @@ The form is now ready for:
 The form structure now perfectly aligns with our e-commerce schema and provides a solid foundation for the full implementation.
 
 
-# Current state: 11/30/2025 - 23:52
-- [ ] fix images in new listing form 
-- [ ] store new listing in db
+# Current state: 1/12/2025 - 23:53
+- [x] fix images in new listing form 
+- [-] store new listing in db
+  - [ ] fix part.ts trpc file 
+  - [ ] fix form for sending data over here 
