@@ -15,7 +15,8 @@ export const partRouter = createTRPCRouter({
             },
             where: (img, { eq }) => eq(img.isPrimary, true),
           },
-        }
+        },
+        limit: 6
       })
       return parts;
     });
@@ -96,8 +97,8 @@ export const partRouter = createTRPCRouter({
         partId: z.string(),
         makeId: z.string(),
         modelId: z.string(),
-        yearStart: z.number().optional(),
-        yearEnd: z.number().optional(),
+        yearStart: z.number().optional().nullable(),
+        yearEnd: z.number().optional().nullable(),
         engine: z.string().optional(),
       })
     )

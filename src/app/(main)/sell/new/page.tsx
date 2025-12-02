@@ -1,5 +1,3 @@
-"use client";
-
 import { NewListingForm } from "@/components/seller/new-listing-form/new-lisiting-form";
 
 export default function NewListingPage() {

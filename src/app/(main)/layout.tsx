@@ -11,9 +11,9 @@ export default async function Layout({ children }: PropsWithChildren) {
   return (
     <UserProvider user={data?.data?.user ?? null}>
       <CartProvider>
-        <div className="flex flex-col min-h-screen">
+        <div className="flex min-h-screen flex-col">
           <Header />
-          <main className="max-w-7xl w-full mx-auto p-5 grow bg-background">{children}</main>
+          <main className="mx-auto w-full max-w-7xl grow bg-background p-5">{children}</main>
           <BottomNav />
         </div>
       </CartProvider>

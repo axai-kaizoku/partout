@@ -1,16 +1,16 @@
 import { Car, CreditCard, Disc, PenLine as Engine, MapPin, Settings, Shield, ShoppingCart, Star, Truck, Wrench, Zap } from "lucide-react";
+import Link from "next/link";
+import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
 import { api } from "@/trpc/server";
-import { Suspense } from "react";
 
 export default async function Home() {
   return (
     <div className="pb-20">
       {/* Hero Section */}
-      <section className="bg-linear-to-b from-muted/50 to-background px-4 py-6">
+      <section className="px-4 py-6">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="mb-4 font-bold font-playfair text-3xl text-foreground md:text-4xl">Find Quality Auto Parts</h1>
           <p className="mb-6 text-lg text-muted-foreground">Browse thousands of parts from trusted sellers</p>
@@ -53,7 +53,7 @@ export function TrustBadges() {
 
   return (
     <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-      {badges.map((badge, index) => (
+      {badges.map((badge) => (
         <div key={badge.text} className="flex items-center gap-2 text-sm text-muted-foreground">
           <badge.icon className="h-4 w-4 text-accent" />
           <span>{badge.text}</span>
@@ -76,7 +76,7 @@ export function FeaturedCategories() {
   return (
     <div className="mx-auto max-w-4xl">
       <h2 className="mb-6 font-bold font-playfair text-2xl text-foreground">Shop by Category</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {categories.map((category) => (
           <Card key={category.name} className="p-4 hover:shadow-md transition-shadow cursor-pointer group">
             <div className="flex flex-col items-center text-center gap-3">
@@ -260,19 +260,19 @@ export async function PartsGrid() {
                 <CardContent className="p-4">
                   <div className="space-y-3">
                     <div>
-                      <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-accent transition-colors">
+                      <h3 className="line-clamp-2 font-medium text-foreground transition-colors group-hover:text-accent">
                         {part.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {part.brand} {part?.model} • {part?.year}
+                      <p className="text-muted-foreground text-sm">
+                        {part?.brand} {part?.model} • {part?.year}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-foreground">${part.price}</span>
+                        <span className="font-bold text-foreground text-lg">${part.price}</span>
                         {part.originalPrice && (
-                          <span className="text-sm text-muted-foreground line-through">${part.originalPrice}</span>
+                          <span className="text-muted-foreground text-sm line-through">${part.originalPrice}</span>
                         )}
                       </div>
                     </div>
@@ -281,7 +281,7 @@ export async function PartsGrid() {
                       <div className="flex items-center gap-1">
                         <span className="text-muted-foreground">{part?.seller?.name}</span>
                         {part?.seller?.verified && (
-                          <Badge variant="outline" className="text-xs px-1 py-0">
+                          <Badge variant="outline" className="px-1 py-0 text-xs">
                             ✓
                           </Badge>
                         )}
@@ -292,14 +292,14 @@ export async function PartsGrid() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1 text-muted-foreground text-xs">
                       <MapPin className="h-3 w-3" />
                       <span>{part?.seller?.location}</span>
                     </div>
 
                     <Button className="w-full" size="sm">
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Add to Cart
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Shop Now
                     </Button>
                   </div>
                 </CardContent>

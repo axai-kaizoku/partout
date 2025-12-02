@@ -1,8 +1,10 @@
 "use client"
 import { Loader2, Upload, X } from "lucide-react";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
+import z from "zod";
 import { useAppForm } from "@/components/form";
 import { Button, LoadingButton } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,10 +15,6 @@ import { basicInfoDefaults, priceShippingDefaults, steps, vehicleDetailsDefaults
 import { PricingShippingForm } from "./pricing-shipping-form";
 import { basicInfoSchema, pricingShippingSchema, vehicleDetailsSchema } from "./validations";
 import { VehicleDetailsForm } from "./vehicle-details-form";
-import { toast } from "sonner";
-import z from "zod";
-import { FieldErrors } from "@/components/form/field-errors";
-import { useRouter } from "next/navigation";
 
 interface ImagePreview {
   id: string;
@@ -36,7 +34,6 @@ export function NewListingForm() {
   const [images, setImages] = useState<ImagePreview[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-
   const { mutateAsync: createModelForMake } = api.partInfo.createModelForMake.useMutation();
 
   const { mutateAsync: createPartCompatibility } = api.part.createPartCompatibility.useMutation();
@@ -50,8 +47,7 @@ export function NewListingForm() {
     validators: {
       onChange: basicInfoSchema,
     },
-    onSubmit: ({ value }) => {
-      // console.log("Form submitted:", value);
+    onSubmit: () => {
       setCurrentStep(2);
     },
   });
@@ -61,8 +57,7 @@ export function NewListingForm() {
     validators: {
       onChange: vehicleDetailsSchema,
     },
-    onSubmit: ({ value }) => {
-      console.log("Form submitted:", value);
+    onSubmit: () => {
       setCurrentStep(3);
     },
   })
@@ -76,9 +71,7 @@ export function NewListingForm() {
         photos: z.array(z.string()).min(1, "At least one photo is required").max(8, "You can only upload up to 8 photos"),
       }),
     },
-    onSubmit: ({ value }) => {
-      console.log("Form submitted:", value);
-      console.log("images", images.map((img) => img.uploaded?.url));
+    onSubmit: () => {
       setCurrentStep(4);
     },
   })
@@ -119,16 +112,16 @@ export function NewListingForm() {
           const createdModelId = await createModelForMake({
             makeId: makeId,
             name: modelId,
-            yearEnd: yearEnd ? parseInt(yearEnd) : undefined,
-            yearStart: yearStart ? parseInt(yearStart) : undefined,
+            yearEnd: yearEnd ? parseInt(yearEnd) : null,
+            yearStart: yearStart ? parseInt(yearStart) : null,
           })
 
           await createPartCompatibility({
             partId: partId,
             makeId: makeId,
             modelId: createdModelId,
-            yearStart: yearStart ? parseInt(yearStart) : undefined,
-            yearEnd: yearEnd ? parseInt(yearEnd) : undefined,
+            yearStart: yearStart ? parseInt(yearStart) : null,
+            yearEnd: yearEnd ? parseInt(yearEnd) : null,
             engine,
           })
         }
@@ -276,16 +269,6 @@ export function NewListingForm() {
       vehicleDetailsForm.handleSubmit();
     }
     if (currentStep === 3) {
-      // console.log(fileInputRef.current?.files);
-      // images.forEach((image) => {
-      //   if (image.uploaded) {
-      //     console.log(image.uploaded);
-      //   }
-      // })
-      // console.log(images);
-      // if (images.length >= 1) {
-      //   setCurrentStep(4);
-      // }
       photoForm.handleSubmit()
     }
     if (currentStep === 4) {
@@ -415,10 +398,6 @@ export function NewListingForm() {
                       {images.filter((img) => img.uploaded).length} of {images.length} images uploaded successfully
                     </p>
                   )}
-                  {/* <p>
-                    {photoForm.getAllErrors().form?.errors.map((err) => err.photos[0].message)[0]}
-                  </p> */}
-                  {/* {JSON.stringify(photoForm.state.errors.map((err) => err))} */}
                 </div>
               </> : currentStep === 4 ?
                 (<PricingShippingForm pricingShippingForm={pricingShippingForm} />)

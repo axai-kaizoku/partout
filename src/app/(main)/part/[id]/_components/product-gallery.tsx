@@ -14,7 +14,6 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
   const images = useMemo(() => {
     return partImages?.map((img) => img?.url)
   }, [])
-  console.log(images)
   const [currentImage, setCurrentImage] = useState(0)
 
   const nextImage = () => {

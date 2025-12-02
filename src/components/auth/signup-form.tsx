@@ -1,24 +1,19 @@
 "use client";
 
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog as Alert, DialogDescription as AlertDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useUser } from "@/hooks/use-user";
 
 export function SignupForm() {
   const router = useRouter();
   const supabase = supabaseBrowserClient();
-  // const { login } = useAuth()
-  const user = useUser();
-  console.log(user);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
