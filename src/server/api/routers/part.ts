@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { basicInfoSchema, pricingShippingSchema, vehicleDetailsSchema } from "@/components/seller/new-listing-form/validations";
 import { db } from "@/server/db";
-import { parts } from "@/server/db/schema";
+import { partCompatibility, parts } from "@/server/db/schema";
 import { createTRPCRouter, privateProcedure, publicProcedure } from "../trpc";
 
 export const partRouter = createTRPCRouter({
@@ -14,9 +13,22 @@ export const partRouter = createTRPCRouter({
   createPart: privateProcedure
     .input(
       z.object({
-        ...basicInfoSchema.shape,
-        ...vehicleDetailsSchema.shape,
-        ...pricingShippingSchema.shape,
+        title: z.string(),
+        description: z.string(),
+        categoryId: z.string(),
+        condition: z.string(),
+        partNumber: z.string(),
+        oem: z.string(),
+        material: z.string(),
+        warranty: z.string(),
+        quantity: z.number(),
+        weight: z.number().optional(),
+        dimensions: z.string(),
+        brand: z.string(),
+        price: z.number(),
+        originalPrice: z.number().optional(),
+        currency: z.string(),
+        isNegotiable: z.boolean(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -29,7 +41,7 @@ export const partRouter = createTRPCRouter({
         oem: input.oem,
         material: input.material,
         warranty: input.warranty,
-        quantity: parseInt(input.quantity),
+        quantity: input.quantity,
         weight: input.weight,
         dimensions: input.dimensions,
         brand: input.brand,
@@ -40,6 +52,39 @@ export const partRouter = createTRPCRouter({
         sellerId: ctx.user.id,
       }).returning();
 
-      return newPart;
+      if (newPart) {
+        return newPart.id;
+      }
+
+      return null;
+    }),
+
+
+  createPartCompatibility: privateProcedure
+    .input(
+      z.object({
+        partId: z.string(),
+        makeId: z.string(),
+        modelId: z.string(),
+        yearStart: z.number().optional(),
+        yearEnd: z.number().optional(),
+        engine: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const [newPartCompatibility] = await db.insert(partCompatibility).values({
+        partId: input.partId,
+        makeId: input.makeId,
+        modelId: input.modelId,
+        yearStart: input.yearStart,
+        yearEnd: input.yearEnd,
+        engine: input.engine,
+      }).returning();
+
+      if (newPartCompatibility) {
+        return newPartCompatibility.id;
+      }
+
+      return null;
     }),
 });

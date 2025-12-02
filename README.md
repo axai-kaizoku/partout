@@ -19,6 +19,6 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
 
 # Current state: 1/12/2025 - 23:53
 - [x] fix images in new listing form 
-- [-] store new listing in db
-  - [ ] fix part.ts trpc file 
-  - [ ] fix form for sending data over here 
+- [x] store new listing in db
+  - [x] fix part.ts trpc file 
+  - [x] fix form for sending data over here 

@@ -16,6 +16,7 @@ import { VehicleDetailsForm } from "./vehicle-details-form";
 import { toast } from "sonner";
 import z from "zod";
 import { FieldErrors } from "@/components/form/field-errors";
+import { useRouter } from "next/navigation";
 
 interface ImagePreview {
   id: string;
@@ -30,9 +31,19 @@ interface ImagePreview {
 }
 
 export function NewListingForm() {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1);
   const [images, setImages] = useState<ImagePreview[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+
+  const { mutateAsync: createModelForMake } = api.partInfo.createModelForMake.useMutation();
+
+  const { mutateAsync: createPartCompatibility } = api.part.createPartCompatibility.useMutation();
+
+  const { mutateAsync: createPart } = api.part.createPart.useMutation();
+
+  const { mutateAsync: createPartImage } = api.image.createPartImage.useMutation();
 
   const basicInfoForm = useAppForm({
     defaultValues: basicInfoDefaults,
@@ -40,7 +51,7 @@ export function NewListingForm() {
       onChange: basicInfoSchema,
     },
     onSubmit: ({ value }) => {
-      console.log("Form submitted:", value);
+      // console.log("Form submitted:", value);
       setCurrentStep(2);
     },
   });
@@ -77,11 +88,68 @@ export function NewListingForm() {
     validators: {
       onChange: pricingShippingSchema,
     },
-    onSubmit: () => {
-      console.log("Form submitted:", basicInfoForm.state.values);
-      console.log("Vehicle details:", vehicleDetailsForm.state.values);
-      console.log("Photos:", images?.map((image) => image.uploaded?.url));
-      console.log("Pricing and shipping:", pricingShippingForm.state.values);
+    onSubmit: async ({ value: pricingShippingFormValues }) => {
+      const toastId = toast.loading("Creating part...")
+
+      const { categoryId, condition, description, dimensions, material, oem, partNumber, quantity, title, warranty, weight } = basicInfoForm.state.values
+
+      const { brand, makeId, modelId, yearStart, yearEnd, engine } = vehicleDetailsForm.state.values
+
+      const { price, originalPrice, currency, isNegotiable } = pricingShippingFormValues
+
+      await createPart({
+        categoryId,
+        condition,
+        description,
+        title,
+        dimensions,
+        material,
+        oem,
+        partNumber,
+        quantity: parseInt(quantity),
+        warranty,
+        weight: weight ? parseInt(weight) : undefined,
+        brand,
+        price: parseInt(price),
+        originalPrice: originalPrice ? parseInt(originalPrice) : undefined,
+        currency,
+        isNegotiable,
+      }).then(async (partId) => {
+        if (makeId && modelId) {
+          const createdModelId = await createModelForMake({
+            makeId: makeId,
+            name: modelId,
+            yearEnd: yearEnd ? parseInt(yearEnd) : undefined,
+            yearStart: yearStart ? parseInt(yearStart) : undefined,
+          })
+
+          await createPartCompatibility({
+            partId: partId,
+            makeId: makeId,
+            modelId: createdModelId,
+            yearStart: yearStart ? parseInt(yearStart) : undefined,
+            yearEnd: yearEnd ? parseInt(yearEnd) : undefined,
+            engine,
+          })
+        }
+
+        Array.from(images).forEach(async (img, index) => {
+          await createPartImage({
+            partId: partId,
+            url: img.uploaded?.url,
+            sortOrder: index,
+            isPrimary: index === 0,
+          })
+        })
+
+
+        toast.success("Part created successfully", { id: toastId })
+        router.push("/sell")
+      }).catch((err) => {
+        toast.error("Failed to create part", { id: toastId })
+      })
+
+
     },
   })
 
@@ -198,7 +266,6 @@ export function NewListingForm() {
   };
 
 
-  const { mutateAsync: createModelForMake } = api.partInfo.createModelForMake.useMutation();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
