@@ -8,6 +8,7 @@ import { Edit, Shield, Calendar, MapPin, LogOut } from "lucide-react";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 export function ProfileHeader() {
   const user = useUser();
   const router = useRouter();
@@ -61,8 +62,8 @@ export function ProfileHeader() {
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Profile
               </Button>
-              <Button variant="outline" size="sm">
-                Switch to Selling
+              <Button variant="outline" size="sm" asChild>
+                <Link href={"/sell"}>Switch to Selling</Link>
               </Button>
             </div>
           </div>

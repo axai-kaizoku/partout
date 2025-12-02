@@ -6,6 +6,7 @@ import { Car, Disc, PenLine as Engine, Settings, Wrench, Zap } from "lucide-reac
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { api } from "@/trpc/react";
 import { MapPin, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -57,7 +58,7 @@ export function TrustBadges() {
   return (
     <div className="flex flex-wrap justify-center gap-4 md:gap-6">
       {badges.map((badge, index) => (
-        <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div key={badge.text} className="flex items-center gap-2 text-sm text-muted-foreground">
           <badge.icon className="h-4 w-4 text-accent" />
           <span>{badge.text}</span>
         </div>
@@ -77,11 +78,11 @@ export function FeaturedCategories() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="font-playfair text-2xl font-bold text-foreground mb-6">Shop by Category</h2>
+    <div className="mx-auto max-w-4xl">
+      <h2 className="mb-6 font-bold font-playfair text-2xl text-foreground">Shop by Category</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {categories.map((category, index) => (
-          <Card key={index} className="p-4 hover:shadow-md transition-shadow cursor-pointer group">
+        {categories.map((category) => (
+          <Card key={category.name} className="p-4 hover:shadow-md transition-shadow cursor-pointer group">
             <div className="flex flex-col items-center text-center gap-3">
               <div className="p-3 rounded-full bg-accent/10 group-hover:bg-accent/20 transition-colors">
                 <category.icon className="h-6 w-6 text-accent" />
@@ -214,6 +215,11 @@ export function PartsGrid() {
     },
   ];
 
+  const parts = api.part.getHomePageParts.useQuery(undefined, {
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  });
   const handlePartClick = (partId: number) => {
     router.push(`/parts/${partId}`);
   };
