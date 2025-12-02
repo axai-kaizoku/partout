@@ -148,10 +148,10 @@ export function NewListingForm() {
         prev.map((img) =>
           img.id === variables.fileName
             ? {
-                ...img,
-                uploaded: data,
-                isUploading: false,
-              }
+              ...img,
+              uploaded: data,
+              isUploading: false,
+            }
             : img
         )
       );
@@ -355,19 +355,17 @@ export function NewListingForm() {
               }}
             >
               <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                  currentStep >= step.number
-                    ? "bg-accent text-accent-foreground border-accent"
-                    : "bg-background text-muted-foreground border-border"
-                }`}
+                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${currentStep >= step.number
+                  ? "bg-accent text-accent-foreground border-accent"
+                  : "bg-background text-muted-foreground border-border"
+                  }`}
               >
                 <step.icon className="h-5 w-5" />
               </div>
               <div className="ml-3">
                 <p
-                  className={`text-sm font-medium ${
-                    currentStep >= step.number ? "text-foreground" : "text-muted-foreground"
-                  }`}
+                  className={`text-sm font-medium ${currentStep >= step.number ? "text-foreground" : "text-muted-foreground"
+                    }`}
                 >
                   Step {step.number}
                 </p>

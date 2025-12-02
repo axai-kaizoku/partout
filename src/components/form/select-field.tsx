@@ -1,6 +1,6 @@
-import { useFieldContext } from ".";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { useFieldContext } from ".";
 import { FieldErrors } from "./field-errors";
 
 type SelectOption = {
@@ -19,10 +19,10 @@ export const SelectField = ({ label, options, placeholder }: SelectFieldProps) =
 
   return (
     <div className="space-y-2">
-      <div className="space-y-1">
+      <div className="space-y-2">
         <Label htmlFor={field.name}>{label}</Label>
         <Select value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
-          <SelectTrigger id={field.name} onBlur={field.handleBlur}>
+          <SelectTrigger id={field.name} className="w-full" onBlur={field.handleBlur}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>

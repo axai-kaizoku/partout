@@ -1,6 +1,6 @@
-import { env } from "@/env";
 import { createClient } from "@supabase/supabase-js";
-import { type STORAGE_BUCKETS } from "../constants";
+import { env } from "@/env";
+import type { STORAGE_BUCKETS } from "../constants";
 
 export async function uploadToSupabaseStorage({
   content,
@@ -30,19 +30,19 @@ export async function uploadToSupabaseStorage({
       data: { publicUrl },
     } = supabaseAdmin.storage.from(bucket).getPublicUrl(uploadResult.data.path);
 
-    const { data: reducedSizeUrlData } = supabaseAdmin.storage.from(bucket).getPublicUrl(uploadResult.data.path, {
-      transform: {
-        format: "origin",
-        quality: 50,
-        resize: "contain",
-        width: 1200,
-      },
-    });
+    // const { data: reducedSizeUrlData } = supabaseAdmin.storage.from(bucket).getPublicUrl(uploadResult.data.path, {
+    //   transform: {
+    //     format: "origin",
+    //     quality: 50,
+    //     resize: "contain",
+    //     width: 1200,
+    //   },
+    // });
 
     return {
       publicUrl,
       key: uploadResult.data.path,
-      reducedSizeUrlData: reducedSizeUrlData.publicUrl,
+      // reducedSizeUrlData: reducedSizeUrlData.publicUrl,
     };
   } catch (err) {
     if (err instanceof Error) {

@@ -1,20 +1,20 @@
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 import { useFieldContext } from ".";
 import { FieldErrors } from "./field-errors";
 
-type TextFieldProps = {
+type TextAreaFieldProps = {
   label: string;
-} & React.InputHTMLAttributes<HTMLInputElement>;
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
-export const TextField = ({ label, ...inputProps }: TextFieldProps) => {
+export const TextAreaField = ({ label, ...inputProps }: TextAreaFieldProps) => {
   const field = useFieldContext<string>();
 
   return (
     <div className="space-y-2">
       <div className="space-y-2">
         <Label htmlFor={field.name}>{label}</Label>
-        <Input
+        <Textarea
           id={field.name}
           value={field.state.value}
           onChange={(e) => field.handleChange(e.target.value)}
