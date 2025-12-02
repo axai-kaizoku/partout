@@ -38,7 +38,7 @@ export function ProductInfo({ part }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1)
 
   const savings = part.originalPrice ? part.originalPrice - part.price : 0
-  const freeShipping = part.price >= part.shipping.freeShippingThreshold
+  const freeShipping = part.price >= part?.shipping?.freeShippingThreshold
 
   return (
     <div className="space-y-6">
@@ -74,9 +74,9 @@ export function ProductInfo({ part }: ProductInfoProps) {
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center gap-1">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">{part.seller.rating}</span>
+            <span className="font-medium">{part?.seller?.rating}</span>
           </div>
-          <span className="text-muted-foreground">({part.seller.reviewCount} reviews)</span>
+          <span className="text-muted-foreground">({part?.seller?.reviewCount} reviews)</span>
         </div>
       </div>
 
@@ -92,16 +92,16 @@ export function ProductInfo({ part }: ProductInfoProps) {
               <p className="text-accent font-medium">Free shipping on this item!</p>
             ) : (
               <p>
-                Shipping: <span className="font-medium">${part.shipping.cost}</span>
-                {part.shipping.freeShippingThreshold > part.price && (
+                Shipping: <span className="font-medium">${part?.shipping?.cost}</span>
+                {part?.shipping?.freeShippingThreshold > part?.price && (
                   <span className="text-muted-foreground">
                     {" "}
-                    (Free on orders ${part.shipping.freeShippingThreshold}+)
+                    (Free on orders ${part?.shipping?.freeShippingThreshold}+)
                   </span>
                 )}
               </p>
             )}
-            <p className="text-muted-foreground">Estimated delivery: {part.shipping.estimatedDays}</p>
+            <p className="text-muted-foreground">Estimated delivery: {part?.shipping?.estimatedDays}</p>
           </div>
         </CardContent>
       </Card>
@@ -146,24 +146,24 @@ export function ProductInfo({ part }: ProductInfoProps) {
       </Card>
 
       {/* Specifications */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="text-lg">Specifications</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {Object.entries(part.specifications).map(([key, value], index) => (
+            {Object.entries(part?.specifications)?.map(([key, value], index) => (
               <div key={key}>
                 <div className="flex justify-between py-2">
                   <span className="text-muted-foreground">{key}</span>
                   <span className="font-medium">{value}</span>
                 </div>
-                {index < Object.entries(part.specifications).length - 1 && <Separator />}
+                {index < Object.entries(part?.specifications)?.length - 1 && <Separator />}
               </div>
             ))}
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }

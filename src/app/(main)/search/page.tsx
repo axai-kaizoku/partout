@@ -1,10 +1,10 @@
 "use client";
 
+import { SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { SearchFilters } from "./_components/search-filters";
 import { SearchResults } from "./_components/search-results";
-import { Button } from "@/components/ui/button";
-import { SlidersHorizontal } from "lucide-react";
 
 export default function SearchPage() {
   const [showFilters, setShowFilters] = useState(false);

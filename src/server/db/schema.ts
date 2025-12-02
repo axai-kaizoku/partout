@@ -1,6 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
+import { relations } from "drizzle-orm";
 import { boolean, decimal, index, integer, jsonb, pgTableCreator, text, timestamp, unique } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
@@ -378,3 +379,25 @@ export const sellerStats = createTable(
 );
 
 // Note: Relations can be added later in a separate file if needed for query building
+export const partRelations = relations(parts, ({ one, many }) => ({
+  partImages: many(partImages),
+  seller: one(profiles, {
+    fields: [parts.sellerId],
+    references: [profiles.id],
+  }),
+  category: one(categories, {
+    fields: [parts.categoryId],
+    references: [categories.id],
+  }),
+  sellerStats: one(sellerStats, {
+    fields: [parts.sellerId],
+    references: [sellerStats.sellerId],
+  }),
+}))
+
+export const partImageRelations = relations(partImages, ({ one }) => ({
+  part: one(parts, {
+    fields: [partImages.partId],
+    references: [parts.id],
+  }),
+}))

@@ -5,6 +5,7 @@ import { CompatibilityTable } from "./_components/compatibility-table";
 import { RelatedParts } from "./_components/related-parts";
 import { ProductReviews } from "./_components/product-reviews";
 import { notFound } from "next/navigation";
+import { api } from "@/trpc/server";
 
 // Mock data - in real app this would come from database
 const mockParts = {
@@ -150,19 +151,18 @@ const mockParts = {
   },
 };
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const part = mockParts[params.id as keyof typeof mockParts];
+export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // const part = mockParts[params.id as keyof typeof mockParts];
+  const id = (await params).id
 
-  if (!part) {
-    notFound();
-  }
+  const part = await api.part.getPartById(id)
 
   return (
     <main className="pb-20">
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Product Gallery */}
-          <ProductGallery images={part.images} title={part.title} />
+          <ProductGallery partImages={part?.partImages} title={part?.title} />
 
           {/* Product Info */}
           <ProductInfo part={part} />
@@ -170,21 +170,21 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
         {/* Seller Info */}
         <div className="mb-8">
-          <SellerInfo seller={part.seller} />
+          {/* <SellerInfo seller={part?.seller} /> */}
         </div>
 
         {/* Compatibility Table */}
         <div className="mb-8">
-          <CompatibilityTable compatibility={part.compatibility} />
+          {/* <CompatibilityTable compatibility={part?.compatibility} /> */}
         </div>
 
         {/* Reviews */}
         <div className="mb-8">
-          <ProductReviews reviews={part.reviews} rating={part.seller.rating} />
+          {/* <ProductReviews reviews={part?.reviews} rating={part?.seller?.rating} /> */}
         </div>
 
         {/* Related Parts */}
-        <RelatedParts currentPartId={part.id} category={part.category} />
+        {/* <RelatedParts currentPartId={part.id} category={part?.category} /> */}
       </div>
     </main>
   );

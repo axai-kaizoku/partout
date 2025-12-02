@@ -1,16 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight, Expand } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 
 interface ProductGalleryProps {
-  images: string[]
+  partImages: { url: string }[]
   title: string
 }
 
-export function ProductGallery({ images, title }: ProductGalleryProps) {
+export function ProductGallery({ partImages = [], title }: ProductGalleryProps) {
+  const images = useMemo(() => {
+    return partImages?.map((img) => img?.url)
+  }, [])
+  console.log(images)
   const [currentImage, setCurrentImage] = useState(0)
 
   const nextImage = () => {
@@ -88,9 +92,8 @@ export function ProductGallery({ images, title }: ProductGalleryProps) {
             <button
               key={index}
               onClick={() => setCurrentImage(index)}
-              className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-colors ${
-                index === currentImage ? "border-accent" : "border-border hover:border-accent/50"
-              }`}
+              className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-colors ${index === currentImage ? "border-accent" : "border-border hover:border-accent/50"
+                }`}
             >
               <img
                 src={image || "/placeholder.svg"}

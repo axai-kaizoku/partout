@@ -1,12 +1,42 @@
 import { z } from "zod";
 import { db } from "@/server/db";
-import { partCompatibility, parts } from "@/server/db/schema";
+import { partCompatibility, partImages, parts } from "@/server/db/schema";
 import { createTRPCRouter, privateProcedure, publicProcedure } from "../trpc";
 
 export const partRouter = createTRPCRouter({
   // Queries
   getHomePageParts: publicProcedure.query(async () => {
-    return await db.query.parts.findMany();
+    const data = await db.transaction((tx) => {
+      const parts = tx.query.parts.findMany({
+        with: {
+          partImages: {
+            columns: {
+              url: true
+            },
+            where: (img, { eq }) => eq(img.isPrimary, true),
+          },
+        }
+      })
+      return parts;
+    });
+    return data;
+  }),
+
+  getPartById: publicProcedure.input(z.string()).query(async ({ input }) => {
+    const data = await db.transaction((tx) => {
+      const part = tx.query.parts.findFirst({
+        where: (part, { eq }) => eq(part.id, input),
+        with: {
+          partImages: {
+            columns: {
+              url: true
+            },
+          },
+        }
+      })
+      return part;
+    });
+    return data;
   }),
 
   // Mutations

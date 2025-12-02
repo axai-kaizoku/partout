@@ -1,24 +1,19 @@
-"use client";
-import { CreditCard, Shield, Star, Truck } from "lucide-react";
-
-import { Card, CardContent } from "@/components/ui/card";
-import { Car, Disc, PenLine as Engine, Settings, Wrench, Zap } from "lucide-react";
-
+import { Car, CreditCard, Disc, PenLine as Engine, MapPin, Settings, Shield, ShoppingCart, Star, Truck, Wrench, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { api } from "@/trpc/react";
-import { MapPin, ShoppingCart } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { api } from "@/trpc/react";
+import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { api } from "@/trpc/server";
+import { Suspense } from "react";
 
-export default function Home() {
+export default async function Home() {
   return (
     <div className="pb-20">
       {/* Hero Section */}
-      <section className="px-4 py-6 bg-gradient-to-b from-muted/50 to-background">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-playfair text-3xl md:text-4xl font-bold text-foreground mb-4">Find Quality Auto Parts</h1>
-          <p className="text-muted-foreground text-lg mb-6">Browse thousands of parts from trusted sellers</p>
+      <section className="bg-linear-to-b from-muted/50 to-background px-4 py-6">
+        <div className="mx-auto max-w-4xl text-center">
+          <h1 className="mb-4 font-bold font-playfair text-3xl text-foreground md:text-4xl">Find Quality Auto Parts</h1>
+          <p className="mb-6 text-lg text-muted-foreground">Browse thousands of parts from trusted sellers</p>
           <TrustBadges />
         </div>
       </section>
@@ -30,7 +25,7 @@ export default function Home() {
 
       {/* Parts Grid */}
       <section className="px-4">
-        <PartsGrid />
+        {await PartsGrid()}
       </section>
     </div>
   );
@@ -100,8 +95,7 @@ export function FeaturedCategories() {
   );
 }
 
-export function PartsGrid() {
-  const router = useRouter();
+export async function PartsGrid() {
 
   const mockParts = [
     {
@@ -216,105 +210,105 @@ export function PartsGrid() {
     },
   ];
 
-  const parts = api.part.getHomePageParts.useQuery(undefined, {
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
-  });
-  const handlePartClick = (partId: number) => {
-    router.push(`/parts/${partId}`);
-  };
-
+  const parts = await api.part.getHomePageParts()
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="font-playfair text-2xl font-bold text-foreground">Featured Parts</h2>
-        <Button variant="outline" size="sm">
-          View All
-        </Button>
-      </div>
+    <Suspense>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockParts.map((part) => (
-          <Card
-            key={part.id}
-            className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer"
-            onClick={() => handlePartClick(part.id)}
-          >
-            <div className="relative">
-              <img
-                src={part.image || "/media/placeholder.svg"}
-                alt={part.title}
-                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute top-3 left-3 flex gap-2">
-                <Badge variant={part.condition === "New" ? "default" : "secondary"} className="text-xs">
-                  {part.condition}
-                </Badge>
-                {part.negotiable && (
-                  <Badge variant="outline" className="text-xs bg-background/90">
-                    Negotiable
-                  </Badge>
-                )}
-              </div>
-              {part.originalPrice && (
-                <div className="absolute top-3 right-3">
-                  <Badge className="bg-accent text-accent-foreground text-xs">
-                    Save ${(part.originalPrice - part.price).toFixed(0)}
-                  </Badge>
-                </div>
-              )}
-            </div>
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-playfair text-2xl font-bold text-foreground">Featured Parts</h2>
+          <Button variant="outline" size="sm">
+            View All
+          </Button>
+        </div>
 
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <div>
-                  <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-accent transition-colors">
-                    {part.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {part.brand} {part.model} • {part.year}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-foreground">${part.price}</span>
-                    {part.originalPrice && (
-                      <span className="text-sm text-muted-foreground line-through">${part.originalPrice}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1">
-                    <span className="text-muted-foreground">{part.seller.name}</span>
-                    {part.seller.verified && (
-                      <Badge variant="outline" className="text-xs px-1 py-0">
-                        ✓
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {parts?.map((part) => (
+            <Link href={`/part/${part.id}`}
+              key={part.id}
+            >
+              <Card
+                className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer"
+              >
+                <div className="relative">
+                  <img
+                    src={part?.partImages?.[0]?.url || "/media/placeholder.svg"}
+                    alt={part.title}
+                    height={192}
+                    width={256}
+                    className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    <Badge variant={part.condition === "New" ? "default" : "secondary"} className="text-xs">
+                      {part.condition}
+                    </Badge>
+                    {part.isNegotiable && (
+                      <Badge variant="outline" className="text-xs bg-background/90">
+                        Negotiable
                       </Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-muted-foreground">{part.seller.rating}</span>
+                  {part.originalPrice && (
+                    <div className="absolute top-3 right-3">
+                      <Badge className="bg-accent text-accent-foreground text-xs">
+                        Save ${(part.originalPrice - part.price).toFixed(0)}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-accent transition-colors">
+                        {part.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {part.brand} {part?.model} • {part?.year}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-foreground">${part.price}</span>
+                        {part.originalPrice && (
+                          <span className="text-sm text-muted-foreground line-through">${part.originalPrice}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">{part?.seller?.name}</span>
+                        {part?.seller?.verified && (
+                          <Badge variant="outline" className="text-xs px-1 py-0">
+                            ✓
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-muted-foreground">{part?.seller?.rating}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <MapPin className="h-3 w-3" />
+                      <span>{part?.seller?.location}</span>
+                    </div>
+
+                    <Button className="w-full" size="sm">
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Add to Cart
+                    </Button>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  <span>{part.seller.location}</span>
-                </div>
-
-                <Button className="w-full" size="sm">
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Add to Cart
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </div>
-    </div>
+    </Suspense>
+
   );
 }
