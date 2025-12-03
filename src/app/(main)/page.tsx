@@ -54,7 +54,7 @@ export function TrustBadges() {
   return (
     <div className="flex flex-wrap justify-center gap-4 md:gap-6">
       {badges.map((badge) => (
-        <div key={badge.text} className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div key={badge.text} className="flex items-center gap-2 text-muted-foreground text-sm">
           <badge.icon className="h-4 w-4 text-accent" />
           <span>{badge.text}</span>
         </div>
@@ -232,7 +232,7 @@ export async function PartsGrid() {
               >
                 <div className="relative">
                   <img
-                    src={part?.partImages?.[0]?.url || "/media/placeholder.svg"}
+                    src={part?.partImages?.[0]?.url || "/media/placeholder.png"}
                     alt={part.title}
                     height={192}
                     width={256}

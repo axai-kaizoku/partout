@@ -146,17 +146,15 @@ export function SearchResults({ filters }: SearchResultsProps) {
           {sortedResults.map((part) => (
             <Card
               key={part.id}
-              className={`overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer ${
-                viewMode === "list" ? "flex" : ""
-              }`}
+              className={`overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer ${viewMode === "list" ? "flex" : ""
+                }`}
             >
               <div className={`relative ${viewMode === "list" ? "w-48 flex-shrink-0" : ""}`}>
                 <img
                   src={part.image || "/placeholder.svg"}
                   alt={part.title}
-                  className={`object-cover group-hover:scale-105 transition-transform duration-300 ${
-                    viewMode === "list" ? "w-full h-full" : "w-full h-48"
-                  }`}
+                  className={`object-cover group-hover:scale-105 transition-transform duration-300 ${viewMode === "list" ? "w-full h-full" : "w-full h-48"
+                    }`}
                 />
                 <div className="absolute top-3 left-3 flex gap-2">
                   <Badge variant={part.condition === "New" ? "default" : "secondary"} className="text-xs">

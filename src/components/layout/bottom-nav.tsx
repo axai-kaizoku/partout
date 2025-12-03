@@ -11,7 +11,7 @@ export function BottomNav() {
 
   const navItems = [
     { icon: Home, label: "Home", path: "/" },
-    { icon: Search, label: "Search", path: "/search" },
+    { icon: Search, label: "Parts", path: "/parts" },
     { icon: Plus, label: "Sell", path: "/sell" },
     { icon: ShoppingCart, label: "Cart", path: "/cart" },
     // { icon: User, label: "Profile", path: user ? "/profile" : "/auth/login" },
