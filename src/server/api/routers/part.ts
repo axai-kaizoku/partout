@@ -40,6 +40,25 @@ export const partRouter = createTRPCRouter({
     return data;
   }),
 
+
+  getPartsByUserId: privateProcedure.query(async ({ ctx }) => {
+    const data = await db.transaction((tx) => {
+      const parts = tx.query.parts.findMany({
+        where: (part, { eq }) => eq(part.sellerId, ctx.user.id),
+        with: {
+          partImages: {
+            columns: {
+              url: true
+            },
+            where: (img, { eq }) => eq(img.isPrimary, true),
+          },
+        },
+      })
+      return parts;
+    });
+    return data;
+  }),
+
   // Mutations
   createPart: privateProcedure
     .input(

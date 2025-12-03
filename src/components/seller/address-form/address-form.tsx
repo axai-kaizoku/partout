@@ -11,16 +11,7 @@ import { addressSchema } from "./validations";
 export const AddressForm = () => {
   const router = useRouter()
 
-  const { mutateAsync: createAddress } = api.address.createAddress.useMutation({
-    onSuccess: () => {
-      toast.success("Address created successfully !")
-      router.back()
-    },
-    onError: (error) => {
-      console.log(error)
-      toast.error("Failed to create address !")
-    }
-  })
+  const { mutateAsync: createAddress } = api.address.createAddress.useMutation()
 
   const addressForm = useAppForm({
     defaultValues: {
@@ -39,7 +30,13 @@ export const AddressForm = () => {
       onChange: addressSchema,
     },
     onSubmit: async ({ value }) => {
-      await createAddress(value)
+      const toastId = toast.loading("Creating address...")
+      await createAddress(value).then(() => {
+        toast.success("Address created successfully !", { id: toastId })
+        router.back()
+      }).catch(() => {
+        toast.error("Failed to create address !", { id: toastId })
+      })
     }
   })
 

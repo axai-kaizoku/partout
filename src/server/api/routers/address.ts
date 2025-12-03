@@ -27,9 +27,9 @@ export const addressRouter = createTRPCRouter({
     return result;
   }),
 
-  updateAddress: privateProcedure.input(z.object({ id: z.string(), ...addressSchema.shape })).mutation(async ({ ctx, input }) => {
+  updateAddress: privateProcedure.input(z.object({ id: z.string(), address: { ...addressSchema.shape } })).mutation(async ({ ctx, input }) => {
     return await db.transaction(async (tx) => {
-      if (input.isDefault === true) {
+      if (input.address.isDefault === true) {
         await tx.update(addresses)
           .set({ isDefault: false })
           .where(
@@ -41,7 +41,9 @@ export const addressRouter = createTRPCRouter({
       }
 
       const [updated] = await tx.update(addresses)
-        .set(input)
+        .set({
+          ...input.address,
+        })
         .where(eq(addresses.id, input.id))
         .returning();
 

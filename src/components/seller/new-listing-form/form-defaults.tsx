@@ -5,11 +5,6 @@ export const priceShippingDefaults = {
   originalPrice: "",
   currency: "USD",
   isNegotiable: false,
-  shippingCost: "",
-  freeShippingThreshold: "",
-  estimatedDaysMin: "",
-  estimatedDaysMax: "",
-  carrier: "",
 }
 
 export const vehicleDetailsDefaults = {

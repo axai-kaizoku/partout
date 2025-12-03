@@ -1,35 +1,25 @@
 'use client';
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useAppForm } from "@/components/form";
 import { Button, LoadingButton } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { validatePhone } from "@/lib/utils";
+import { carriers } from "@/lib/constants/dropdown-data";
 import { api } from "@/trpc/react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { shippingProfilesSchema } from "./validations";
 
 export const ShippingProfilesForm = () => {
   const router = useRouter()
 
-  const { mutateAsync: createAddress } = api.address.createAddress.useMutation({
-    onSuccess: () => {
-      toast.success("Shipping profile created successfully !")
-      router.back()
-    },
-    onError: (error) => {
-      console.log(error)
-      toast.error("Failed to create shipping profile !")
-    }
-  })
+  const { mutateAsync: createShippingProfile } = api.shipping.createShippingProfile.useMutation()
 
-  const addressForm = useAppForm({
+  const shippingForm = useAppForm({
     defaultValues: {
-      sellerId: "",
       name: "",
-      baseCost: 0,
-      freeShippingThreshold: 0,
-      estimatedDaysMin: 0,
-      estimatedDaysMax: 0,
+      baseCost: "",
+      freeShippingThreshold: "",
+      estimatedDaysMin: "3",
+      estimatedDaysMax: "10",
       carrier: "",
       isDefault: false,
       isActive: true,
@@ -38,58 +28,63 @@ export const ShippingProfilesForm = () => {
       onChange: shippingProfilesSchema,
     },
     onSubmit: async ({ value }) => {
-      await createAddress(value)
+      const toastId = toast.loading("Creating shipping profile...")
+      // console.log(value)
+      await createShippingProfile(value).then(() => {
+        toast.success("Shipping profile created successfully !", { id: toastId })
+        router.back()
+      }).catch(() => {
+        toast.error("Failed to create shipping profile !", { id: toastId })
+      })
     }
   })
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    addressForm.handleSubmit()
+    shippingForm.handleSubmit()
   }
 
   return (
     <div className="mx-auto max-w-4xl">
-      <form id="addressform" onSubmit={handleSubmit}>
+      <form id="shippingform" onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
             <CardTitle>Shipping Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <addressForm.AppField name="fullName" >
-                {(field) => <field.TextField label="Full Name *" placeholder="e.g., Peter " required maxLength={100} />}
-              </addressForm.AppField>
-              <addressForm.AppField name="phone" >
-                {(field) => <field.TextField label="Phone *" placeholder="e.g., 123-456-7890" required
-                  onChange={(e) => validatePhone(e.target.value, field.handleChange)}
-                  maxLength={10}
-                />}
-              </addressForm.AppField>
+              <shippingForm.AppField name="name" >
+                {(field) => <field.TextField label="Name *" placeholder="e.g., Standard,Express " required maxLength={100} />}
+              </shippingForm.AppField>
+              <shippingForm.AppField name="carrier" >
+                {(field) => <field.SelectField label="Carrier *" placeholder="Select carrier" options={carriers.map((carrier) => ({ label: carrier, value: carrier }))} />}
+              </shippingForm.AppField>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <addressForm.AppField name="line1" >
-                {(field) => <field.TextField label="Line 1 *" placeholder="e.g., 123 Main St" required maxLength={100} />}
-              </addressForm.AppField>
-              <addressForm.AppField name="line2" >
-                {(field) => <field.TextField label="Line 2" placeholder="e.g., Suite 100" maxLength={100} />}
-              </addressForm.AppField>
+              <shippingForm.AppField name="baseCost" >
+                {(field) => <field.TextField label="Base Cost *" placeholder="e.g., 10" type="number" min={0} max={1000000} required maxLength={100} />}
+              </shippingForm.AppField>
+              <shippingForm.AppField name="freeShippingThreshold" >
+                {(field) => <field.TextField label="Free Shipping Threshold" placeholder="e.g., 100" type="number" min={0} max={1000000} maxLength={100} />}
+              </shippingForm.AppField>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <addressForm.AppField name="city" >
-                {(field) => <field.TextField label="City *" placeholder="e.g., San Francisco" required maxLength={100} />}
-              </addressForm.AppField>
-              <addressForm.AppField name="state" >
-                {(field) => <field.TextField label="State *" placeholder="e.g., CA" required maxLength={100} />}
-              </addressForm.AppField>
-              <addressForm.AppField name="postalCode" >
-                {(field) => <field.TextField label="Postal Code *" placeholder="e.g., 94102" required maxLength={100} />}
-              </addressForm.AppField>
+              <shippingForm.AppField name="estimatedDaysMin" >
+                {(field) => <field.TextField label="Estimated Days Min *" placeholder="e.g., 10" type="number" min={0} max={1000000} required />}
+              </shippingForm.AppField>
+              <shippingForm.AppField name="estimatedDaysMax" >
+                {(field) => <field.TextField label="Estimated Days Max *" placeholder="e.g., 100" type="number" min={0} max={1000000} required />}
+              </shippingForm.AppField>
             </div>
 
-            <addressForm.AppField name="isDefault" >
+            <shippingForm.AppField name="isActive" >
+              {(field) => <field.CheckboxField label="Active" />}
+            </shippingForm.AppField>
+
+            <shippingForm.AppField name="isDefault" >
               {(field) => <field.CheckboxField label="Set as default" />}
-            </addressForm.AppField>
+            </shippingForm.AppField>
           </CardContent>
         </Card>
 
@@ -100,10 +95,10 @@ export const ShippingProfilesForm = () => {
 
           <div className="flex gap-2">
 
-            <LoadingButton disabled={addressForm.state.isSubmitting}
-              loading={addressForm.state.isSubmitting}
-              type="submit" form="addressform">
-              Create Address
+            <LoadingButton disabled={shippingForm.state.isSubmitting}
+              loading={shippingForm.state.isSubmitting}
+              type="submit" form="shippingform">
+              Create Shipping Profile
             </LoadingButton>
           </div>
         </div>
