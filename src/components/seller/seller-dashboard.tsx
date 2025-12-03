@@ -16,11 +16,19 @@ export function SellerDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-playfair text-2xl md:text-3xl font-bold text-foreground">Seller Dashboard</h1>
+          <h1 className="font-bold font-playfair text-2xl text-foreground md:text-3xl">Seller Dashboard</h1>
           <p className="text-muted-foreground">Manage your listings and track your sales</p>
         </div>
+        <Button onClick={() => router.push("/sell/addresses")} size="lg">
+          <Plus className="mr-2 h-5 w-5" />
+          Addresses
+        </Button>
+        <Button onClick={() => router.push("/sell/shipping")} size="lg">
+          <Plus className="mr-2 h-5 w-5" />
+          Shipping
+        </Button>
         <Button onClick={() => router.push("/sell/new")} size="lg">
-          <Plus className="h-5 w-5 mr-2" />
+          <Plus className="mr-2 h-5 w-5" />
           List New Part
         </Button>
       </div>

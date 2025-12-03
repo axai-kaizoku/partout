@@ -1,0 +1,59 @@
+import { and, eq, ne } from "drizzle-orm";
+import z from "zod";
+import { addressSchema } from "@/components/seller/address-form/validations";
+import { db } from "@/server/db";
+import { addresses } from "@/server/db/schema";
+import { createTRPCRouter, privateProcedure } from "../trpc";
+
+export const addressRouter = createTRPCRouter({
+  createAddress: privateProcedure.input(addressSchema).mutation(async ({ ctx, input }) => {
+    return await db.transaction(async (tx) => {
+      if (input.isDefault) {
+        await tx.update(addresses)
+          .set({ isDefault: false })
+          .where(eq(addresses.userId, ctx.user.id));
+      }
+
+      const [newAddress] = await tx.insert(addresses)
+        .values({ ...input, userId: ctx.user.id })
+        .returning();
+
+      return newAddress;
+    });
+  }),
+
+  getAllAddresses: privateProcedure.query(async ({ ctx }) => {
+    const result = await db.select().from(addresses).where(eq(addresses.userId, ctx.user.id));
+    return result;
+  }),
+
+  updateAddress: privateProcedure.input(z.object({ id: z.string(), ...addressSchema.shape })).mutation(async ({ ctx, input }) => {
+    return await db.transaction(async (tx) => {
+      if (input.isDefault === true) {
+        await tx.update(addresses)
+          .set({ isDefault: false })
+          .where(
+            and(
+              eq(addresses.userId, ctx.user.id),
+              ne(addresses.id, input.id)
+            )
+          );
+      }
+
+      const [updated] = await tx.update(addresses)
+        .set(input)
+        .where(eq(addresses.id, input.id))
+        .returning();
+
+      return updated;
+    });
+  }),
+
+  deleteAddress: privateProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+    const [result] = await db.delete(addresses).where(eq(addresses.id, input.id)).returning();
+    if (result) {
+      return result
+    }
+    return null;
+  })
+})

@@ -18,10 +18,10 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
 
 
 # Current state: 2/12/2025 - 23:11
-- [ ] check create part form
-- [ ] seller side
-  - [ ] add address 
-  - [ ] shipping form
+- [x] check create part form
+- [-] seller side
+  - [x] add address 
+  - [-] shipping form
 - [ ] Home Page
   - [ ] create part-card component
   - [ ] fix search page layout

@@ -412,7 +412,9 @@ export function NewListingForm() {
 
           <div className="flex gap-2">
 
-            <LoadingButton type="submit" form="partform">
+            <LoadingButton disabled={pricingShippingForm.state.isSubmitting}
+              loading={pricingShippingForm.state.isSubmitting}
+              type="submit" form="partform">
               {currentStep < 4 ? "Next" : "Create Listing"}
             </LoadingButton>
           </div>

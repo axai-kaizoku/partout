@@ -205,8 +205,8 @@ export const partCompatibility = createTable(
     modelId: text("model_id")
       .notNull()
       .references(() => vehicleModels.id),
-    yearStart: integer("year_start").notNull(),
-    yearEnd: integer("year_end").notNull(),
+    yearStart: integer("year_start"),
+    yearEnd: integer("year_end"),
     engine: text("engine"), // "2.5L", "3.0L V6", etc.
     trim: text("trim"), // "Base", "Sport", "M3", etc.
     createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
@@ -305,9 +305,8 @@ export const addresses = createTable(
     userId: text("user_id")
       .notNull()
       .references(() => profiles.id),
-    type: text("type").notNull(), // "billing", "shipping"
-    firstName: text("first_name"),
-    lastName: text("last_name"),
+    type: text("type"), // "billing", "shipping"
+    fullName: text("full_name"),
     company: text("company"),
     line1: text("line1").notNull(),
     line2: text("line2"),
