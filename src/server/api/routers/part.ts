@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "@/server/db";
-import { partCompatibility, parts } from "@/server/db/schema";
+import { partCompatibility, parts, partShipping } from "@/server/db/schema";
 import { createTRPCRouter, privateProcedure, publicProcedure } from "../trpc";
 
 export const partRouter = createTRPCRouter({
@@ -69,6 +69,7 @@ export const partRouter = createTRPCRouter({
           seller: {
             columns: {
               name: true,
+              createdAt: true,
             },
             with: {
               addresses: {
@@ -88,6 +89,11 @@ export const partRouter = createTRPCRouter({
               shippingProfile: {
                 columns: {
                   name: true,
+                  baseCost: true,
+                  carrier: true,
+                  freeShippingThreshold: true,
+                  estimatedDaysMin: true,
+                  estimatedDaysMax: true,
                 }
               }
             }
@@ -181,6 +187,28 @@ export const partRouter = createTRPCRouter({
 
       if (newPart) {
         return newPart.id;
+      }
+
+      return null;
+    }),
+
+
+  createPartShipping: privateProcedure
+    .input(
+      z.object({
+        partId: z.string(),
+        shippingProfileId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [newPartShipping] = await db.insert(partShipping).values({
+        partId: input.partId,
+        shippingProfileId: input.shippingProfileId,
+        sellerId: ctx.user.id,
+      }).returning();
+
+      if (newPartShipping) {
+        return newPartShipping.id;
       }
 
       return null;

@@ -5,6 +5,7 @@ export const priceShippingDefaults = {
   originalPrice: "",
   currency: "USD",
   isNegotiable: false,
+  partShippingId: "",
 }
 
 export const vehicleDetailsDefaults = {

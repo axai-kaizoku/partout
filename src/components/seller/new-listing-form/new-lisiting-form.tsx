@@ -42,6 +42,8 @@ export function NewListingForm() {
 
   const { mutateAsync: createPartImage } = api.image.createPartImage.useMutation();
 
+  const { mutateAsync: createPartShipping } = api.part.createPartShipping.useMutation();
+
   const basicInfoForm = useAppForm({
     defaultValues: basicInfoDefaults,
     validators: {
@@ -108,6 +110,12 @@ export function NewListingForm() {
         currency,
         isNegotiable,
       }).then(async (partId) => {
+
+        await createPartShipping({
+          partId: partId,
+          shippingProfileId: pricingShippingFormValues.partShippingId,
+        })
+
         if (makeId && modelId) {
           const createdModelId = await createModelForMake({
             makeId: makeId,

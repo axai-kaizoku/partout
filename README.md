@@ -34,6 +34,6 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
   - [x] add edit address, edit shipping
 
 - [-] Home Page
-  - [-] create part-card component
-  - [ ] link part to seller
+  - [x] create part-card component
+  - [x] link part to seller
   - [ ] fix search page layout

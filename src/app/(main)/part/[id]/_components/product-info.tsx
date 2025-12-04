@@ -90,22 +90,22 @@ export function ProductInfo({ part }: ProductInfoProps) {
             <Truck className="h-4 w-4" />
             <span className="font-medium">Shipping</span>
           </div>
-          <pre>{JSON.stringify(part?.partShipping)}</pre>
+          {/* <pre>{JSON.stringify(part?.partShipping[0]?.shippingProfile)}</pre> */}
           <div className="space-y-1 text-sm">
             {freeShipping ? (
               <p className="text-accent font-medium">Free shipping on this item!</p>
             ) : (
               <p>
-                Shipping: <span className="font-medium">${part?.shipping?.cost}</span>
-                {part?.shipping?.freeShippingThreshold > part?.price && (
+                Shipping: <span className="font-medium">${part?.partShipping[0]?.shippingProfile?.baseCost}</span>
+                {part?.partShipping[0]?.shippingProfile?.freeShippingThreshold > part?.price && (
                   <span className="text-muted-foreground">
                     {" "}
-                    (Free on orders ${part?.shipping?.freeShippingThreshold}+)
+                    (Free on orders ${part?.partShipping[0]?.shippingProfile?.freeShippingThreshold}+)
                   </span>
                 )}
               </p>
             )}
-            <p className="text-muted-foreground">Estimated delivery: {part?.shipping?.estimatedDays}</p>
+            <p className="text-muted-foreground">Estimated delivery: {part?.partShipping[0]?.shippingProfile?.estimatedDaysMin} - {part?.partShipping[0]?.shippingProfile?.estimatedDaysMax} days</p>
           </div>
         </CardContent>
       </Card>
@@ -128,11 +128,11 @@ export function ProductInfo({ part }: ProductInfoProps) {
       {/* Trust Badges */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
-          <Shield className="h-4 w-4 text-accent" />
+          <Shield className="h-4 w-4" />
           <span>Secure Payment</span>
         </div>
         <div className="flex items-center gap-1">
-          <Truck className="h-4 w-4 text-accent" />
+          <Truck className="h-4 w-4" />
           <span>Fast Shipping</span>
         </div>
       </div>

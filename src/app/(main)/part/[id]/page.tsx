@@ -152,7 +152,6 @@ const mockParts = {
 };
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  // const part = mockParts[params.id as keyof typeof mockParts];
   const id = (await params).id
 
   const part = await api.part.getPartById(id)
@@ -174,12 +173,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
         {/* Seller Info */}
         <div className="mb-8">
-          {/* <SellerInfo seller={part?.seller} /> */}
+          <SellerInfo seller={part?.seller} />
         </div>
 
         {/* Compatibility Table */}
         <div className="mb-8">
-          {/* <CompatibilityTable compatibility={part?.compatibility} /> */}
+          <CompatibilityTable compatibility={part?.partCompatibility} />
         </div>
 
         {/* Reviews */}
