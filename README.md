@@ -18,7 +18,13 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
 
 ---
 
-# Current state: 3/12/2025 - 23:30
+## TODO - Needed Discussion
+- [ ] fix seller profile side - flow
+- [ ] ratings, reviews
+
+---
+
+# Current state: 4/12/2025 - 16:42
 - [x] check create part form
 - [x] seller side
   - [x] add address 
@@ -26,6 +32,7 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
   - [x] show active listings
   - [x] fix create part form
   - [x] add edit address, edit shipping
+
 - [-] Home Page
   - [-] create part-card component
   - [ ] link part to seller

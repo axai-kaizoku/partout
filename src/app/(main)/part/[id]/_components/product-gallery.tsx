@@ -29,7 +29,7 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
       {/* Main Image */}
       <div className="relative aspect-square bg-muted rounded-lg overflow-hidden group">
         <img
-          src={images[currentImage] || "/placeholder.svg"}
+          src={images[currentImage] || "/media/placeholder.png"}
           alt={`${title} - Image ${currentImage + 1}`}
           className="w-full h-full object-cover"
         />

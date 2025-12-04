@@ -128,7 +128,7 @@ export function OrderHistory() {
               <div key={item.id}>
                 <div className="flex gap-4">
                   <img
-                    src={item.image || "/placeholder.svg"}
+                    src={"/media/placeholder.png"}
                     alt={item.title}
                     className="w-16 h-16 object-cover rounded-md flex-shrink-0"
                   />

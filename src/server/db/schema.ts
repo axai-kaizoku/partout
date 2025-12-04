@@ -134,6 +134,7 @@ export const parts = createTable(
     title: text("title").notNull(),
     description: text("description"),
     partNumber: text("part_number"),
+
     oem: text("oem"), // Original Equipment Manufacturer
     brand: text("brand"),
     condition: text("condition").notNull(), // New, Used, Refurbished
@@ -169,6 +170,8 @@ export const parts = createTable(
     index("part_view_count_idx").on(t.viewCount),
   ]
 );
+
+export type Part = typeof parts.$inferSelect;
 
 // Part images
 export const partImages = createTable(
@@ -392,6 +395,8 @@ export const partRelations = relations(parts, ({ one, many }) => ({
     fields: [parts.categoryId],
     references: [categories.id],
   }),
+  partShipping: many(partShipping),
+  partCompatibility: many(partCompatibility),
   sellerStats: one(sellerStats, {
     fields: [parts.sellerId],
     references: [sellerStats.sellerId],
@@ -402,5 +407,55 @@ export const partImageRelations = relations(partImages, ({ one }) => ({
   part: one(parts, {
     fields: [partImages.partId],
     references: [parts.id],
+  }),
+}))
+
+export const profileRelations = relations(profiles, ({ one, many }) => ({
+  part: one(parts, {
+    fields: [profiles.id],
+    references: [parts.sellerId],
+  }),
+  addresses: many(addresses),
+  shippingProfiles: many(shippingProfiles),
+}))
+
+export const addressRelations = relations(addresses, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [addresses.userId],
+    references: [profiles.id],
+  }),
+}))
+
+export const partCompatibilityRelations = relations(partCompatibility, ({ one }) => ({
+  part: one(parts, {
+    fields: [partCompatibility.partId],
+    references: [parts.id],
+  }),
+  make: one(vehicleMakes, {
+    fields: [partCompatibility.makeId],
+    references: [vehicleMakes.id],
+  }),
+  model: one(vehicleModels, {
+    fields: [partCompatibility.modelId],
+    references: [vehicleModels.id],
+  }),
+}))
+
+export const makeRelations = relations(vehicleMakes, ({ many }) => ({
+  partCompatibility: many(partCompatibility),
+}))
+
+export const modelRelations = relations(vehicleModels, ({ many }) => ({
+  partCompatibility: many(partCompatibility),
+}))
+
+export const partShippingRelations = relations(partShipping, ({ one }) => ({
+  part: one(parts, {
+    fields: [partShipping.partId],
+    references: [parts.id],
+  }),
+  shippingProfile: one(shippingProfiles, {
+    fields: [partShipping.shippingProfileId],
+    references: [shippingProfiles.id],
   }),
 }))

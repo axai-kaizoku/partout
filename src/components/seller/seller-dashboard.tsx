@@ -247,8 +247,10 @@ export function Shipping() {
         <div className="flex border p-3 rounded-md my-2 items-center justify-between space-y-2" key={profile.id}>
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium text-foreground line-clamp-2">{profile.name}</h3>
-              <p className="text-sm text-muted-foreground">{profile.baseCost}, {profile.carrier}</p> {profile.isDefault && <Badge className="ml-2">Default</Badge>}
+              <h3 className="font-medium text-foreground line-clamp-2">{profile.name}
+                {profile.isDefault && <Badge className="ml-2">Default</Badge>}
+              </h3>
+              <p className="text-sm text-muted-foreground">{profile.baseCost}, {profile.carrier}</p>
             </div>
           </div>
 
