@@ -14,7 +14,6 @@ export const basicInfoSchema = z.object({
   dimensions: z.string().optional(),
 })
 
-
 export const vehicleDetailsSchema = z.object({
   makeId: z.string().optional(),
   modelId: z.string().optional(),
@@ -29,5 +28,6 @@ export const pricingShippingSchema = z.object({
   price: z.string().min(1, "Price is required"),
   originalPrice: z.string().optional(),
   currency: z.string().min(1, "Currency is required"),
-  isNegotiable: z.boolean().optional()
+  isNegotiable: z.boolean().optional(),
+  partShippingId: z.string().min(1, "Shipping is required"),
 })

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "@/server/db";
-import { partCompatibility, partImages, parts } from "@/server/db/schema";
+import { partCompatibility, parts, partShipping } from "@/server/db/schema";
 import { createTRPCRouter, privateProcedure, publicProcedure } from "../trpc";
 
 export const partRouter = createTRPCRouter({
@@ -15,6 +15,38 @@ export const partRouter = createTRPCRouter({
             },
             where: (img, { eq }) => eq(img.isPrimary, true),
           },
+          seller: {
+            columns: {
+              name: true,
+            },
+            with: {
+              addresses: {
+                where: (address, { eq }) => eq(address.isDefault, true),
+                columns: {
+                  city: true,
+                  state: true,
+                }
+              }
+            }
+          },
+          partCompatibility: {
+            columns: {
+              yearStart: true,
+              yearEnd: true,
+            },
+            with: {
+              make: {
+                columns: {
+                  name: true
+                }
+              },
+              model: {
+                columns: {
+                  name: true
+                }
+              }
+            }
+          }
         },
         limit: 6
       })
@@ -32,8 +64,59 @@ export const partRouter = createTRPCRouter({
             columns: {
               url: true
             },
+            where: (img, { eq }) => eq(img.isPrimary, true),
           },
-        }
+          seller: {
+            columns: {
+              name: true,
+              createdAt: true,
+            },
+            with: {
+              addresses: {
+                where: (address, { eq }) => eq(address.isDefault, true),
+                columns: {
+                  city: true,
+                  state: true,
+                }
+              }
+            }
+          },
+          partShipping: {
+            columns: {
+              shippingProfileId: true,
+            },
+            with: {
+              shippingProfile: {
+                columns: {
+                  name: true,
+                  baseCost: true,
+                  carrier: true,
+                  freeShippingThreshold: true,
+                  estimatedDaysMin: true,
+                  estimatedDaysMax: true,
+                }
+              }
+            }
+          },
+          partCompatibility: {
+            columns: {
+              yearStart: true,
+              yearEnd: true,
+            },
+            with: {
+              make: {
+                columns: {
+                  name: true
+                }
+              },
+              model: {
+                columns: {
+                  name: true
+                }
+              }
+            }
+          }
+        },
       })
       return part;
     });
@@ -104,6 +187,28 @@ export const partRouter = createTRPCRouter({
 
       if (newPart) {
         return newPart.id;
+      }
+
+      return null;
+    }),
+
+
+  createPartShipping: privateProcedure
+    .input(
+      z.object({
+        partId: z.string(),
+        shippingProfileId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [newPartShipping] = await db.insert(partShipping).values({
+        partId: input.partId,
+        shippingProfileId: input.shippingProfileId,
+        sellerId: ctx.user.id,
+      }).returning();
+
+      if (newPartShipping) {
+        return newPartShipping.id;
       }
 
       return null;

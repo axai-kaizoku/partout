@@ -67,14 +67,14 @@ export function Header() {
             <Search className="h-5 w-5" />
           </Button>
 
-          <Button variant="ghost" size="icon" className="relative" asChild>
+          {/* <Button variant="ghost" size="icon" className="relative" asChild>
             <Link href={"/cart"}>
               <ShoppingCart className="h-5 w-5" />
               <span className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
                 2
               </span>
             </Link>
-          </Button>
+          </Button> */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:text-primary">

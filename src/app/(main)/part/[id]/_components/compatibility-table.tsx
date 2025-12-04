@@ -16,7 +16,7 @@ export function CompatibilityTable({ compatibility }: CompatibilityTableProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
-          <CheckCircle className="h-5 w-5 text-accent" />
+          <CheckCircle className="h-5 w-5" />
           Vehicle Compatibility
         </CardTitle>
       </CardHeader>
@@ -39,12 +39,12 @@ export function CompatibilityTable({ compatibility }: CompatibilityTableProps) {
                   <tr key={index} className="border-b border-border/50">
                     <td className="py-3">
                       <Badge variant="outline" className="text-xs">
-                        {vehicle.make}
+                        {vehicle.make?.name}
                       </Badge>
                     </td>
-                    <td className="py-3 font-medium">{vehicle.model}</td>
-                    <td className="py-3 text-muted-foreground">{vehicle.year}</td>
-                    <td className="py-3 text-muted-foreground">{vehicle.engine}</td>
+                    <td className="py-3 font-medium">{vehicle.model?.name}</td>
+                    <td className="py-3 text-muted-foreground">{vehicle.yearStart} - {vehicle.yearEnd}</td>
+                    <td className="py-3 text-muted-foreground">{vehicle.engine?.name ?? "-"}</td>
                   </tr>
                 ))}
               </tbody>

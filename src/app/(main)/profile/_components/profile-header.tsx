@@ -25,7 +25,7 @@ export function ProfileHeader() {
           <div className="flex-1 space-y-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="font-playfair text-2xl font-bold text-foreground">{user?.user_metadata?.name}</h1>
+                <h1 className="font-playfair text-2xl font-bold text-foreground capitalize">{user?.user_metadata?.name}</h1>
                 <Badge variant="outline" className="text-xs">
                   <Shield className="h-3 w-3 mr-1" />
                   Verified

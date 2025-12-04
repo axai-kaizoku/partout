@@ -1,6 +1,8 @@
 import { currencies } from "@/lib/constants/dropdown-data";
+import { api } from "@/trpc/react";
 
 export function PricingShippingForm({ pricingShippingForm }: { pricingShippingForm: any }) {
+  const { data: shipping } = api.shipping.getAllShippingProfiles.useQuery()
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -17,7 +19,13 @@ export function PricingShippingForm({ pricingShippingForm }: { pricingShippingFo
           }))} />}
         </pricingShippingForm.AppField>
       </div>
-
+      <pricingShippingForm.AppField name="partShippingId">
+        {(field) => <field.SelectField label="Shipping *" placeholder="Select a shipping" options={shipping?.map((shipping) => ({
+          value: shipping.id,
+          label: shipping.name,
+        })) ?? []} />}
+      </pricingShippingForm.AppField>
+      <p className="text-xs text-muted-foreground">Add your shipping profile</p>
       <div className="flex items-center space-x-2">
         <pricingShippingForm.AppField name="isNegotiable">
           {(field) => <field.CheckboxField label="Price is negotiable" />}
