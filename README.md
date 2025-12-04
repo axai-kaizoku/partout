@@ -1,9 +1,9 @@
 # Partout
 
-[x] - Deploy to vercel
-[x] - Setup Auth
-[x] - Copy frontend
-[x] - Create Tables
+- [x] Deploy to vercel
+- [x] Setup Auth
+- [x] Copy frontend
+- [x] Create Tables
 
 Next Steps for Implementation
 The form is now ready for:
@@ -15,13 +15,18 @@ The form is now ready for:
 - Real-time model filtering based on selected make
 
 The form structure now perfectly aligns with our e-commerce schema and provides a solid foundation for the full implementation.
-<<<<<<< HEAD
-=======
 
+---
 
-# Current state: 1/12/2025 - 23:53
-- [x] fix images in new listing form 
-- [x] store new listing in db
-  - [x] fix part.ts trpc file 
-  - [x] fix form for sending data over here 
->>>>>>> 97540208d88c7153bd388f392ae1684b7e9603a6
+# Current state: 3/12/2025 - 23:30
+- [x] check create part form
+- [x] seller side
+  - [x] add address 
+  - [x] shipping form
+  - [x] show active listings
+  - [x] fix create part form
+  - [x] add edit address, edit shipping
+- [-] Home Page
+  - [-] create part-card component
+  - [ ] link part to seller
+  - [ ] fix search page layout

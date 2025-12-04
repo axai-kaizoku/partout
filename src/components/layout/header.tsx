@@ -1,11 +1,12 @@
 "use client";
 
+import { Box, LogOut, Search, ShoppingCart, User } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type React from "react";
-
-import { Search, ShoppingCart, User, LogOut } from "lucide-react";
+import { useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,22 +14,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { useUser } from "@/hooks/use-user";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 
-const user = { name: "", avatar: "" };
 export function Header() {
   const router = useRouter();
   const supabase = supabaseBrowserClient();
   const [searchQuery, setSearchQuery] = useState("");
-  // const { user, logout } = useAuth();
+  const _user = useUser()
+  const user = _user ? _user : { user_metadata: { name: "Guest", email: "" } }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+      router.push(`/parts?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -38,12 +38,15 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+    <header className="sticky top-0 z-50 border-border border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Logo */}
-        <div className="flex items-center cursor-pointer" onClick={() => router.push("/")}>
-          <h1 className="font-playfair text-xl font-bold text-primary">Partout.com</h1>
-        </div>
+        <Link href={"/"}>
+          <div className="flex items-center">
+            <h1 className="font-bold font-playfair text-primary text-xl">Partout.com</h1>
+          </div>
+        </Link>
+
 
         {/* Search Bar - Hidden on mobile, shown on desktop */}
         <div className="hidden md:flex flex-1 max-w-md mx-6">
@@ -60,78 +63,51 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => router.push("/search")}>
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => router.push("/parts")}>
             <Search className="h-5 w-5" />
           </Button>
 
-          <Link href={"/cart"}>
-            <Button variant="ghost" size="icon" className="relative">
+          <Button variant="ghost" size="icon" className="relative" asChild>
+            <Link href={"/cart"}>
               <ShoppingCart className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
                 2
               </span>
-            </Button>
-          </Link>
-
-          {true ? (
-            <>
-              {/* <Link href={"/profile"}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  // onClick={() => router.push('/auth/login')}
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                    <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </Link> */}
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar || "/media/placeholder.svg"} alt={user.name} />
-                      <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium">{user.name}</p>
-                      <p className="w-[200px] truncate text-sm text-muted-foreground">{user.name}</p>
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/profile")}>
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/orders")}>Orders</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/favorites")}>Favorites</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          ) : (
-            <Link href={"/auth/login"}>
-              <Button
-                variant="ghost"
-                size="icon"
-                // onClick={() => router.push('/auth/login')}
-              >
-                <User className="h-5 w-5" />
-              </Button>
             </Link>
-          )}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:text-primary">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>{user?.user_metadata?.name?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <div className="flex items-center justify-start gap-2 p-2">
+                <div className="flex flex-col space-y-1 leading-none">
+                  <p className="font-medium capitalize">{user?.user_metadata?.name}</p>
+                  <p className="truncate w-[200px] text-sm text-muted-foreground">{user?.user_metadata?.email}</p>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push("/profile")}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/orders")}>
+                <Box className="mr-2 h-4 w-4" />
+                Orders</DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={() => router.push("/favorites")}>Favorites</DropdownMenuItem> */}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-    </header>
+    </header >
   );
 }

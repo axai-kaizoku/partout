@@ -15,7 +15,8 @@ export const partRouter = createTRPCRouter({
             },
             where: (img, { eq }) => eq(img.isPrimary, true),
           },
-        }
+        },
+        limit: 6
       })
       return parts;
     });
@@ -35,6 +36,25 @@ export const partRouter = createTRPCRouter({
         }
       })
       return part;
+    });
+    return data;
+  }),
+
+
+  getPartsByUserId: privateProcedure.query(async ({ ctx }) => {
+    const data = await db.transaction((tx) => {
+      const parts = tx.query.parts.findMany({
+        where: (part, { eq }) => eq(part.sellerId, ctx.user.id),
+        with: {
+          partImages: {
+            columns: {
+              url: true
+            },
+            where: (img, { eq }) => eq(img.isPrimary, true),
+          },
+        },
+      })
+      return parts;
     });
     return data;
   }),
@@ -96,8 +116,8 @@ export const partRouter = createTRPCRouter({
         partId: z.string(),
         makeId: z.string(),
         modelId: z.string(),
-        yearStart: z.number().optional(),
-        yearEnd: z.number().optional(),
+        yearStart: z.number().optional().nullable(),
+        yearEnd: z.number().optional().nullable(),
         engine: z.string().optional(),
       })
     )

@@ -37,7 +37,7 @@ export function CartItems() {
                 <div key={item.id}>
                   <div className="flex gap-4">
                     <img
-                      src={item.image || "/placeholder.svg"}
+                      src={item.image || "/media/placeholder.png"}
                       alt={item.title}
                       className="w-20 h-20 object-cover rounded-md flex-shrink-0"
                     />

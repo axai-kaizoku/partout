@@ -13,7 +13,6 @@ export function SalesHistory() {
       buyer: "John D.",
       dateSold: "2024-01-14",
       status: "completed",
-      image: "/mercedes-door-handle.jpg",
     },
     {
       id: 2,
@@ -22,7 +21,6 @@ export function SalesHistory() {
       buyer: "Sarah M.",
       dateSold: "2024-01-12",
       status: "shipped",
-      image: "/jeep-wrangler-soft-top.jpg",
     },
     {
       id: 3,
@@ -31,7 +29,6 @@ export function SalesHistory() {
       buyer: "Mike R.",
       dateSold: "2024-01-10",
       status: "completed",
-      image: "/placeholder.svg?height=80&width=80&text=BMW+Rotors",
     },
   ]
 
@@ -85,7 +82,7 @@ export function SalesHistory() {
             <CardContent className="p-6">
               <div className="flex gap-4">
                 <img
-                  src={sale.image || "/placeholder.svg"}
+                  src={sale.image || "/media/placeholder.png"}
                   alt={sale.title}
                   className="w-16 h-16 object-cover rounded-md flex-shrink-0"
                 />

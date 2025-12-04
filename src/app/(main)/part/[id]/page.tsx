@@ -157,6 +157,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const part = await api.part.getPartById(id)
 
+  if (!part) {
+    return <div>Part not found</div>
+  }
+
   return (
     <main className="pb-20">
       <div className="max-w-6xl mx-auto px-4 py-6">

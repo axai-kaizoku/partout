@@ -222,7 +222,7 @@ export const partInfoRouter = createTRPCRouter({
     ]);
   }),
 
-  createModelForMake: publicProcedure.input(z.object({ makeId: z.string(), name: z.string(), yearStart: z.number().optional(), yearEnd: z.number().optional() })).mutation(async ({ input }) => {
+  createModelForMake: publicProcedure.input(z.object({ makeId: z.string(), name: z.string(), yearStart: z.number().optional().nullable(), yearEnd: z.number().optional().nullable() })).mutation(async ({ input }) => {
     const [model] = await db.insert(vehicleModels).values({
       name: input.name,
       makeId: input.makeId,

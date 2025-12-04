@@ -1,15 +1,14 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog as Alert, DialogDescription as AlertDescription } from "@/components/ui/dialog";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog as Alert, DialogDescription as AlertDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
@@ -86,7 +85,7 @@ export function LoginForm() {
             type="button"
             variant="ghost"
             size="icon"
-            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -105,7 +104,7 @@ export function LoginForm() {
             Remember me
           </Label>
         </div>
-        <Button variant="link" className="px-0 text-sm">
+        <Button variant="link" className="px-0 text-sm" type="button">
           Forgot password?
         </Button>
       </div>
@@ -115,7 +114,7 @@ export function LoginForm() {
         Sign In
       </Button>
 
-      <div className="text-center text-xs text-muted-foreground">Demo credentials: demo@partout.com / password</div>
+      <div className="text-center text-muted-foreground text-xs">Demo credentials: demo@partout.com / password</div>
     </form>
   );
 }

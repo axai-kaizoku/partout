@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight, Expand } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 interface ProductGalleryProps {
   partImages: { url: string }[]
@@ -14,7 +14,6 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
   const images = useMemo(() => {
     return partImages?.map((img) => img?.url)
   }, [])
-  console.log(images)
   const [currentImage, setCurrentImage] = useState(0)
 
   const nextImage = () => {
@@ -41,7 +40,7 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={prevImage}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -49,7 +48,7 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={nextImage}
             >
               <ChevronRight className="h-4 w-4" />
@@ -63,12 +62,18 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 bg-background/80 hover:bg-background opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 bg-background/80  opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <Expand className="h-4 w-4" />
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl">
+            <DialogHeader className="sr-only">
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription>
+                {currentImage + 1} / {images.length}
+              </DialogDescription>
+            </DialogHeader>
             <img
               src={images[currentImage] || "/placeholder.svg"}
               alt={`${title} - Image ${currentImage + 1}`}

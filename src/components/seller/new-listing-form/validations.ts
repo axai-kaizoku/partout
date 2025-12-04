@@ -29,10 +29,5 @@ export const pricingShippingSchema = z.object({
   price: z.string().min(1, "Price is required"),
   originalPrice: z.string().optional(),
   currency: z.string().min(1, "Currency is required"),
-  isNegotiable: z.boolean().optional(),
-  shippingCost: z.string().optional(),
-  freeShippingThreshold: z.string().optional(),
-  estimatedDaysMin: z.string().optional(),
-  estimatedDaysMax: z.string().optional(),
-  carrier: z.string().optional(),
+  isNegotiable: z.boolean().optional()
 })
