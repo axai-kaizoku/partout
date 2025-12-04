@@ -244,6 +244,8 @@ export const shippingProfiles = createTable(
   ]
 );
 
+export type ShippingProfile = typeof shippingProfiles.$inferSelect;
+
 // Part shipping (links parts to shipping profiles)
 export const partShipping = createTable(
   "part_shipping",
@@ -329,6 +331,8 @@ export const addresses = createTable(
     index("address_postal_idx").on(t.postalCode),
   ]
 );
+
+export type Address = typeof addresses.$inferSelect
 
 // User favorites/watchlist
 export const favorites = createTable(

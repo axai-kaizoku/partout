@@ -1,9 +1,9 @@
 # Partout
 
-[x] - Deploy to vercel
-[x] - Setup Auth
-[x] - Copy frontend
-[x] - Create Tables
+- [x] Deploy to vercel
+- [x] Setup Auth
+- [x] Copy frontend
+- [x] Create Tables
 
 Next Steps for Implementation
 The form is now ready for:
@@ -20,12 +20,12 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
 
 # Current state: 3/12/2025 - 23:30
 - [x] check create part form
-- [-] seller side
+- [x] seller side
   - [x] add address 
   - [x] shipping form
   - [x] show active listings
   - [x] fix create part form
-  - [ ] add edit address, edit shipping
+  - [x] add edit address, edit shipping
 - [-] Home Page
   - [-] create part-card component
   - [ ] link part to seller

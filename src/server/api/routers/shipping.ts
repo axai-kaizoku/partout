@@ -4,6 +4,7 @@ import { shippingProfilesSchema } from "@/components/seller/shipping-profiles-fo
 import { db } from "@/server/db";
 import { shippingProfiles } from "@/server/db/schema";
 import { createTRPCRouter, privateProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 export const shippingRouter = createTRPCRouter({
   createShippingProfile: privateProcedure.input(shippingProfilesSchema).mutation(async ({ ctx, input }) => {
@@ -30,11 +31,14 @@ export const shippingRouter = createTRPCRouter({
   }),
 
   getAllShippingProfiles: privateProcedure.query(async ({ ctx }) => {
-    const result = await db.select().from(shippingProfiles).where(eq(shippingProfiles.sellerId, ctx.user.id));
+    const result = await db.query.shippingProfiles.findMany({
+      where: eq(shippingProfiles.sellerId, ctx.user.id),
+      orderBy: (shippingProfiles, { asc }) => [asc(shippingProfiles.createdAt)]
+    })
     return result;
   }),
 
-  updateShippingProfile: privateProcedure.input(z.object({ id: z.string(), shippingProfile: shippingProfilesSchema.shape })).mutation(async ({ ctx, input }) => {
+  updateShippingProfile: privateProcedure.input(z.object({ id: z.string(), shippingProfile: z.object({ ...shippingProfilesSchema.shape }) })).mutation(async ({ ctx, input }) => {
     return await db.transaction(async (tx) => {
       if (input.shippingProfile.isDefault === true) {
         await tx.update(shippingProfiles)
@@ -48,7 +52,13 @@ export const shippingRouter = createTRPCRouter({
       }
 
       const [updated] = await tx.update(shippingProfiles)
-        .set({ ...input.shippingProfile })
+        .set({
+          ...input.shippingProfile,
+          baseCost: parseInt(input.shippingProfile.baseCost),
+          freeShippingThreshold: input.shippingProfile.freeShippingThreshold ? parseInt(input.shippingProfile.freeShippingThreshold) : null,
+          estimatedDaysMin: input.shippingProfile.estimatedDaysMin ? parseInt(input.shippingProfile.estimatedDaysMin) : null,
+          estimatedDaysMax: input.shippingProfile.estimatedDaysMax ? parseInt(input.shippingProfile.estimatedDaysMax) : null,
+        })
         .where(eq(shippingProfiles.id, input.id))
         .returning();
 
@@ -56,7 +66,10 @@ export const shippingRouter = createTRPCRouter({
     });
   }),
 
-  deleteShippingProfile: privateProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+  deleteShippingProfile: privateProcedure.input(z.object({ id: z.string(), isDefault: z.boolean() })).mutation(async ({ input }) => {
+    if (input.isDefault) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Default shipping profile cannot be deleted" })
+    }
     const [result] = await db.delete(shippingProfiles).where(eq(shippingProfiles.id, input.id)).returning();
     if (result) {
       return result

@@ -7,36 +7,53 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { validatePhone } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { addressSchema } from "./validations";
+import type { Address } from "@/server/db/schema";
 
-export const AddressForm = () => {
+export const AddressForm = ({ address = null, onSuccess }: { address?: Address | null, onSuccess?: () => void }) => {
   const router = useRouter()
+
+  const utils = api.useUtils();
 
   const { mutateAsync: createAddress } = api.address.createAddress.useMutation()
 
+  const { mutateAsync: updateAddress } = api.address.updateAddress.useMutation()
+
   const addressForm = useAppForm({
     defaultValues: {
-      fullName: "",
-      company: "",
-      line1: "",
-      line2: "",
-      city: "",
-      state: "",
-      postalCode: "",
+      fullName: address?.fullName || "",
+      company: address?.company || "",
+      line1: address?.line1 || "",
+      line2: address?.line2 || "",
+      city: address?.city || "",
+      state: address?.state || "",
+      postalCode: address?.postalCode || "",
       country: "US",
-      phone: "",
-      isDefault: false,
+      phone: address?.phone || "",
+      isDefault: address?.isDefault || false,
     },
     validators: {
       onChange: addressSchema,
     },
     onSubmit: async ({ value }) => {
-      const toastId = toast.loading("Creating address...")
-      await createAddress(value).then(() => {
-        toast.success("Address created successfully !", { id: toastId })
-        router.back()
-      }).catch(() => {
-        toast.error("Failed to create address !", { id: toastId })
-      })
+      const toastId = toast.loading(address ? "Updating address..." : "Creating address...")
+      if (address) {
+        await updateAddress({ id: address.id, address: { ...value } }).then(() => {
+          toast.success("Address updated successfully !", { id: toastId })
+          utils.address.getAllAddresses.invalidate()
+          // router.back()
+          onSuccess?.()
+        }).catch(() => {
+          toast.error("Failed to update address !", { id: toastId })
+        })
+      } else {
+        await createAddress(value).then(() => {
+          toast.success("Address created successfully !", { id: toastId })
+          utils.address.getAllAddresses.invalidate()
+          router.back()
+        }).catch(() => {
+          toast.error("Failed to create address !", { id: toastId })
+        })
+      }
     }
   })
 
@@ -101,7 +118,7 @@ export const AddressForm = () => {
             <LoadingButton disabled={addressForm.state.isSubmitting}
               loading={addressForm.state.isSubmitting}
               type="submit" form="addressform">
-              Create Address
+              {address ? "Update Address" : "Create Address"}
             </LoadingButton>
           </div>
         </div>

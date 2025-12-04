@@ -7,35 +7,56 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { carriers } from "@/lib/constants/dropdown-data";
 import { api } from "@/trpc/react";
 import { shippingProfilesSchema } from "./validations";
+import type { ShippingProfile } from "@/server/db/schema";
 
-export const ShippingProfilesForm = () => {
+interface Props {
+  profile?: ShippingProfile | null;
+  onSuccess?: () => void;
+}
+
+export const ShippingProfilesForm = ({ profile = null, onSuccess }: Props) => {
   const router = useRouter()
+
+  const utils = api.useUtils();
 
   const { mutateAsync: createShippingProfile } = api.shipping.createShippingProfile.useMutation()
 
+  const { mutateAsync: updateShippingProfile } = api.shipping.updateShippingProfile.useMutation()
+
   const shippingForm = useAppForm({
     defaultValues: {
-      name: "",
-      baseCost: "",
-      freeShippingThreshold: "",
-      estimatedDaysMin: "3",
-      estimatedDaysMax: "10",
-      carrier: "",
-      isDefault: false,
-      isActive: true,
+      name: profile?.name || "",
+      baseCost: profile?.baseCost || "",
+      freeShippingThreshold: profile?.freeShippingThreshold || "",
+      estimatedDaysMin: profile?.estimatedDaysMin || "3",
+      estimatedDaysMax: profile?.estimatedDaysMax || "10",
+      carrier: profile?.carrier || "",
+      isDefault: profile?.isDefault || false,
+      isActive: profile?.isActive || true,
     },
     validators: {
       onChange: shippingProfilesSchema,
     },
     onSubmit: async ({ value }) => {
-      const toastId = toast.loading("Creating shipping profile...")
+      const toastId = toast.loading(profile ? "Updating shipping profile..." : "Creating shipping profile...")
       // console.log(value)
-      await createShippingProfile(value).then(() => {
-        toast.success("Shipping profile created successfully !", { id: toastId })
-        router.back()
-      }).catch(() => {
-        toast.error("Failed to create shipping profile !", { id: toastId })
-      })
+      if (profile) {
+        await updateShippingProfile({ id: profile.id, shippingProfile: { ...value } }).then(() => {
+          toast.success("Shipping profile updated successfully !", { id: toastId })
+          utils.shipping.getAllShippingProfiles.invalidate()
+          onSuccess?.()
+        }).catch(() => {
+          toast.error("Failed to update shipping profile !", { id: toastId })
+        })
+      } else {
+        await createShippingProfile(value).then(() => {
+          toast.success("Shipping profile created successfully !", { id: toastId })
+          utils.shipping.getAllShippingProfiles.invalidate()
+          router.back()
+        }).catch(() => {
+          toast.error("Failed to create shipping profile !", { id: toastId })
+        })
+      }
     }
   })
 

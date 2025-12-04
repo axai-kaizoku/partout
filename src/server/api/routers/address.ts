@@ -4,14 +4,17 @@ import { addressSchema } from "@/components/seller/address-form/validations";
 import { db } from "@/server/db";
 import { addresses } from "@/server/db/schema";
 import { createTRPCRouter, privateProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 export const addressRouter = createTRPCRouter({
   createAddress: privateProcedure.input(addressSchema).mutation(async ({ ctx, input }) => {
     return await db.transaction(async (tx) => {
       if (input.isDefault) {
-        await tx.update(addresses)
+
+        const add = await tx.update(addresses)
           .set({ isDefault: false })
-          .where(eq(addresses.userId, ctx.user.id));
+          .where(eq(addresses.userId, ctx.user.id)).returning();
+        console.log(add)
       }
 
       const [newAddress] = await tx.insert(addresses)
@@ -23,21 +26,25 @@ export const addressRouter = createTRPCRouter({
   }),
 
   getAllAddresses: privateProcedure.query(async ({ ctx }) => {
-    const result = await db.select().from(addresses).where(eq(addresses.userId, ctx.user.id));
+    const result = await db.query.addresses.findMany({
+      where: eq(addresses.userId, ctx.user.id),
+      orderBy: (addresses, { asc }) => [asc(addresses.createdAt)],
+    });
     return result;
   }),
 
-  updateAddress: privateProcedure.input(z.object({ id: z.string(), address: { ...addressSchema.shape } })).mutation(async ({ ctx, input }) => {
+  updateAddress: privateProcedure.input(z.object({ id: z.string(), address: z.object({ ...addressSchema.shape }) })).mutation(async ({ ctx, input }) => {
     return await db.transaction(async (tx) => {
-      if (input.address.isDefault === true) {
-        await tx.update(addresses)
+      if (input.address.isDefault) {
+        const updatedAddresses = await tx.update(addresses)
           .set({ isDefault: false })
           .where(
             and(
               eq(addresses.userId, ctx.user.id),
               ne(addresses.id, input.id)
             )
-          );
+          ).returning();
+        console.log(updatedAddresses)
       }
 
       const [updated] = await tx.update(addresses)
@@ -51,7 +58,10 @@ export const addressRouter = createTRPCRouter({
     });
   }),
 
-  deleteAddress: privateProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+  deleteAddress: privateProcedure.input(z.object({ id: z.string(), isDefault: z.boolean() })).mutation(async ({ input }) => {
+    if (input.isDefault) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Default address cannot be deleted" })
+    }
     const [result] = await db.delete(addresses).where(eq(addresses.id, input.id)).returning();
     if (result) {
       return result

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Edit, Eye, Trash2, Package } from "lucide-react"
 import { api } from "@/trpc/react"
+import { Skeleton } from "../ui/skeleton"
 
 export function ActiveListings() {
   // const [listings, setListings] = useState([
@@ -55,7 +56,7 @@ export function ActiveListings() {
   //   },
   // ])
 
-  const { data: listings } = api.part.getPartsByUserId.useQuery()
+  const { data: listings, isPending } = api.part.getPartsByUserId.useQuery(undefined, { staleTime: 30 * 1000 })
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -73,6 +74,15 @@ export function ActiveListings() {
   // const deleteListing = (id: number) => {
   //   setListings((prev) => prev.filter((listing) => listing.id !== id))
   // }
+  if (isPending) {
+    return <div className="flex flex-col items-center justify-center gap-4">
+      <Skeleton className="h-52 w-full rounded-xl" />
+      <Skeleton className="h-52 w-full rounded-xl" />
+      <Skeleton className="h-52 w-full rounded-xl" />
+      <Skeleton className="h-52 w-full rounded-xl" />
+    </div>
+  }
+
 
   if (listings?.length === 0) {
     return (
