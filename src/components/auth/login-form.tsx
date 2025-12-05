@@ -114,6 +114,10 @@ export function LoginForm() {
         Sign In
       </Button>
 
+      <Button type="button" className="w-full" disabled={isLoading} onClick={() => supabase.auth.signInWithOAuth({ provider: "google" })}>
+        Sign In with Google
+      </Button>
+
       <div className="text-center text-muted-foreground text-xs">Demo credentials: demo@partout.com / password</div>
     </form>
   );

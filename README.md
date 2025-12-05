@@ -18,6 +18,11 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
 
 ---
 
+oauth callback url supabase
+https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
+
+---
+
 ## TODO - Needed Discussion
 - [ ] fix seller profile side - flow
 - [ ] ratings, reviews
