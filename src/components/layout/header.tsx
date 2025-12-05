@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,8 +22,7 @@ export function Header() {
   const router = useRouter();
   const supabase = supabaseBrowserClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const _user = useUser()
-  const user = _user ? _user : { user_metadata: { name: "Guest", email: "" } }
+  const user = useUser()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,39 +74,50 @@ export function Header() {
               </span>
             </Link>
           </Button> */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:text-primary">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>{user?.user_metadata?.name?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <div className="flex items-center justify-start gap-2 p-2">
-                <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium capitalize">{user?.user_metadata?.name}</p>
-                  <p className="truncate w-[200px] text-sm text-muted-foreground">{user?.user_metadata?.email}</p>
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:text-primary">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>{user?.user_metadata?.name?.slice(0, 2)?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium capitalize">{user?.user_metadata?.name}</p>
+                    <p className="truncate w-[200px] text-sm text-muted-foreground">{user?.user_metadata?.email}</p>
+                  </div>
                 </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push("/profile")}>
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/orders")}>
-                <Box className="mr-2 h-4 w-4" />
-                Orders</DropdownMenuItem>
-              {/* <DropdownMenuItem onClick={() => router.push("/favorites")}>Favorites</DropdownMenuItem> */}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push("/profile")}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/orders")}>
+                  <Box className="mr-2 h-4 w-4" />
+                  Orders</DropdownMenuItem>
+                {/* <DropdownMenuItem onClick={() => router.push("/favorites")}>Favorites</DropdownMenuItem> */}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+          ) : <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:text-primary" asChild>
+            <Link href={"/login"}>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={"/media/placeholder-user.jpg"} />
+              </Avatar>
+            </Link>
+          </Button>}
+
+        </div >
+      </div >
     </header >
   );
 }

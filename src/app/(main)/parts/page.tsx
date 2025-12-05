@@ -21,28 +21,25 @@ export default function SearchPage() {
 
   return (
     <main className="pb-20">
-      {/* Search Header */}
-      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur border-b border-border">
+      <div className="sticky top-16 z-40 border-border border-b bg-background/95 backdrop-blur">
         <div className="flex items-center justify-between px-4 py-3">
-          <h1 className="font-playfair text-xl font-bold text-foreground">Search Parts</h1>
+          <h1 className="font-bold font-playfair text-foreground text-xl">Search Parts</h1>
           <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)} className="md:hidden">
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
             Filters
           </Button>
         </div>
       </div>
 
       <div className="flex">
-        {/* Desktop Sidebar Filters */}
-        <div className="hidden md:block w-80 border-r border-border">
+        <div className="hidden w-80 border-border border-r md:block">
           <SearchFilters filters={filters} setFilters={setFilters} />
         </div>
 
-        {/* Mobile Filters Overlay */}
         {showFilters && (
           <div className="fixed inset-0 z-50 bg-background md:hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="font-playfair text-lg font-bold">Filters</h2>
+            <div className="flex items-center justify-between border-border border-b p-4">
+              <h2 className="font-bold font-playfair text-lg">Filters</h2>
               <Button variant="ghost" size="sm" onClick={() => setShowFilters(false)}>
                 Done
               </Button>
@@ -51,7 +48,6 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Search Results */}
         <div className="flex-1">
           <SearchResults filters={filters} />
         </div>

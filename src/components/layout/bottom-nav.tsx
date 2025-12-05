@@ -11,9 +11,9 @@ export function BottomNav() {
 
   const navItems = [
     { icon: Home, label: "Home", path: "/" },
-    { icon: Search, label: "Parts", path: "/parts" },
+    { icon: Search, label: "Search", path: "/parts" },
     { icon: Plus, label: "Sell", path: "/sell" },
-    { icon: ShoppingCart, label: "Cart", path: "/cart" },
+    // { icon: ShoppingCart, label: "Cart", path: "/cart" },
     // { icon: User, label: "Profile", path: user ? "/profile" : "/auth/login" },
   ];
 
@@ -27,16 +27,11 @@ export function BottomNav() {
               key={item.path}
               variant="ghost"
               size="sm"
-              className={`flex flex-col items-center gap-1 ${isActive ? "text-accent" : "text-muted-foreground"}`}
+              className={`flex flex-col items-center gap-1 ${isActive ? "" : "text-muted-foreground"}`}
               onClick={() => router.push(item.path)}
             >
               <item.icon className="h-5 w-5" />
               <span className="text-xs">{item.label}</span>
-              {item.label === "Cart" && (
-                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  2
-                </span>
-              )}
             </Button>
           );
         })}

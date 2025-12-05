@@ -48,7 +48,74 @@ export const partRouter = createTRPCRouter({
             }
           }
         },
+        orderBy: (orderBy, { desc }) => desc(orderBy.createdAt),
         limit: 6
+      })
+      return parts;
+    });
+    return data;
+  }),
+
+  getSearchResults: publicProcedure.input(z.object({
+    search: z.string(),
+    filters: z.object({
+      category: z.string().optional(),
+      brand: z.string().optional(),
+      model: z.string().optional(),
+      year: z.string().optional(),
+      condition: z.string().optional(),
+      priceRange: z.array(z.number()).optional(),
+      location: z.string().optional(),
+      negotiable: z.boolean().optional(),
+    })
+  })).query(async ({ input }) => {
+
+
+    // const { search, filters } = input;
+
+    const data = await db.transaction((tx) => {
+      const parts = tx.query.parts.findMany({
+        with: {
+          partImages: {
+            columns: {
+              url: true
+            },
+            where: (img, { eq }) => eq(img.isPrimary, true),
+          },
+          seller: {
+            columns: {
+              name: true,
+            },
+            with: {
+              addresses: {
+                where: (address, { eq }) => eq(address.isDefault, true),
+                columns: {
+                  city: true,
+                  state: true,
+                }
+              }
+            }
+          },
+          partCompatibility: {
+            columns: {
+              yearStart: true,
+              yearEnd: true,
+            },
+            with: {
+              make: {
+                columns: {
+                  name: true
+                }
+              },
+              model: {
+                columns: {
+                  name: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: (orderBy, { desc }) => desc(orderBy.createdAt),
       })
       return parts;
     });

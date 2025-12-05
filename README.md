@@ -37,3 +37,13 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
   - [x] create part-card component
   - [x] link part to seller
   - [ ] fix search page layout
+
+
+
+## Things remaining from my end: 
+
+- [ ] search, filters, pagination
+- [ ] responsive layout
+- [ ] seller side - flow
+- [ ] ratings, reviews
+- [ ] contact details - only for signed in users ?
