@@ -109,7 +109,7 @@ export function Header() {
             </DropdownMenu>
 
           ) : <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:text-primary" asChild>
-            <Link href={"/login"}>
+            <Link href={"/sign-in"}>
               <Avatar className="h-8 w-8">
                 <AvatarImage src={"/media/placeholder-user.jpg"} />
               </Avatar>

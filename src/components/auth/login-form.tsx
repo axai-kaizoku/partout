@@ -114,7 +114,7 @@ export function LoginForm() {
         Sign In
       </Button>
 
-      <div className="text-center text-muted-foreground text-xs">Demo credentials: demo@partout.com / password</div>
+      {/* <div className="text-center text-muted-foreground text-xs">Demo credentials: demo@partout.com / password</div> */}
     </form>
   );
 }
