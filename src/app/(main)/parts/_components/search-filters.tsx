@@ -1,30 +1,28 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { X } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
+import { useState } from "react"
 
-interface SearchFiltersProps {
-  filters: {
-    category: string
-    brand: string
-    model: string
-    year: string
-    condition: string
-    priceRange: number[]
-    location: string
-    negotiable: boolean
-  }
-  setFilters: (filters: any) => void
-}
+export function SearchFilters() {
 
-export function SearchFilters({ filters, setFilters }: SearchFiltersProps) {
+  const [filters, setFilters] = useState({
+    category: "",
+    brand: "",
+    model: "",
+    year: "",
+    condition: "",
+    priceRange: [0, 1000],
+    location: "",
+    negotiable: false,
+  });
   const categories = [
     "Engine Parts",
     "Brake System",
@@ -127,7 +125,7 @@ export function SearchFilters({ filters, setFilters }: SearchFiltersProps) {
         </CardHeader>
         <CardContent className="pt-0">
           <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>

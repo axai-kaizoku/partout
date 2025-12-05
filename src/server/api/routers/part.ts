@@ -57,7 +57,7 @@ export const partRouter = createTRPCRouter({
   }),
 
   getSearchResults: publicProcedure.input(z.object({
-    search: z.string(),
+    search: z.string().optional(),
     filters: z.object({
       category: z.string().optional(),
       brand: z.string().optional(),
@@ -67,7 +67,7 @@ export const partRouter = createTRPCRouter({
       priceRange: z.array(z.number()).optional(),
       location: z.string().optional(),
       negotiable: z.boolean().optional(),
-    })
+    }).optional()
   })).query(async ({ input }) => {
 
 
