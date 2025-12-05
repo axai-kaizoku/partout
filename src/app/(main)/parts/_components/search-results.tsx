@@ -3,11 +3,11 @@
 import { PartCard } from "@/components/parts/part-card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { api } from "@/trpc/react"
+import type { Part } from "@/server/db/schema"
 import { useState } from "react"
 
 interface SearchResultsProps {
-  filters: {
+  filters?: {
     category: string
     brand: string
     model: string
@@ -16,10 +16,11 @@ interface SearchResultsProps {
     priceRange: number[]
     location: string
     negotiable: boolean
-  }
+  };
+  data: Part[]
 }
 
-export function SearchResults({ filters }: SearchResultsProps) {
+export function SearchResults({ data }: SearchResultsProps) {
   const [sortBy, setSortBy] = useState("relevance")
   // const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
@@ -88,15 +89,14 @@ export function SearchResults({ filters }: SearchResultsProps) {
   //   }
   // })
 
-  const { data: sortedResults } = api.part.getHomePageParts.useQuery()
 
   return (
     <div className="p-4">
       {/* Results Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="font-playfair text-xl font-bold text-foreground">Search Results</h2>
-          <p className="text-sm text-muted-foreground">{sortedResults?.length} parts found</p>
+          <h2 className="font-bold font-playfair text-foreground text-xl">Search Results</h2>
+          <p className="text-muted-foreground text-sm">{data?.length} parts found</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -137,14 +137,14 @@ export function SearchResults({ filters }: SearchResultsProps) {
       </div>
 
       {/* Results Grid/List */}
-      {sortedResults?.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">No parts found matching your criteria</p>
+      {data?.length === 0 ? (
+        <div className="py-12 text-center">
+          <p className="mb-4 text-muted-foreground">No parts found matching your criteria</p>
           <Button variant="outline">Clear Filters</Button>
         </div>
       ) : (
         <div className={"grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"}>
-          {sortedResults?.map((part) => (
+          {data?.map((part) => (
             <PartCard key={part.id} part={part} />
           ))}
         </div>
