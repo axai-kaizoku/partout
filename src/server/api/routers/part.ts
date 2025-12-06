@@ -68,7 +68,7 @@ export const partRouter = createTRPCRouter({
       location: z.string().optional(),
       negotiable: z.boolean().optional(),
     }).optional()
-  })).query(async ({ input }) => {
+  }).optional()).query(async ({ input }) => {
 
 
     // const { search, filters } = input;
@@ -115,7 +115,7 @@ export const partRouter = createTRPCRouter({
             }
           }
         },
-        orderBy: (orderBy, { desc }) => desc(orderBy.createdAt),
+        orderBy: (orderBy, { asc }) => asc(orderBy.createdAt),
       })
       return parts;
     });

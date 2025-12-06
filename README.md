@@ -29,7 +29,7 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 
 ---
 
-# Current state: 4/12/2025 - 16:42
+# Current state: 6/12/2025 - 10:44
 - [x] check create part form
 - [x] seller side
   - [x] add address 
@@ -41,14 +41,23 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 - [-] Home Page
   - [x] create part-card component
   - [x] link part to seller
-  - [ ] fix search page layout
+  - [-] fix search page layout
 
 
 
 ## Things remaining from my end: 
 
-- [ ] search, filters, pagination
-- [ ] responsive layout
+- [-] search, filters, pagination
 - [ ] seller side - flow
+- [ ] login flow
+- [ ] responsive layout
+- [ ] chat based contact
 - [ ] ratings, reviews
 - [ ] contact details - only for signed in users ?
+
+## TODO - My end
+
+- [ ] login flow
+- [ ] seller flow
+- [ ] filters search
+- [ ] chat based contact
