@@ -45,9 +45,21 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 
 
 
-## Things remaining from my end: 
+## Things remaining from my end:
+
+7/12/2025 - 00:24
 
 - [-] search, filters, pagination
+  - [x] search
+  - [x] filters
+  - [ ] sorting
+  - [ ] pagination
+    - [ ] cursor based pagination
+    - [ ] infinite scroll
+  - [ ] server-side queries
+
+
+  
 - [ ] seller side - flow
 - [ ] login flow
 - [ ] responsive layout

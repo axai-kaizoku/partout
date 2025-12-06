@@ -1,11 +1,23 @@
 // "use client";
 
+import { urlParamsToFilters } from "@/lib/url-params";
 import { api } from "@/trpc/server";
-import { SearchResults } from "./_components/search-results";
 import { SearchFilters } from "./_components/search-filters";
+import { SearchResults } from "./_components/search-results";
 
-export default async function SearchPage() {
-  // const [showFilters, setShowFilters] = useState(false);
+export default async function SearchPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const params = await searchParams
+  const urlSearchParams = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === "") return
+    urlSearchParams.set(key, String(value))
+  })
+
+  const { filters, sortBy } = urlParamsToFilters(urlSearchParams)
+  const searchQuery = urlSearchParams.get("q") ?? ""
+
+  // console.log({ filters, sortBy })
 
   const data = await api.part.getSearchResults({})
 
@@ -23,7 +35,7 @@ export default async function SearchPage() {
 
       <div className="flex">
         <div className="hidden w-80 border-border border-r md:block">
-          <SearchFilters />
+          <SearchFilters initialFilters={filters} initialSortBy={sortBy} initialSearchQuery={searchQuery} />
         </div>
         {/* 
         {showFilters && (
