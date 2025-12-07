@@ -298,11 +298,17 @@ export const partRouter = createTRPCRouter({
           },
           seller: {
             columns: {
-              id: true,
               name: true,
-              imageUrl: true,
-              responseTime: true,
             },
+            with: {
+              addresses: {
+                where: (address, { eq }) => eq(address.isDefault, true),
+                columns: {
+                  city: true,
+                  state: true,
+                }
+              }
+            }
           },
           category: {
             columns: {

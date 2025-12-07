@@ -3,7 +3,7 @@
 import { Box, LogOut, Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,7 @@ export function Header() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const supabase = supabaseBrowserClient();
+  const searchRef = useRef<HTMLInputElement>(null)
   const user = useUser()
 
   const [term, setTerm] = useState(searchParams.get("q") || "") // Initialize with query param if available
@@ -55,13 +56,30 @@ export function Header() {
   }, [debouncedTerm])
 
 
+  useEffect(() => {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "/") {
+        searchRef.current?.focus()
+      }
+    })
+
+    return () => {
+      window.removeEventListener("keydown", (e) => {
+        if (e.key === "/") {
+          searchRef.current?.focus()
+        }
+      })
+    }
+  }, [])
+
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/");
   };
 
   return (
-    <header className="sticky top-0 z-50 border-border border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 border-border border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Logo */}
         <Link href={"/"}>
@@ -72,12 +90,13 @@ export function Header() {
 
 
         {/* Search Bar - Hidden on mobile, shown on desktop */}
-        <div className="hidden md:flex flex-1 max-w-md mx-6 relative w-full">
+        <div className="relative mx-6 hidden w-full max-w-md flex-1 md:flex">
           {/* <form onSubmit={handleSearch} className=""> */}
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
           <Input
             placeholder="Search parts..."
-            className="pl-10 pr-4"
+            className="pr-4 pl-10"
+            ref={searchRef}
             value={term}
             onChange={(e) => setTerm(e.target.value)}
           />

@@ -70,5 +70,5 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 
 - [ ] login flow
 - [ ] seller flow
-- [ ] filters search
+- [x] filters search
 - [ ] chat based contact
