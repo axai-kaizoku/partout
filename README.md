@@ -53,13 +53,12 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
   - [x] search
   - [x] filters
   - [x] sorting
-  - [ ] pagination
-    - [ ] cursor based pagination
+  - [-] pagination
+    - [-] cursor based pagination
     - [ ] infinite scroll
-  - [ ] server-side queries
+  - [x] server-side queries
 
 
-  
 - [ ] seller side - flow
 - [ ] login flow
 - [ ] responsive layout
