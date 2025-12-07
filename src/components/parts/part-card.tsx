@@ -13,7 +13,7 @@ export function PartCard({ part }: { part: Part }) {
     <Link href={`/part/${part.id}`}
     >
       <Card
-        className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer"
+        className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer min-w-0"
       >
         <div className="relative">
           <img

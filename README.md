@@ -52,7 +52,7 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 - [-] search, filters, pagination
   - [x] search
   - [x] filters
-  - [ ] sorting
+  - [x] sorting
   - [ ] pagination
     - [ ] cursor based pagination
     - [ ] infinite scroll

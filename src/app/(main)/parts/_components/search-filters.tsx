@@ -2,130 +2,69 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { conditions as _conditions } from "@/lib/constants/dropdown-data"
+import type { Filters } from "@/lib/url-params"
+import { cn } from "@/lib/utils"
 import { api } from "@/trpc/react"
 import { X } from "lucide-react"
-import { type Filters, filtersToUrlParams, urlParamsToFilters } from "@/lib/url-params"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useRef, useState, useTransition } from "react"
+import { useEffect, useMemo, useState } from "react"
 
-export function SearchFilters({ initialSearchQuery, initialFilters, initialSortBy }: { initialSearchQuery: string, initialFilters: Filters, initialSortBy?: string }) {
-  const router = useRouter()
-  const isUrlUpdateRef = useRef(false)
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
-
-  const searchQuery = useMemo(() => initialSearchQuery, [initialSearchQuery])
-
-  const [sortBy, setSortBy] = useState(initialSortBy ?? "relevance")
-
-
-  const [filters, setFilters] = useState<Filters>(initialFilters)
-  // const params = filtersToUrlParams(filters, "relevance")
-  // console.log({ params: params.toString() })
-
-  useEffect(() => {
-    const params = filtersToUrlParams(filters, sortBy)
-    if (searchQuery) params.set("q", searchQuery)
-    const newUrl = `?${params.toString()}`
-
-    // Only push if URL is different
-    if (window.location.search !== newUrl) {
-      isUrlUpdateRef.current = true
-      startTransition(() => {
-        router.replace(newUrl)
-      })
-    }
-  }, [filters, searchQuery, sortBy])
-
-
-  useEffect(() => {
-    if (isUrlUpdateRef.current) {
-      isUrlUpdateRef.current = false
-      return // Skip if the change was triggered by our own update
-    }
-
-    const { filters: updatedFilters, sortBy: updatedSortBy } = urlParamsToFilters(searchParams)
-
-    if (JSON.stringify(updatedFilters) !== JSON.stringify(filters)) {
-      setFilters(updatedFilters)
-    }
-    if (updatedSortBy !== sortBy) {
-      setSortBy(updatedSortBy)
-    }
-  }, [searchParams])
-
-  // useEffect(() => {
-  //   const currentSort = searchParams.get("sort") || "relevance"
-  //   const params = filtersToUrlParams(filters, currentSort)
-  //   router.push(`/parts?${params.toString()}`)
-  // }, [filters, router, searchParams])
-
-  const updateFilter = (key: string, value: any) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const clearFilters = () => {
-    setFilters({
-      category: "",
-      brand: "",
-      model: "",
-      year: "",
-      condition: "",
-      priceRange: [0, 1000],
-      location: "",
-      negotiable: false,
-    })
-  }
-
-  const activeFiltersCount = Object.values(filters).filter(
-    (value) => value !== "" && value !== false && !(Array.isArray(value) && value[0] === 0 && value[1] === 1000),
-  ).length
+export function SearchFilters({ className, filters, updateFilter, activeFiltersCount, clearFilters }: { className?: string, filters: Filters, updateFilter: (key: string, value: any) => void, activeFiltersCount: number, clearFilters: () => void }) {
 
   return (
-    <div className="max-h-screen space-y-6 overflow-y-auto p-4">
+    <div className={cn("space-y-6 overflow-y-auto p-4", className)}>
+      {activeFiltersCount > 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={clearFilters}
+          className="h-7 px-2 text-muted-foreground text-xs hover:text-foreground"
+        >
+          Clear all
+        </Button>
+      )}
       <ActiveFilters
         filters={filters}
         updateFilter={updateFilter}
-        clearFilters={clearFilters}
         count={activeFiltersCount}
       />
+      <div className="space-y-4">
+        <CategoryFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
 
-      <CategoryFilter
-        filters={filters}
-        updateFilter={updateFilter}
-      />
+        <VehicleFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
 
-      <VehicleFilter
-        filters={filters}
-        updateFilter={updateFilter}
-      />
+        <ConditionFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
 
-      <ConditionFilter
-        filters={filters}
-        updateFilter={updateFilter}
-      />
+        <PriceRangeFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
 
-      <PriceRangeFilter
-        filters={filters}
-        updateFilter={updateFilter}
-      />
+        <LocationFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
 
-      <LocationFilter
-        filters={filters}
-        updateFilter={updateFilter}
-      />
+        <OptionsFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
+      </div>
 
-      <OptionsFilter
-        filters={filters}
-        updateFilter={updateFilter}
-      />
     </div>
   )
 }
@@ -133,63 +72,53 @@ export function SearchFilters({ initialSearchQuery, initialFilters, initialSortB
 function ActiveFilters({
   filters,
   updateFilter,
-  clearFilters,
   count,
 }: {
   filters: Filters
   updateFilter: (key: string, value: any) => void
-  clearFilters: () => void
   count: number
 }) {
+
+  const getActiveFilterBadges = () => {
+    const badges: { key: string; label: string }[] = []
+    if (filters.category) badges.push({ key: "category", label: filters.category })
+    if (filters.brand) badges.push({ key: "brand", label: filters.brand })
+    if (filters.model) badges.push({ key: "model", label: filters.model })
+    if (filters.year) badges.push({ key: "year", label: filters.year })
+    if (filters.condition) badges.push({ key: "condition", label: filters.condition })
+    if (filters.location) badges.push({ key: "location", label: filters.location })
+    if (filters.negotiable) badges.push({ key: "negotiable", label: "Negotiable" })
+    if (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 1000) {
+      badges.push({ key: "priceRange", label: `$${filters.priceRange[0]} - $${filters.priceRange[1]}` })
+    }
+    return badges
+  }
+
+  const removeFilter = (key: string) => {
+    if (key === "priceRange") {
+      updateFilter("priceRange", [0, 1000])
+    } else if (key === "negotiable") {
+      updateFilter("negotiable", false)
+    } else {
+      updateFilter(key, "")
+    }
+  }
+
+  const activeFilterBadges = getActiveFilterBadges()
+
   if (count === 0) return null
 
   return (
-    <Card className="gap-3">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm">Active Filters ({count})</CardTitle>
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
-            Clear All
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex flex-wrap gap-2">
-          {filters.category && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              {filters.category}
-              <button onClick={() => updateFilter("category", "")}>
-                <X className="size-3 cursor-pointer" />
-              </button>
-            </Badge>
-          )}
-          {filters.brand && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              {filters.brand}
-              <button onClick={() => updateFilter("brand", "")}>
-                <X className="size-3 cursor-pointer" />
-              </button>
-            </Badge>
-          )}
-          {filters.condition && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              {filters.condition}
-              <button onClick={() => updateFilter("condition", "")}>
-                <X className="size-3 cursor-pointer" />
-              </button>
-            </Badge>
-          )}
-          {filters.negotiable && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              Negotiable
-              <button onClick={() => updateFilter("negotiable", false)}>
-                <X className="size-3 cursor-pointer" />
-              </button>
-            </Badge>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-wrap gap-2">
+      {activeFilterBadges.map((filter) => (
+        <Badge key={filter.key} variant="secondary" className="flex items-center gap-1 pr-1 bg-background">
+          {filter.label}
+          <button onClick={() => removeFilter(filter.key)} className="ml-1 hover:bg-muted rounded-full p-0.5">
+            <X className="size-3" />
+          </button>
+        </Badge>
+      ))}
+    </div>
   )
 }
 
@@ -203,25 +132,21 @@ function CategoryFilter({
 
   const categories = api.partInfo.getCategories.useQuery().data?.map((category) => category.name) ?? []
   return (
-    <Card className="gap-3">
-      <CardHeader>
-        <CardTitle className="text-sm">Category</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories?.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </CardContent>
-    </Card>
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Category</Label>
+      <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select category" />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map((category) => (
+            <SelectItem key={category} value={category}>
+              {category}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
 
@@ -265,17 +190,13 @@ function VehicleFilter({
   }, [year, updateFilter, filters.year])
 
   return (
-    <Card className="gap-3">
-      <CardHeader>
-        <CardTitle className="text-sm">Vehicle</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-0">
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Vehicle</Label>
+      <div className="space-y-3">
         <div>
-          <Label htmlFor="brand" className="text-muted-foreground text-xs">
-            Brand
-          </Label>
+          <Label className="text-muted-foreground text-xs">Brand</Label>
           <Select value={filters.brand} onValueChange={(value) => updateFilter("brand", value)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="mt-1 w-full">
               <SelectValue placeholder="Select brand" />
             </SelectTrigger>
             <SelectContent>
@@ -288,29 +209,25 @@ function VehicleFilter({
           </Select>
         </div>
         <div>
-          <Label htmlFor="model" className="text-muted-foreground text-xs">
-            Model
-          </Label>
+          <Label className="text-muted-foreground text-xs">Model</Label>
           <Input
-            id="model"
             placeholder="Enter model"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
+            value={filters.model}
+            onChange={(e) => updateFilter("model", e.target.value)}
+            className="mt-1"
           />
         </div>
         <div>
-          <Label htmlFor="year" className="text-muted-foreground text-xs">
-            Year
-          </Label>
+          <Label className="text-muted-foreground text-xs">Year</Label>
           <Input
-            id="year"
             placeholder="e.g. 2015-2020"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
+            value={filters.year}
+            onChange={(e) => updateFilter("year", e.target.value)}
+            className="mt-1"
           />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
@@ -324,25 +241,21 @@ function ConditionFilter({
   const conditions = useMemo(() => _conditions, [])
 
   return (
-    <Card className="gap-3">
-      <CardHeader>
-        <CardTitle className="text-sm">Condition</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <Select value={filters.condition} onValueChange={(value) => updateFilter("condition", value)}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select condition" />
-          </SelectTrigger>
-          <SelectContent>
-            {conditions.map((condition) => (
-              <SelectItem key={condition} value={condition}>
-                {condition}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </CardContent>
-    </Card>
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Condition</Label>
+      <Select value={filters.condition} onValueChange={(value) => updateFilter("condition", value)}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select condition" />
+        </SelectTrigger>
+        <SelectContent>
+          {conditions.map((condition) => (
+            <SelectItem key={condition} value={condition}>
+              {condition}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
 
@@ -357,28 +270,24 @@ function PriceRangeFilter({
   const [range, setRange] = useState(filters.priceRange)
 
   return (
-    <Card className="gap-3">
-      <CardHeader>
-        <CardTitle className="text-sm">Price Range</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-0">
-        <div className="px-2">
-          <Slider
-            value={range}
-            onValueChange={(value) => setRange(value)}
-            onValueCommit={(value) => updateFilter("priceRange", value)}
-            max={1000}
-            min={0}
-            step={10}
-            className="w-full"
-          />
-        </div>
-        <div className="flex items-center justify-between text-muted-foreground text-sm">
-          <span>${filters.priceRange[0]}</span>
-          <span>${filters.priceRange[1]}+</span>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Price Range</Label>
+      <div className="px-1">
+        <Slider
+          value={range}
+          onValueChange={(value) => setRange(value)}
+          onValueCommit={(value) => updateFilter("priceRange", value)}
+          max={1000}
+          min={0}
+          step={10}
+          className="w-full"
+        />
+      </div>
+      <div className="flex items-center justify-between text-muted-foreground text-sm">
+        <span>${filters.priceRange[0]}</span>
+        <span>${filters.priceRange[1]}+</span>
+      </div>
+    </div>
   )
 }
 
@@ -406,18 +315,14 @@ function LocationFilter({
   }, [value, updateFilter, filters.location])
 
   return (
-    <Card className="gap-3">
-      <CardHeader>
-        <CardTitle className="text-sm">Location</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <Input
-          placeholder="City, State or ZIP"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-      </CardContent>
-    </Card>
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Location</Label>
+      <Input
+        placeholder="City, State or ZIP"
+        value={filters.location}
+        onChange={(e) => updateFilter("location", e.target.value)}
+      />
+    </div>
   )
 }
 
@@ -429,22 +334,18 @@ function OptionsFilter({
   updateFilter: (key: string, value: any) => void
 }) {
   return (
-    <Card className="gap-3">
-      <CardHeader>
-        <CardTitle className="text-sm">Options</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="negotiable"
-            checked={filters.negotiable}
-            onCheckedChange={(checked) => updateFilter("negotiable", checked)}
-          />
-          <Label htmlFor="negotiable" className="text-sm">
-            Negotiable price only
-          </Label>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Options</Label>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="negotiable"
+          checked={filters.negotiable}
+          onCheckedChange={(checked) => updateFilter("negotiable", checked)}
+        />
+        <Label htmlFor="negotiable" className="font-normal text-sm">
+          Negotiable price only
+        </Label>
+      </div>
+    </div>
   )
 }
