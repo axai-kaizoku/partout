@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 
-import { PartCard } from "@/components/parts/part-card"
+import { PartCard, PartCardSkeleton } from "@/components/parts/part-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { type Filters, filtersToUrlParams, urlParamsToFilters } from "@/lib/url-params"
 import type { Part } from "@/server/db/schema"
@@ -224,4 +224,66 @@ export const SearchPageClient = ({ initialSearchQuery, initialFilters, initialSo
       </div>
     </div>
   )
+}
+
+
+import { Skeleton } from "@/components/ui/skeleton";
+export function SearchPageSkeleton() {
+  return (
+    <div className="flex">
+      {/* LEFT SIDEBAR (Filters) */}
+      <aside className="hidden w-80 border-border border-r md:block sticky top-0 h-[calc(100vh-57px)] overflow-y-auto p-4 space-y-4">
+        {/* SearchFilters skeleton (rough structure) */}
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-40" />
+        <div className="space-y-3 pt-2">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1">
+        <div className="md:px-4 md:pb-4">
+          <div className="sticky z-10 top-0">
+            <div className="md:px-4 py-3">
+              <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+
+                {/* Title + Subtitle */}
+                <div className="min-w-0 space-y-2 w-full md:w-auto text-center md:text-left">
+                  <Skeleton className="h-6 w-40 mx-auto md:mx-0" />
+                  <Skeleton className="h-4 w-32 mx-auto md:mx-0" />
+                </div>
+
+                {/* Desktop Sort Trigger */}
+                <div className="hidden md:block">
+                  <Skeleton className="h-9 w-40 rounded-md" />
+                </div>
+
+                {/* Mobile Filter + Sort */}
+                <div className="flex items-center gap-2 md:hidden">
+                  {/* Filter Dialog Trigger */}
+                  <Skeleton className="h-9 w-24 rounded-md" />
+
+                  {/* Sort Select Trigger */}
+                  <Skeleton className="h-9 w-[130px] rounded-md" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RESULTS GRID */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 mt-4">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <PartCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

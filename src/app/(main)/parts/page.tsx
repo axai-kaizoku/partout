@@ -2,7 +2,8 @@
 
 import { urlParamsToFilters } from "@/lib/url-params";
 import { api } from "@/trpc/server";
-import { SearchPageClient } from "./_components/search-client";
+import { SearchPageClient, SearchPageSkeleton } from "./_components/search-client";
+import { Suspense } from "react";
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams
@@ -22,7 +23,9 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="min-h-screen pb-20">
-      <SearchPageClient initialFilters={filters} initialSortBy={sortBy} initialSearchQuery={searchQuery} data={data} />
+      <Suspense fallback={<SearchPageSkeleton />}>
+        <SearchPageClient initialFilters={filters} initialSortBy={sortBy} initialSearchQuery={searchQuery} data={data} />
+      </Suspense>
     </div>
   );
 }

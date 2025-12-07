@@ -93,3 +93,60 @@ export function PartCard({ part }: { part: Part }) {
     </Link>
   )
 }
+
+import { Skeleton } from "@/components/ui/skeleton";
+
+export function PartCardSkeleton() {
+  return (
+    <Card className="overflow-hidden min-w-0">
+      {/* Image */}
+      <div className="relative">
+        <Skeleton className="h-48 w-full" />
+
+        {/* Top-left badges */}
+        <div className="absolute top-3 left-3 flex gap-2">
+          <Skeleton className="h-5 w-14 rounded-sm" />
+          <Skeleton className="h-5 w-16 rounded-sm" />
+        </div>
+
+        {/* Save badge */}
+        <div className="absolute top-3 right-3">
+          <Skeleton className="h-5 w-16 rounded-sm" />
+        </div>
+      </div>
+
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {/* Title */}
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+
+          {/* Price row */}
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+
+          {/* Seller row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-4 rounded-sm" />
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="flex items-center gap-1">
+            <Skeleton className="h-3 w-3 rounded-full" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+
+          {/* Button */}
+          <Skeleton className="h-9 w-full rounded-md" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
