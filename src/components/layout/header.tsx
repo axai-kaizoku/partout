@@ -2,9 +2,8 @@
 
 import { Box, LogOut, Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type React from "react";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,19 +16,62 @@ import {
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/use-user";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const supabase = supabaseBrowserClient();
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null)
   const user = useUser()
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/parts?q=${encodeURIComponent(searchQuery)}`);
+  const [term, setTerm] = useState(searchParams.get("q") || "") // Initialize with query param if available
+  const debouncedTerm = useDebounce(term.trim(), 600)
+
+  useEffect(() => {
+    const isOnParts = pathname.startsWith("/parts")
+
+    if (!debouncedTerm) {
+      if (isOnParts && window.location.search.includes("q=")) {
+        router.replace("/parts")
+      }
+      return
     }
-  };
+
+    const query = `q=${encodeURIComponent(debouncedTerm)}`
+    const hasQuery = window.location.search.includes("q=")
+    const currentQuery = window.location.search
+    // console.log({ query, currentQuery })
+
+    if (!isOnParts || currentQuery !== query) {
+      router.replace(`/parts?${query}`)
+      return
+    }
+
+    if (hasQuery) {
+      router.replace(`/parts${currentQuery}`)
+      return
+    }
+  }, [debouncedTerm])
+
+
+  useEffect(() => {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "/") {
+        searchRef.current?.focus()
+      }
+    })
+
+    return () => {
+      window.removeEventListener("keydown", (e) => {
+        if (e.key === "/") {
+          searchRef.current?.focus()
+        }
+      })
+    }
+  }, [])
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -37,7 +79,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-border border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 border-border border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="flex items-center justify-between px-4 py-3">
         {/* Logo */}
         <Link href={"/"}>
@@ -48,16 +90,17 @@ export function Header() {
 
 
         {/* Search Bar - Hidden on mobile, shown on desktop */}
-        <div className="hidden md:flex flex-1 max-w-md mx-6">
-          <form onSubmit={handleSearch} className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search parts..."
-              className="pl-10 pr-4"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </form>
+        <div className="relative mx-6 hidden w-full max-w-md flex-1 md:flex">
+          {/* <form onSubmit={handleSearch} className=""> */}
+          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
+          <Input
+            placeholder="Search parts..."
+            className="pr-4 pl-10"
+            ref={searchRef}
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+          />
+          {/* </form> */}
         </div>
 
         {/* Actions */}

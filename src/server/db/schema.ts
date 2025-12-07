@@ -167,7 +167,6 @@ export const parts = createTable(
     index("part_status_idx").on(t.status),
     index("part_part_number_idx").on(t.partNumber),
     index("part_created_idx").on(t.createdAt),
-    index("part_view_count_idx").on(t.viewCount),
   ]
 );
 

@@ -18,13 +18,18 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
 
 ---
 
+oauth callback url supabase
+https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
+
+---
+
 ## TODO - Needed Discussion
 - [ ] fix seller profile side - flow
 - [ ] ratings, reviews
 
 ---
 
-# Current state: 4/12/2025 - 16:42
+# Current state: 6/12/2025 - 10:44
 - [x] check create part form
 - [x] seller side
   - [x] add address 
@@ -36,14 +41,34 @@ The form structure now perfectly aligns with our e-commerce schema and provides 
 - [-] Home Page
   - [x] create part-card component
   - [x] link part to seller
-  - [ ] fix search page layout
+  - [-] fix search page layout
 
 
 
-## Things remaining from my end: 
+## Things remaining from my end:
 
-- [ ] search, filters, pagination
-- [ ] responsive layout
+7/12/2025 - 00:24
+
+- [-] search, filters, pagination
+  - [x] search
+  - [x] filters
+  - [x] sorting
+  - [-] pagination
+    - [-] cursor based pagination
+    - [ ] infinite scroll
+  - [x] server-side queries
+
+
 - [ ] seller side - flow
+- [ ] login flow
+- [ ] responsive layout
+- [ ] chat based contact
 - [ ] ratings, reviews
 - [ ] contact details - only for signed in users ?
+
+## TODO - My end
+
+- [ ] login flow
+- [ ] seller flow
+- [x] filters search
+- [ ] chat based contact

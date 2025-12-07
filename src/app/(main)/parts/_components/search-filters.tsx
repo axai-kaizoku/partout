@@ -1,270 +1,359 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
-import { Badge } from "@/components/ui/badge"
+import { conditions as _conditions } from "@/lib/constants/dropdown-data"
+import type { Filters } from "@/lib/url-params"
+import { cn } from "@/lib/utils"
+import { api } from "@/trpc/react"
 import { X } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 
-interface SearchFiltersProps {
-  filters: {
-    category: string
-    brand: string
-    model: string
-    year: string
-    condition: string
-    priceRange: number[]
-    location: string
-    negotiable: boolean
-  }
-  setFilters: (filters: any) => void
-}
-
-export function SearchFilters({ filters, setFilters }: SearchFiltersProps) {
-  const categories = [
-    "Engine Parts",
-    "Brake System",
-    "Electrical",
-    "Body Parts",
-    "Suspension",
-    "Exhaust",
-    "Interior",
-    "Exterior",
-    "Tools",
-    "Accessories",
-  ]
-
-  const brands = [
-    "BMW",
-    "Mercedes-Benz",
-    "Audi",
-    "Toyota",
-    "Honda",
-    "Ford",
-    "Chevrolet",
-    "Nissan",
-    "Hyundai",
-    "Volkswagen",
-    "Jeep",
-    "Subaru",
-  ]
-
-  const conditions = ["New", "Used - Excellent", "Used - Good", "Used - Fair", "Refurbished"]
-
-  const updateFilter = (key: string, value: any) => {
-    setFilters({ ...filters, [key]: value })
-  }
-
-  const clearFilters = () => {
-    setFilters({
-      category: "",
-      brand: "",
-      model: "",
-      year: "",
-      condition: "",
-      priceRange: [0, 1000],
-      location: "",
-      negotiable: false,
-    })
-  }
-
-  const activeFiltersCount = Object.values(filters).filter(
-    (value) => value !== "" && value !== false && !(Array.isArray(value) && value[0] === 0 && value[1] === 1000),
-  ).length
+export function SearchFilters({ className, filters, updateFilter, activeFiltersCount, clearFilters }: { className?: string, filters: Filters, updateFilter: (key: string, value: any) => void, activeFiltersCount: number, clearFilters: () => void }) {
 
   return (
-    <div className="p-4 space-y-6 max-h-screen overflow-y-auto">
-      {/* Active Filters */}
+    <div className={cn("space-y-6 overflow-y-auto p-4", className)}>
       {activeFiltersCount > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">Active Filters ({activeFiltersCount})</CardTitle>
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                Clear All
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="flex flex-wrap gap-2">
-              {filters.category && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  {filters.category}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("category", "")} />
-                </Badge>
-              )}
-              {filters.brand && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  {filters.brand}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("brand", "")} />
-                </Badge>
-              )}
-              {filters.condition && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  {filters.condition}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("condition", "")} />
-                </Badge>
-              )}
-              {filters.negotiable && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  Negotiable
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("negotiable", false)} />
-                </Badge>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={clearFilters}
+          className="h-7 px-2 text-muted-foreground text-xs hover:text-foreground"
+        >
+          Clear all
+        </Button>
       )}
+      <ActiveFilters
+        filters={filters}
+        updateFilter={updateFilter}
+        count={activeFiltersCount}
+      />
+      <div className="space-y-4">
+        <CategoryFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
 
-      {/* Category Filter */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Category</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
+        <VehicleFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
+
+        <ConditionFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
+
+        <PriceRangeFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
+
+        {/* <LocationFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        /> */}
+
+        <OptionsFilter
+          filters={filters}
+          updateFilter={updateFilter}
+        />
+      </div>
+
+    </div>
+  )
+}
+
+function ActiveFilters({
+  filters,
+  updateFilter,
+  count,
+}: {
+  filters: Filters
+  updateFilter: (key: string, value: any) => void
+  count: number
+}) {
+
+  const getActiveFilterBadges = () => {
+    const badges: { key: string; label: string }[] = []
+    if (filters.category) badges.push({ key: "category", label: filters.category })
+    if (filters.brand) badges.push({ key: "brand", label: filters.brand })
+    if (filters.model) badges.push({ key: "model", label: filters.model })
+    if (filters.year) badges.push({ key: "year", label: filters.year })
+    if (filters.condition) badges.push({ key: "condition", label: filters.condition })
+    if (filters.location) badges.push({ key: "location", label: filters.location })
+    if (filters.negotiable) badges.push({ key: "negotiable", label: "Negotiable" })
+    if (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 1000) {
+      badges.push({ key: "priceRange", label: `$${filters.priceRange[0]} - $${filters.priceRange[1]}` })
+    }
+    return badges
+  }
+
+  const removeFilter = (key: string) => {
+    if (key === "priceRange") {
+      updateFilter("priceRange", [0, 1000])
+    } else if (key === "negotiable") {
+      updateFilter("negotiable", false)
+    } else {
+      updateFilter(key, "")
+    }
+  }
+
+  const activeFilterBadges = getActiveFilterBadges()
+
+  if (count === 0) return null
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {activeFilterBadges.map((filter) => (
+        <Badge key={filter.key} variant="secondary" className="flex items-center gap-1 pr-1 bg-background">
+          {filter.label}
+          <button onClick={() => removeFilter(filter.key)} className="ml-1 hover:bg-muted rounded-full p-0.5">
+            <X className="size-3" />
+          </button>
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
+function CategoryFilter({
+  filters,
+  updateFilter,
+}: {
+  filters: Filters
+  updateFilter: (key: string, value: any) => void
+}) {
+
+  const categories = api.partInfo.getCategories.useQuery().data?.map((category) => category.name) ?? []
+  return (
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Category</Label>
+      <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select category" />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map((category) => (
+            <SelectItem key={category} value={category}>
+              {category}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
+function VehicleFilter({
+  filters,
+  updateFilter,
+}: {
+  filters: Filters
+  updateFilter: (key: string, value: any) => void
+}) {
+  const brands = api.partInfo.getMakes.useQuery().data?.map((brand) => brand.name) ?? []
+
+  const [model, setModel] = useState(filters.model)
+  const [year, setYear] = useState(filters.year)
+
+  // Sync local state with parent state (in case filters are cleared)
+  useEffect(() => {
+    setModel(filters.model)
+  }, [filters.model])
+
+  useEffect(() => {
+    setYear(filters.year)
+  }, [filters.year])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (model !== filters.model) {
+        updateFilter("model", model)
+      }
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [model, updateFilter, filters.model])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (year !== filters.year) {
+        updateFilter("year", year)
+      }
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [year, updateFilter, filters.year])
+
+  return (
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Vehicle</Label>
+      <div className="space-y-3">
+        <div>
+          <Label className="text-muted-foreground text-xs">Brand</Label>
+          <Select value={filters.brand} onValueChange={(value) => updateFilter("brand", value)}>
+            <SelectTrigger className="mt-1 w-full">
+              <SelectValue placeholder="Select brand" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
+              {brands.map((brand) => (
+                <SelectItem key={brand} value={brand}>
+                  {brand}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </CardContent>
-      </Card>
-
-      {/* Brand & Model */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Vehicle</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-4">
-          <div>
-            <Label htmlFor="brand" className="text-xs text-muted-foreground">
-              Brand
-            </Label>
-            <Select value={filters.brand} onValueChange={(value) => updateFilter("brand", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select brand" />
-              </SelectTrigger>
-              <SelectContent>
-                {brands.map((brand) => (
-                  <SelectItem key={brand} value={brand}>
-                    {brand}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="model" className="text-xs text-muted-foreground">
-              Model
-            </Label>
-            <Input
-              id="model"
-              placeholder="Enter model"
-              value={filters.model}
-              onChange={(e) => updateFilter("model", e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="year" className="text-xs text-muted-foreground">
-              Year
-            </Label>
-            <Input
-              id="year"
-              placeholder="e.g. 2015-2020"
-              value={filters.year}
-              onChange={(e) => updateFilter("year", e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Condition */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Condition</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <Select value={filters.condition} onValueChange={(value) => updateFilter("condition", value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select condition" />
-            </SelectTrigger>
-            <SelectContent>
-              {conditions.map((condition) => (
-                <SelectItem key={condition} value={condition}>
-                  {condition}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      {/* Price Range */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Price Range</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-4">
-          <div className="px-2">
-            <Slider
-              value={filters.priceRange}
-              onValueChange={(value) => updateFilter("priceRange", value)}
-              max={1000}
-              min={0}
-              step={10}
-              className="w-full"
-            />
-          </div>
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>${filters.priceRange[0]}</span>
-            <span>${filters.priceRange[1]}+</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Location */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Location</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
+        </div>
+        <div>
+          <Label className="text-muted-foreground text-xs">Model</Label>
           <Input
-            placeholder="City, State or ZIP"
-            value={filters.location}
-            onChange={(e) => updateFilter("location", e.target.value)}
+            placeholder="Enter model"
+            value={filters.model}
+            onChange={(e) => updateFilter("model", e.target.value)}
+            className="mt-1"
           />
-        </CardContent>
-      </Card>
+        </div>
+        <div>
+          <Label className="text-muted-foreground text-xs">Year</Label>
+          <Input
+            placeholder="e.g. 2015"
+            type="number"
+            min={1900}
+            max={new Date().getFullYear()}
+            value={filters.year}
+            onChange={(e) => {
+              // const numYear = Number(e.target.value)
+              // if (numYear >= 1900 && numYear <= new Date().getFullYear()) {
+              updateFilter("year", e.target.value)
+              // }
+            }}
+            className="mt-1"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
 
-      {/* Additional Options */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Options</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="negotiable"
-              checked={filters.negotiable}
-              onCheckedChange={(checked) => updateFilter("negotiable", checked)}
-            />
-            <Label htmlFor="negotiable" className="text-sm">
-              Negotiable price only
-            </Label>
-          </div>
-        </CardContent>
-      </Card>
+function ConditionFilter({
+  filters,
+  updateFilter,
+}: {
+  filters: Filters
+  updateFilter: (key: string, value: any) => void
+}) {
+  const conditions = useMemo(() => _conditions, [])
+
+  return (
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Condition</Label>
+      <Select value={filters.condition} onValueChange={(value) => updateFilter("condition", value)}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select condition" />
+        </SelectTrigger>
+        <SelectContent>
+          {conditions.map((condition) => (
+            <SelectItem key={condition} value={condition}>
+              {condition}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
+function PriceRangeFilter({
+  filters,
+  updateFilter,
+}: {
+  filters: Filters
+  updateFilter: (key: string, value: any) => void
+}) {
+
+  const [range, setRange] = useState(filters.priceRange)
+
+  return (
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Price Range</Label>
+      <div className="px-1">
+        <Slider
+          value={range}
+          onValueChange={(value) => setRange(value)}
+          onValueCommit={(value) => updateFilter("priceRange", value)}
+          max={1000}
+          min={0}
+          step={10}
+          className="w-full"
+        />
+      </div>
+      <div className="flex items-center justify-between text-muted-foreground text-sm">
+        <span>${filters.priceRange[0]}</span>
+        <span>${filters.priceRange[1]}+</span>
+      </div>
+    </div>
+  )
+}
+
+function LocationFilter({
+  filters,
+  updateFilter,
+}: {
+  filters: Filters
+  updateFilter: (key: string, value: any) => void
+}) {
+  const [value, setValue] = useState(filters.location)
+
+  useEffect(() => {
+    setValue(filters.location)
+  }, [filters.location])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (value !== filters.location) {
+        updateFilter("location", value)
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [value, updateFilter, filters.location])
+
+  return (
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Location</Label>
+      <Input
+        placeholder="City, State or ZIP"
+        value={filters.location}
+        onChange={(e) => updateFilter("location", e.target.value)}
+      />
+    </div>
+  )
+}
+
+function OptionsFilter({
+  filters,
+  updateFilter,
+}: {
+  filters: Filters
+  updateFilter: (key: string, value: any) => void
+}) {
+  return (
+    <div className="space-y-3">
+      <Label className="font-medium text-sm">Options</Label>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="negotiable"
+          checked={filters.negotiable}
+          onCheckedChange={(checked) => updateFilter("negotiable", checked)}
+        />
+        <Label htmlFor="negotiable" className="font-normal text-sm">
+          Negotiable price only
+        </Label>
+      </div>
     </div>
   )
 }

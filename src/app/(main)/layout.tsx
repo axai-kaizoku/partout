@@ -13,7 +13,7 @@ export default async function Layout({ children }: PropsWithChildren) {
       <CartProvider>
         <div className="flex min-h-screen flex-col">
           <Header />
-          <main className="mx-auto w-full max-w-7xl grow bg-background p-5">{children}</main>
+          <main className="mx-auto w-full max-w-7xl grow bg-background p-3 md:p-5">{children}</main>
           <BottomNav />
         </div>
       </CartProvider>
