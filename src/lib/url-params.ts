@@ -6,7 +6,7 @@ export interface Filters {
   condition: string
   priceRange: number[]
   location: string
-  negotiable: boolean
+  negotiable: boolean | undefined
   [key: string]: any
 }
 
@@ -52,7 +52,7 @@ export const urlParamsToFilters = (
     condition: "",
     priceRange: [0, 1000],
     location: "",
-    negotiable: false,
+    negotiable: undefined,
   }
 
   // Map simple string fields

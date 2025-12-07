@@ -18,7 +18,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   // console.log({ filters, sortBy })
 
-  const data = await api.part.getSearchResults({})
+  const data = await api.part.getSearchResults({ filters: { brand: filters.brand, category: filters.category, model: filters.model, year: Number(filters.year), condition: filters.condition, priceRange: filters.priceRange as [number, number], negotiable: filters.negotiable }, sort: sortBy, search: searchQuery, })
 
   return (
     <div className="min-h-screen pb-20">

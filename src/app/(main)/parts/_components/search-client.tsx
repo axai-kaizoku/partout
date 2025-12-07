@@ -13,6 +13,7 @@ import { ArrowUpDown, SlidersHorizontal } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react"
 import { SearchFilters } from "./search-filters"
+import { sortOptions } from "@/lib/constants/dropdown-data"
 
 const defaultFilters: Filters = {
   category: "",
@@ -34,11 +35,9 @@ export const SearchPageClient = ({ initialSearchQuery, initialFilters, initialSo
 
   const searchQuery = useMemo(() => initialSearchQuery, [initialSearchQuery])
 
-  const [sortBy, setSortBy] = useState(initialSortBy ?? "relevance")
+  const [sortBy, setSortBy] = useState(initialSortBy ?? sortOptions[0].value)
 
   const [filters, setFilters] = useState<Filters>(initialFilters)
-  // const params = filtersToUrlParams(filters, "relevance")
-  // console.log({ params: params.toString() })
 
   useEffect(() => {
     const params = filtersToUrlParams(filters, sortBy)
@@ -116,10 +115,11 @@ export const SearchPageClient = ({ initialSearchQuery, initialFilters, initialSo
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="relevance">Relevance</SelectItem>
-                      <SelectItem value="price-low">Price: Low to High</SelectItem>
-                      <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      <SelectItem value="newest">Newest First</SelectItem>
+                      {sortOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -188,10 +188,11 @@ export const SearchPageClient = ({ initialSearchQuery, initialFilters, initialSo
                       <SelectValue placeholder="Sort" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="relevance">Relevance</SelectItem>
-                      <SelectItem value="price-low">Price: Low</SelectItem>
-                      <SelectItem value="price-high">Price: High</SelectItem>
-                      <SelectItem value="newest">Newest</SelectItem>
+                      {sortOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

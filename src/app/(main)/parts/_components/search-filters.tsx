@@ -54,10 +54,10 @@ export function SearchFilters({ className, filters, updateFilter, activeFiltersC
           updateFilter={updateFilter}
         />
 
-        <LocationFilter
+        {/* <LocationFilter
           filters={filters}
           updateFilter={updateFilter}
-        />
+        /> */}
 
         <OptionsFilter
           filters={filters}
@@ -220,9 +220,17 @@ function VehicleFilter({
         <div>
           <Label className="text-muted-foreground text-xs">Year</Label>
           <Input
-            placeholder="e.g. 2015-2020"
+            placeholder="e.g. 2015"
+            type="number"
+            min={1900}
+            max={new Date().getFullYear()}
             value={filters.year}
-            onChange={(e) => updateFilter("year", e.target.value)}
+            onChange={(e) => {
+              // const numYear = Number(e.target.value)
+              // if (numYear >= 1900 && numYear <= new Date().getFullYear()) {
+              updateFilter("year", e.target.value)
+              // }
+            }}
             className="mt-1"
           />
         </div>
