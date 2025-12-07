@@ -3,7 +3,7 @@ import { Header } from "@/components/layout/header";
 import { CartProvider } from "@/hooks/use-cart";
 import { UserProvider } from "@/lib/providers/user-provider";
 import { getUser } from "@/server/supabase";
-import type { PropsWithChildren } from "react";
+import { Suspense, type PropsWithChildren } from "react";
 
 export default async function Layout({ children }: PropsWithChildren) {
   const data = await getUser();
