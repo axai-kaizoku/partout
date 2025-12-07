@@ -72,7 +72,7 @@ export function Header() {
     }
 
     window.addEventListener("keydown", focusQuickSearch)
-    notificationsAllow()
+    // notificationsAllow()
 
     return () => {
       window.removeEventListener("keydown", focusQuickSearch)
