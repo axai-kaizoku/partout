@@ -57,18 +57,25 @@ export function Header() {
 
 
   useEffect(() => {
-    window.addEventListener("keydown", (e) => {
+    const focusQuickSearch = (e: KeyboardEvent) => {
       if (e.key === "/") {
         searchRef.current?.focus()
       }
-    })
+    }
+    const notificationsAllow = () => {
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission()
+        new Notification("Hello", {
+          body: "Hello World",
+        })
+      }
+    }
+
+    window.addEventListener("keydown", focusQuickSearch)
+    notificationsAllow()
 
     return () => {
-      window.removeEventListener("keydown", (e) => {
-        if (e.key === "/") {
-          searchRef.current?.focus()
-        }
-      })
+      window.removeEventListener("keydown", focusQuickSearch)
     }
   }, [])
 

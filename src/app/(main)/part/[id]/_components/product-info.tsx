@@ -49,7 +49,14 @@ export function ProductInfo({ part }: ProductInfoProps) {
           {/* <Button variant="ghost" size="icon" onClick={() => setIsFavorited(!isFavorited)}>
             <Heart className={`h-5 w-5 ${isFavorited ? "fill-red-500 text-red-500" : ""}`} />
           </Button> */}
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" onClick={() => {
+
+            navigator.share({
+              title: part.title,
+              text: part.description,
+              url: window.location.href,
+            })
+          }}>
             <Share2 className="h-4 w-4" />
           </Button>
         </div>

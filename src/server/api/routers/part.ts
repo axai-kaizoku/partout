@@ -386,7 +386,6 @@ export const partRouter = createTRPCRouter({
             columns: {
               url: true
             },
-            where: (img, { eq }) => eq(img.isPrimary, true),
           },
           seller: {
             columns: {
