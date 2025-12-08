@@ -11,9 +11,9 @@ export function ProfileTabs() {
   return (
     <Tabs defaultValue="orders" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="settings">Settings</TabsTrigger>
         <TabsTrigger value="orders">Orders</TabsTrigger>
         {/* <TabsTrigger value="favorites">Favorites</TabsTrigger> */}
-        <TabsTrigger value="settings">Settings</TabsTrigger>
       </TabsList>
 
       <TabsContent value="orders" className="mt-6">

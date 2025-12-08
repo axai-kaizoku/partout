@@ -58,7 +58,8 @@ export function SalesHistory() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <p className="text-sm text-muted-foreground">Coming Soon !</p>
+          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Sales</p>
               <p className="text-2xl font-bold">${totalSales.toFixed(2)}</p>
@@ -71,12 +72,12 @@ export function SalesHistory() {
               <p className="text-sm text-muted-foreground">Average Sale</p>
               <p className="text-2xl font-bold">${(totalSales / sales.length).toFixed(2)}</p>
             </div>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
 
       {/* Sales List */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         {sales.map((sale) => (
           <Card key={sale.id}>
             <CardContent className="p-6">
@@ -109,7 +110,7 @@ export function SalesHistory() {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div> */}
     </div>
   )
 }

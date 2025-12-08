@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, LogOut, Search, ShoppingCart, User } from "lucide-react";
+import { Box, LogOut, Package, Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -146,9 +146,14 @@ export function Header() {
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/orders")}>
+                <DropdownMenuItem onClick={() => router.push("/sell")}>
+                  <Package className="mr-2 h-4 w-4" />
+                  Sell
+                </DropdownMenuItem>
+
+                {/* <DropdownMenuItem onClick={() => router.push("/orders")}>
                   <Box className="mr-2 h-4 w-4" />
-                  Orders</DropdownMenuItem>
+                  Orders</DropdownMenuItem> */}
                 {/* <DropdownMenuItem onClick={() => router.push("/favorites")}>Favorites</DropdownMenuItem> */}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>

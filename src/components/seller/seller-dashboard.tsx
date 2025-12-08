@@ -42,8 +42,8 @@ export function SellerDashboard() {
       <Tabs defaultValue="listings" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="listings">Active Listings</TabsTrigger>
-          <TabsTrigger value="sales">Sales History</TabsTrigger>
           <TabsTrigger value="addresses-shipping">Addresses & Shipping</TabsTrigger>
+          <TabsTrigger value="sales">Sales History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="listings" className="mt-6">
