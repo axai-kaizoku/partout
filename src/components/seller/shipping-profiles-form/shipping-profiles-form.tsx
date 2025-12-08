@@ -52,7 +52,7 @@ export const ShippingProfilesForm = ({ profile = null, onSuccess }: Props) => {
         await createShippingProfile(value).then(() => {
           toast.success("Shipping profile created successfully !", { id: toastId })
           utils.shipping.getAllShippingProfiles.invalidate()
-          router.back()
+          onSuccess?.()
         }).catch(() => {
           toast.error("Failed to create shipping profile !", { id: toastId })
         })

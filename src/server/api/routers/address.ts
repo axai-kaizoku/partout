@@ -9,16 +9,23 @@ import { TRPCError } from "@trpc/server";
 export const addressRouter = createTRPCRouter({
   createAddress: privateProcedure.input(addressSchema).mutation(async ({ ctx, input }) => {
     return await db.transaction(async (tx) => {
-      if (input.isDefault) {
+      // Check if user has any existing addresses
+      const existingAddresses = await tx.query.addresses.findMany({
+        where: eq(addresses.userId, ctx.user.id),
+      });
 
-        const add = await tx.update(addresses)
+      // If this is the first address, automatically make it default
+      const shouldBeDefault = existingAddresses.length === 0 || input.isDefault;
+
+      if (shouldBeDefault && existingAddresses.length > 0) {
+        // Unset other defaults if this is being set as default
+        await tx.update(addresses)
           .set({ isDefault: false })
-          .where(eq(addresses.userId, ctx.user.id)).returning();
-        console.log(add)
+          .where(eq(addresses.userId, ctx.user.id));
       }
 
       const [newAddress] = await tx.insert(addresses)
-        .values({ ...input, userId: ctx.user.id })
+        .values({ ...input, userId: ctx.user.id, isDefault: shouldBeDefault })
         .returning();
 
       return newAddress;

@@ -9,24 +9,32 @@ import { TRPCError } from "@trpc/server";
 export const shippingRouter = createTRPCRouter({
   createShippingProfile: privateProcedure.input(shippingProfilesSchema).mutation(async ({ ctx, input }) => {
     return await db.transaction(async (tx) => {
-      if (input.isDefault) {
+      // Check if user has any existing shipping profiles
+      const existingProfiles = await tx.query.shippingProfiles.findMany({
+        where: eq(shippingProfiles.sellerId, ctx.user.id),
+      });
+
+      // If this is the first shipping profile, automatically make it default
+      const shouldBeDefault = existingProfiles.length === 0 || input.isDefault;
+
+      if (shouldBeDefault && existingProfiles.length > 0) {
+        // Unset other defaults if this is being set as default
         await tx.update(shippingProfiles)
           .set({ isDefault: false })
           .where(eq(shippingProfiles.sellerId, ctx.user.id));
       }
 
-      const [newAddress] = await tx.insert(shippingProfiles)
+      const [newProfile] = await tx.insert(shippingProfiles)
         .values({
           ...input,
-          baseCost: parseInt(input.baseCost),
-          freeShippingThreshold: input.freeShippingThreshold ? parseInt(input.freeShippingThreshold) : null,
           estimatedDaysMin: input.estimatedDaysMin ? parseInt(input.estimatedDaysMin) : null,
           estimatedDaysMax: input.estimatedDaysMax ? parseInt(input.estimatedDaysMax) : null,
-          sellerId: ctx.user.id
+          sellerId: ctx.user.id,
+          isDefault: shouldBeDefault
         })
         .returning();
 
-      return newAddress;
+      return newProfile;
     });
   }),
 
@@ -54,8 +62,6 @@ export const shippingRouter = createTRPCRouter({
       const [updated] = await tx.update(shippingProfiles)
         .set({
           ...input.shippingProfile,
-          baseCost: parseInt(input.shippingProfile.baseCost),
-          freeShippingThreshold: input.shippingProfile.freeShippingThreshold ? parseInt(input.shippingProfile.freeShippingThreshold) : null,
           estimatedDaysMin: input.shippingProfile.estimatedDaysMin ? parseInt(input.shippingProfile.estimatedDaysMin) : null,
           estimatedDaysMax: input.shippingProfile.estimatedDaysMax ? parseInt(input.shippingProfile.estimatedDaysMax) : null,
         })

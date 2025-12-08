@@ -49,7 +49,7 @@ export const AddressForm = ({ address = null, onSuccess }: { address?: Address |
         await createAddress(value).then(() => {
           toast.success("Address created successfully !", { id: toastId })
           utils.address.getAllAddresses.invalidate()
-          router.back()
+          onSuccess?.()
         }).catch(() => {
           toast.error("Failed to create address !", { id: toastId })
         })

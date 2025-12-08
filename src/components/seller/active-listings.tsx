@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, Edit, Eye, Trash2, Package } from "lucide-react"
 import { api } from "@/trpc/react"
 import { Skeleton } from "../ui/skeleton"
+import Link from "next/link"
 
 export function ActiveListings() {
   // const [listings, setListings] = useState([
@@ -90,7 +91,7 @@ export function ActiveListings() {
         <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
         <h3 className="font-playfair text-xl font-bold text-foreground mb-2">No listings yet</h3>
         <p className="text-muted-foreground mb-4">Create your first listing to start selling</p>
-        <Button>List Your First Part</Button>
+        <Button asChild><Link href="/sell/new">List Your First Part</Link></Button>
       </div>
     )
   }

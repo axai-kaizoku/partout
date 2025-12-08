@@ -9,6 +9,7 @@ import { supabaseBrowserClient } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
 export function ProfileHeader() {
   const user = useUser();
   const router = useRouter();
@@ -58,10 +59,10 @@ export function ProfileHeader() {
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
-              <Button variant="outline" size="sm">
+              {/* <Button variant="outline" size="sm">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Profile
-              </Button>
+              </Button> */}
               <Button variant="outline" size="sm" asChild>
                 <Link href={"/sell"}>Switch to Selling</Link>
               </Button>
