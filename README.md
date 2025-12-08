@@ -59,8 +59,8 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
   - [x] server-side queries
 
 
-- [ ] seller side - flow
-- [ ] login flow
+- [-] seller side - flow
+- [x] login flow
 - [ ] responsive layout
 - [ ] chat based contact
 - [ ] ratings, reviews
@@ -69,6 +69,6 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 ## TODO - My end
 
 - [x] login flow
-- [ ] seller flow
+- [-] seller flow
 - [x] filters search
 - [ ] chat based contact

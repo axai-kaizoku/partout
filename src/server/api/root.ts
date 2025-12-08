@@ -4,6 +4,8 @@ import { imageRouter } from "./routers/image";
 import { partRouter } from "./routers/part";
 import { partInfoRouter } from "./routers/part-info";
 import { shippingRouter } from "./routers/shipping";
+import { sellerRouter } from "./routers/seller";
+import { userRouter } from "./routers/user";
 
 /**
  * This is the primary router for your server.
@@ -12,6 +14,8 @@ import { shippingRouter } from "./routers/shipping";
  */
 export const appRouter = createTRPCRouter({
   part: partRouter,
+  seller: sellerRouter,
+  user: userRouter,
   image: imageRouter,
   address: addressRouter,
   shipping: shippingRouter,
