@@ -4,7 +4,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, LoadingButton } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog as Alert, DialogDescription as AlertDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,7 @@ export function LoginForm() {
       });
 
       if (!res.error) {
+        router.refresh()
         router.push("/");
       } else {
         setError(res.error.message);
@@ -109,10 +110,9 @@ export function LoginForm() {
         </Button>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      <LoadingButton loading={isLoading} type="submit" className="w-full" disabled={isLoading}>
         Sign In
-      </Button>
+      </LoadingButton>
 
       <Button type="button" className="w-full" disabled={isLoading} onClick={() => supabase.auth.signInWithOAuth({ provider: "google" })}>
         Sign In with Google

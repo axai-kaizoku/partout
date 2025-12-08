@@ -8,14 +8,14 @@ export default function LoginPage() {
       <main className="flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="font-playfair text-2xl font-bold">Welcome Back</CardTitle>
+            <CardTitle className="font-bold font-playfair text-2xl">Welcome Back</CardTitle>
             <CardDescription>Sign in to your Partout.com account to continue shopping</CardDescription>
           </CardHeader>
           <CardContent>
             <LoginForm />
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">Don't have an account? </span>
-              <Link href="/sign-up" className=" hover:underline font-medium">
+              <Link href="/sign-up" className="font-medium hover:underline">
                 Sign up
               </Link>
             </div>
