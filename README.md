@@ -68,7 +68,7 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 
 ## TODO - My end
 
-- [ ] login flow
+- [x] login flow
 - [ ] seller flow
 - [x] filters search
 - [ ] chat based contact

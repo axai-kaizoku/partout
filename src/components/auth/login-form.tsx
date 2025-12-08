@@ -35,7 +35,6 @@ export function LoginForm() {
       });
 
       if (!res.error) {
-        router.refresh()
         router.push("/");
       } else {
         setError(res.error.message);
@@ -114,7 +113,20 @@ export function LoginForm() {
         Sign In
       </LoadingButton>
 
-      <Button type="button" className="w-full" disabled={isLoading} onClick={() => supabase.auth.signInWithOAuth({ provider: "google" })}>
+      <Button
+        type="button"
+        className="w-full"
+        disabled={isLoading}
+        onClick={() => {
+          const redirectUrl = `${window.location.origin}/`;
+          supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: redirectUrl,
+            }
+          });
+        }}
+      >
         Sign In with Google
       </Button>
 
