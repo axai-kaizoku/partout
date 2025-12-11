@@ -24,15 +24,18 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 ---
 
 ## TODO - Needed Discussion
+
 - [ ] fix seller profile side - flow
 - [ ] ratings, reviews
 
 ---
 
 # Current state: 6/12/2025 - 10:44
+
 - [x] check create part form
 - [x] seller side
-  - [x] add address 
+
+  - [x] add address
   - [x] shipping form
   - [x] show active listings
   - [x] fix create part form
@@ -43,13 +46,12 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
   - [x] link part to seller
   - [-] fix search page layout
 
-
-
 ## Things remaining from my end:
 
 7/12/2025 - 00:24
 
 - [-] search, filters, pagination
+
   - [x] search
   - [x] filters
   - [x] sorting
@@ -57,7 +59,6 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
     - [-] cursor based pagination
     - [ ] infinite scroll
   - [x] server-side queries
-
 
 - [x] seller side - flow
 - [x] login flow
@@ -72,3 +73,5 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 - [x] seller flow
 - [x] filters search
 - [ ] chat based contact
+
+- [ ] new
