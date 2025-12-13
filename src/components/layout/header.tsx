@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, LogOut, Package, Search, ShoppingCart, User } from "lucide-react";
+import { Box, LogOut, MessageCircle, Package, Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/use-user";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 import { useDebounce } from "@/hooks/use-debounce";
+import { api } from "@/trpc/react";
 
 export function Header() {
   const router = useRouter();
@@ -28,6 +29,12 @@ export function Header() {
 
   const [term, setTerm] = useState(searchParams.get("q") || "") // Initialize with query param if available
   const debouncedTerm = useDebounce(term.trim(), 600)
+
+  // Get unread message count
+  const { data: unreadCount } = api.chat.getUnreadCount.useQuery(undefined, {
+    enabled: !!user,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
 
   useEffect(() => {
     const isOnParts = pathname.startsWith("/parts")
@@ -116,14 +123,20 @@ export function Header() {
             <Search className="h-5 w-5" />
           </Button>
 
-          {/* <Button variant="ghost" size="icon" className="relative" asChild>
-            <Link href={"/cart"}>
-              <ShoppingCart className="h-5 w-5" />
-              <span className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
-                2
-              </span>
-            </Link>
-          </Button> */}
+          {/* Messages Button with Notification Badge */}
+          {user && (
+            <Button variant="ghost" size="icon" className="relative" asChild>
+              <Link href={"/messages"}>
+                <MessageCircle className="h-5 w-5" />
+                {unreadCount && unreadCount > 0 && (
+                  <span className="-top-1 -right-1 absolute flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
+                  </span>
+                )}
+              </Link>
+            </Button>
+          )}
 
           {user ? (
             <DropdownMenu>
@@ -145,6 +158,15 @@ export function Header() {
                 <DropdownMenuItem onClick={() => router.push("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/messages")} className="relative">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Messages
+                  {unreadCount && unreadCount > 0 && (
+                    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/sell")}>
                   <Package className="mr-2 h-4 w-4" />

@@ -458,3 +458,89 @@ export const partShippingRelations = relations(partShipping, ({ one }) => ({
     references: [shippingProfiles.id],
   }),
 }))
+
+// Chat/Messaging system
+export const conversations = createTable(
+  "conversations",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    partId: text("part_id")
+      .notNull()
+      .references(() => parts.id, { onDelete: "cascade" }),
+    sellerId: text("seller_id")
+      .notNull()
+      .references(() => profiles.id),
+    buyerId: text("buyer_id")
+      .notNull()
+      .references(() => profiles.id),
+    lastMessageAt: commonTimeStampSchema("last_message_at"),
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+    updatedAt: commonTimeStampSchema("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    unique("conversation_unique").on(t.partId, t.sellerId, t.buyerId),
+    index("conversation_part_idx").on(t.partId),
+    index("conversation_seller_idx").on(t.sellerId),
+    index("conversation_buyer_idx").on(t.buyerId),
+    index("conversation_last_message_idx").on(t.lastMessageAt),
+  ]
+);
+
+export type Conversation = typeof conversations.$inferSelect;
+
+export const messages = createTable(
+  "messages",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    conversationId: text("conversation_id")
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    senderId: text("sender_id")
+      .notNull()
+      .references(() => profiles.id),
+    content: text("content").notNull(),
+    isRead: boolean("is_read").default(false),
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    index("message_conversation_idx").on(t.conversationId),
+    index("message_sender_idx").on(t.senderId),
+    index("message_created_idx").on(t.conversationId, t.createdAt),
+    index("message_read_idx").on(t.conversationId, t.isRead),
+  ]
+);
+
+export type Message = typeof messages.$inferSelect;
+
+// Chat relations
+export const conversationRelations = relations(conversations, ({ one, many }) => ({
+  part: one(parts, {
+    fields: [conversations.partId],
+    references: [parts.id],
+  }),
+  seller: one(profiles, {
+    fields: [conversations.sellerId],
+    references: [profiles.id],
+    relationName: "sellerConversations",
+  }),
+  buyer: one(profiles, {
+    fields: [conversations.buyerId],
+    references: [profiles.id],
+    relationName: "buyerConversations",
+  }),
+  messages: many(messages),
+}));
+
+export const messageRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(profiles, {
+    fields: [messages.senderId],
+    references: [profiles.id],
+  }),
+}));

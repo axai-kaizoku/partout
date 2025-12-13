@@ -1,0 +1,79 @@
+"use client";
+
+import { useState } from "react";
+import { ChatList } from "@/components/chat/chat-list";
+import { ChatWindow } from "@/components/chat/chat-window";
+import { Card, CardContent } from "@/components/ui/card";
+import { useUser } from "@/hooks/use-user";
+
+export default function MessagesPage() {
+	const user = useUser();
+	const [selectedConversation, setSelectedConversation] = useState<{
+		id: string;
+		otherUserName: string;
+		otherUserImage: string | null;
+		partTitle: string;
+	} | null>(null);
+
+	if (!user) {
+		return (
+			<div className="min-h-screen bg-background">
+				<main className="pb-20">
+					<div className="container mx-auto px-4 py-6">
+						<Card>
+							<CardContent className="py-8 text-center">
+								<p className="text-muted-foreground">
+									Please sign in to view your messages.
+								</p>
+							</CardContent>
+						</Card>
+					</div>
+				</main>
+			</div>
+		);
+	}
+
+	return (
+		<div className="min-h-screen bg-background">
+			<main className="pb-20">
+				<div className="container mx-auto px-4 py-6">
+					<div className="grid h-[calc(100vh-8rem)] gap-4 md:grid-cols-[350px_1fr]">
+						<div className="h-full overflow-hidden">
+							<ChatList
+								onSelectConversation={(id, name, image, title) =>
+									setSelectedConversation({
+										id,
+										otherUserName: name,
+										otherUserImage: image,
+										partTitle: title,
+									})
+								}
+								selectedConversationId={selectedConversation?.id}
+							/>
+						</div>
+
+						<div className="h-full overflow-hidden">
+							{selectedConversation ? (
+								<ChatWindow
+									conversationId={selectedConversation.id}
+									otherUserName={selectedConversation.otherUserName}
+									otherUserImage={selectedConversation.otherUserImage}
+									partTitle={selectedConversation.partTitle}
+									currentUserId={user.id}
+								/>
+							) : (
+								<Card className="flex h-full items-center justify-center">
+									<CardContent>
+										<p className="text-muted-foreground text-center">
+											Select a conversation to start chatting
+										</p>
+									</CardContent>
+								</Card>
+							)}
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+	);
+}
