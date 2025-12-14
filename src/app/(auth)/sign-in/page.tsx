@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import {
 	Card,
@@ -6,8 +9,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
-import { Suspense } from "react";
+
+export const metadata: Metadata = {
+	title: "Sign In",
+	description: "Sign in to your Partout.com account to continue shopping",
+};
 
 export default function LoginPage() {
 	return (
