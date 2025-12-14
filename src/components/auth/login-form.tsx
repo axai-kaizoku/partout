@@ -39,7 +39,7 @@ export function LoginForm() {
 			});
 
 			if (!res.error) {
-				router.push(redirectPath);
+				router.replace(redirectPath);
 			} else {
 				setError(res.error.message);
 			}

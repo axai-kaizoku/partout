@@ -63,7 +63,7 @@ export function SignupForm() {
 			});
 
 			if (!user.error) {
-				router.push(redirectPath);
+				router.replace(redirectPath);
 			} else {
 				setError(user.error.message);
 			}
