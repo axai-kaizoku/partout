@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/date";
 import { MapPin, Shield } from "lucide-react";
 
 interface SellerInfoProps {
@@ -25,7 +26,7 @@ export function SellerInfo({ seller }: SellerInfoProps) {
 				<CardTitle className="text-lg">Seller Information</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="flex items-start gap-4">
+				<div className="flex items-start gap-4 md:flex-row flex-col">
 					<Avatar className="h-16 w-16">
 						<AvatarFallback>
 							{seller?.name?.slice(0, 2).toUpperCase()}
@@ -85,7 +86,7 @@ export function SellerInfo({ seller }: SellerInfoProps) {
 					</div>
 					<div>
 						<p className="text-muted-foreground text-sm">Member since</p>
-						<p className="font-medium">{seller?.createdAt?.toDateString()}</p>
+						<p className="font-medium">{formatDate(seller?.createdAt)}</p>
 					</div>
 				</div>
 			</CardContent>
