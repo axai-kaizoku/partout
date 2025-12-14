@@ -41,7 +41,9 @@ export function ProductInfo({ part }: ProductInfoProps) {
 	const handleContactSeller = () => {
 		if (!user) {
 			toast.error("Please sign in to contact the seller");
-			router.push("/sign-in");
+			router.push(
+				"/sign-in?redirect=" + encodeURIComponent(window.location.pathname),
+			);
 			return;
 		}
 

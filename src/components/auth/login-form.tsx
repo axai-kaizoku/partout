@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
 import { Button, LoadingButton } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { supabaseBrowserClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
 	const router = useRouter();
+	const redirectPath = useSearchParams().get("redirect") || "/";
 	const supabase = supabaseBrowserClient();
 	const [showPassword, setShowPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +39,7 @@ export function LoginForm() {
 			});
 
 			if (!res.error) {
-				router.push("/");
+				router.push(redirectPath);
 			} else {
 				setError(res.error.message);
 			}
