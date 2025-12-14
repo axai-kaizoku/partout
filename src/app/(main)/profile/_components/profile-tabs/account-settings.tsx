@@ -2,35 +2,38 @@
 
 import type React from "react";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Addresses } from "@/components/seller/seller-dashboard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Dialog as Alert,
 	DialogDescription as AlertDescription,
 } from "@/components/ui/dialog";
-import { User, Lock, Bell, Shield, Trash2 } from "lucide-react";
-// import { useAuth } from "@/hooks/use-auth"
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { useNotifications } from "@/hooks/use-notifications";
+import { useUser } from "@/hooks/use-user";
+import { Bell, Shield, Trash2, User } from "lucide-react";
+import { useState } from "react";
 
 export function AccountSettings() {
-	// const { user } = useAuth()
+	const user = useUser();
+	const { requestPermission, permission } = useNotifications();
 	const [isEditing, setIsEditing] = useState(false);
 	const [showSuccess, setShowSuccess] = useState(false);
 	const [formData, setFormData] = useState({
-		name: "",
-		email: "",
-		phone: "",
-		location: "Los Angeles, CA",
+		name: user?.user_metadata?.name || "",
+		email: user?.email || "",
+		phone: user?.phone || "",
+		// location: "Los Angeles, CA",
 	});
 	const [notifications, setNotifications] = useState({
-		orderUpdates: true,
-		promotions: false,
-		newMessages: true,
-		priceAlerts: true,
+		orderUpdates: permission.granted,
+		// promotions: false,
+		newMessages: permission.granted,
+		// priceAlerts: false,
 	});
 
 	const handleSave = (e: React.FormEvent) => {
@@ -44,16 +47,18 @@ export function AccountSettings() {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 	};
 
-	const handleNotificationChange = (field: string, value: boolean) => {
-		setNotifications((prev) => ({ ...prev, [field]: value }));
+	const handleNotificationChange = async (field: string, value: boolean) => {
+		const permission = await requestPermission();
+		// console.log({ permission });
+		setNotifications((prev) => ({ ...prev, [field]: permission }));
 	};
 
 	return (
 		<div className="space-y-6">
 			{showSuccess && (
 				<Alert>
-					<Shield className="h-4 w-4" />
 					<AlertDescription>
+						<Shield className="h-4 w-4" />
 						Your settings have been saved successfully.
 					</AlertDescription>
 				</Alert>
@@ -103,7 +108,7 @@ export function AccountSettings() {
 									placeholder="(555) 123-4567"
 								/>
 							</div>
-							<div className="space-y-2">
+							{/* <div className="space-y-2">
 								<Label htmlFor="location">Location</Label>
 								<Input
 									id="location"
@@ -111,7 +116,7 @@ export function AccountSettings() {
 									onChange={(e) => handleChange("location", e.target.value)}
 									disabled={!isEditing}
 								/>
-							</div>
+							</div> */}
 						</div>
 
 						<div className="flex gap-2">
@@ -126,7 +131,11 @@ export function AccountSettings() {
 									</Button>
 								</>
 							) : (
-								<Button type="button" onClick={() => setIsEditing(true)}>
+								<Button
+									type="button"
+									disabled
+									onClick={() => setIsEditing(true)}
+									className="disabled:pointer-events-auto disabled:cursor-not-allowed">
 									Edit Profile
 								</Button>
 							)}
@@ -135,8 +144,10 @@ export function AccountSettings() {
 				</CardContent>
 			</Card>
 
+			<Addresses />
+
 			{/* Security */}
-			<Card>
+			{/* <Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Lock className="h-5 w-5" />
@@ -166,7 +177,7 @@ export function AccountSettings() {
 						<Button variant="outline">Enable 2FA</Button>
 					</div>
 				</CardContent>
-			</Card>
+			</Card> */}
 
 			{/* Notifications */}
 			<Card>
@@ -192,9 +203,9 @@ export function AccountSettings() {
 						/>
 					</div>
 
-					<Separator />
+					{/* <Separator /> */}
 
-					<div className="flex items-center justify-between">
+					{/* <div className="flex items-center justify-between">
 						<div>
 							<p className="font-medium">Promotions & Deals</p>
 							<p className="text-sm text-muted-foreground">
@@ -207,7 +218,7 @@ export function AccountSettings() {
 								handleNotificationChange("promotions", checked)
 							}
 						/>
-					</div>
+					</div> */}
 
 					<Separator />
 
@@ -226,9 +237,9 @@ export function AccountSettings() {
 						/>
 					</div>
 
-					<Separator />
+					{/* <Separator /> */}
 
-					<div className="flex items-center justify-between">
+					{/* <div className="flex items-center justify-between">
 						<div>
 							<p className="font-medium">Price Alerts</p>
 							<p className="text-sm text-muted-foreground">
@@ -241,7 +252,7 @@ export function AccountSettings() {
 								handleNotificationChange("priceAlerts", checked)
 							}
 						/>
-					</div>
+					</div> */}
 				</CardContent>
 			</Card>
 
