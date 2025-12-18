@@ -1,6 +1,6 @@
-import { useFieldContext } from ".";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
+import { useFieldContext } from ".";
 import { FieldErrors } from "./field-errors";
 
 type CheckboxFieldProps = {
@@ -26,7 +26,9 @@ export const CheckboxField = ({ label, description }: CheckboxFieldProps) => {
           <Label htmlFor={field.name} className="cursor-pointer">
             {label}
           </Label>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {description && (
+            <p className="text-muted-foreground text-sm">{description}</p>
+          )}
         </div>
       </div>
       <FieldErrors meta={field.state.meta} />

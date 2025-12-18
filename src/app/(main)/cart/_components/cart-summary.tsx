@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Truck, Shield } from "lucide-react";
+import { Shield, ShoppingCart, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/use-cart";
 
 export function CartSummary() {
@@ -43,11 +43,15 @@ export function CartSummary() {
           <span>${total.toFixed(2)}</span>
         </div>
 
-        <Button className="w-full" size="lg" onClick={() => router.push("/checkout")}>
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={() => router.push("/checkout")}
+        >
           Proceed to Checkout
         </Button>
 
-        <div className="space-y-2 text-xs text-muted-foreground">
+        <div className="space-y-2 text-muted-foreground text-xs">
           <div className="flex items-center gap-2">
             <Shield className="h-3 w-3" />
             <span>Secure checkout with SSL encryption</span>

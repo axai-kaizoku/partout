@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Heart, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function FavoritesList() {
   const [favorites, setFavorites] = useState([
@@ -65,19 +65,26 @@ export function FavoritesList() {
 
   if (favorites.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-        <h3 className="font-playfair text-xl font-bold text-foreground mb-2">No favorites yet</h3>
-        <p className="text-muted-foreground mb-4">Save parts you like to easily find them later</p>
+      <div className="py-12 text-center">
+        <Heart className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+        <h3 className="mb-2 font-bold font-playfair text-foreground text-xl">
+          No favorites yet
+        </h3>
+        <p className="mb-4 text-muted-foreground">
+          Save parts you like to easily find them later
+        </p>
         <Button>Browse Parts</Button>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {favorites.map((part) => (
-        <Card key={part.id} className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer relative">
+        <Card
+          key={part.id}
+          className="group relative cursor-pointer overflow-hidden transition-shadow hover:shadow-lg"
+        >
           <Button
             variant="ghost"
             size="icon"
@@ -91,14 +98,17 @@ export function FavoritesList() {
             <img
               src={part.image || "/placeholder.svg"}
               alt={part.title}
-              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <div className="absolute top-3 left-3 flex gap-2">
-              <Badge variant={part.condition === "New" ? "default" : "secondary"} className="text-xs">
+              <Badge
+                variant={part.condition === "New" ? "default" : "secondary"}
+                className="text-xs"
+              >
                 {part.condition}
               </Badge>
               {part.negotiable && (
-                <Badge variant="outline" className="text-xs bg-background/90">
+                <Badge variant="outline" className="bg-background/90 text-xs">
                   Negotiable
                 </Badge>
               )}
@@ -115,38 +125,46 @@ export function FavoritesList() {
           <CardContent className="p-4">
             <div className="space-y-3">
               <div>
-                <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-accent transition-colors">
+                <h3 className="line-clamp-2 font-medium text-foreground transition-colors group-hover:text-accent">
                   {part.title}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {part.brand} {part.model} • {part.year}
                 </p>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-foreground">${part.price}</span>
+                  <span className="font-bold text-foreground text-lg">
+                    ${part.price}
+                  </span>
                   {part.originalPrice && (
-                    <span className="text-sm text-muted-foreground line-through">${part.originalPrice}</span>
+                    <span className="text-muted-foreground text-sm line-through">
+                      ${part.originalPrice}
+                    </span>
                   )}
                 </div>
               </div>
 
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1">
-                  <span className="text-muted-foreground">{part.seller.name}</span>
+                  <span className="text-muted-foreground">
+                    {part.seller.name}
+                  </span>
                   {part.seller.verified && (
-                    <Badge variant="outline" className="text-xs px-1 py-0">
+                    <Badge variant="outline" className="px-1 py-0 text-xs">
                       ✓
                     </Badge>
                   )}
                 </div>
               </div>
 
-              <div className="text-xs text-muted-foreground">Added {new Date(part.dateAdded).toLocaleDateString()}</div>
+              <div className="text-muted-foreground text-xs">
+                Added {new Date(part.dateAdded).toLocaleDateString()}
+              </div>
 
               <Button className="w-full" size="sm">
-                <ShoppingCart className="h-4 w-4 mr-2" />
+                <ShoppingCart className="mr-2 h-4 w-4" />
                 Add to Cart
               </Button>
             </div>

@@ -25,8 +25,7 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 
 ## TODO - Needed Discussion
 
-- [ ] fix seller profile side - flow
-- [ ] ratings, reviews
+- [x] fix seller profile side - flow
 
 ---
 
@@ -62,14 +61,18 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 
 - [x] seller side - flow
 - [x] login flow
-- [ ] responsive layout
+- [x] responsive layout
 - [x] chat based contact
 - [ ] ratings, reviews
-- [ ] contact details - only for signed in users ?
+- [x] contact details - only for signed in users ?
 
 ## TODO - My end
 
-- [x] login flow
-- [x] seller flow
-- [x] filters search
-- [x] chat based contact
+- [ ] home page shop by category
+- [ ] seller's store
+- [ ] messages by id page
+- [ ] active listings in seller side
+- [ ] in add part form, he can add multiple models
+  - [ ] or fetch models using VIN number
+- [ ] oauth callback url
+- [ ] phone number country code

@@ -22,21 +22,34 @@
  * - Shipping → shippingProfiles table
  */
 
+import {
+  Camera,
+  Car,
+  DollarSign,
+  Loader2,
+  Package,
+  Upload,
+  X,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
-
-import { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Upload, X, Package, DollarSign, Car, Camera, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
-import { toast } from "sonner";
 
 // Types for image handling
 interface ImagePreview {
@@ -137,8 +150,25 @@ export function NewListingForm() {
   const conditions = ["New", "Used", "Refurbished"];
   const currencies = ["USD", "CAD", "EUR", "GBP"];
   const carriers = ["UPS", "FedEx", "USPS", "DHL"];
-  const materials = ["Ceramic", "Metal", "Plastic", "Rubber", "Carbon Fiber", "Aluminum", "Steel"];
-  const warranties = ["No Warranty", "30 Days", "90 Days", "6 Months", "1 Year", "2 Years", "3 Years", "Lifetime"];
+  const materials = [
+    "Ceramic",
+    "Metal",
+    "Plastic",
+    "Rubber",
+    "Carbon Fiber",
+    "Aluminum",
+    "Steel",
+  ];
+  const warranties = [
+    "No Warranty",
+    "30 Days",
+    "90 Days",
+    "6 Months",
+    "1 Year",
+    "2 Years",
+    "3 Years",
+    "Lifetime",
+  ];
 
   // Image upload mutation
   const uploadImageMutation = api.image.uploadTempImage.useMutation({
@@ -148,12 +178,12 @@ export function NewListingForm() {
         prev.map((img) =>
           img.id === variables.fileName
             ? {
-              ...img,
-              uploaded: data,
-              isUploading: false,
-            }
-            : img
-        )
+                ...img,
+                uploaded: data,
+                isUploading: false,
+              }
+            : img,
+        ),
       );
     },
     onError: (error, variables) => {
@@ -171,9 +201,13 @@ export function NewListingForm() {
 
     try {
       // Validate that all images are uploaded
-      const uploadedImages = images.filter((img) => img.uploaded && !img.isUploading);
+      const uploadedImages = images.filter(
+        (img) => img.uploaded && !img.isUploading,
+      );
       if (images.length > 0 && uploadedImages.length !== images.length) {
-        alert("Please wait for all images to finish uploading before submitting.");
+        alert(
+          "Please wait for all images to finish uploading before submitting.",
+        );
         setIsLoading(false);
         return;
       }
@@ -191,10 +225,12 @@ export function NewListingForm() {
           brand: formData.brand,
           condition: formData.condition,
           price: parseFloat(formData.price),
-          originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
+          originalPrice: formData.originalPrice
+            ? parseFloat(formData.originalPrice)
+            : null,
           currency: formData.currency,
           isNegotiable: formData.isNegotiable,
-          quantity: parseInt(formData.quantity),
+          quantity: parseInt(formData.quantity, 10),
           weight: formData.weight ? parseFloat(formData.weight) : null,
           dimensions: formData.dimensions,
           warranty: formData.warranty,
@@ -203,7 +239,7 @@ export function NewListingForm() {
         },
         // Part images data (from uploaded images)
         images: uploadedImages.map((img, index) => ({
-          url: img.uploaded!.url,
+          url: img.uploaded?.url,
           sortOrder: index,
           isPrimary: index === 0,
           altText: `${formData.title} - Image ${index + 1}`,
@@ -212,17 +248,23 @@ export function NewListingForm() {
         compatibility: {
           makeId: formData.makeId,
           modelId: formData.modelId,
-          yearStart: parseInt(formData.yearStart),
-          yearEnd: parseInt(formData.yearEnd),
+          yearStart: parseInt(formData.yearStart, 10),
+          yearEnd: parseInt(formData.yearEnd, 10),
           engine: formData.engine,
           trim: formData.trim,
         },
         // Shipping profile data
         shipping: {
           baseCost: parseFloat(formData.shippingCost),
-          freeShippingThreshold: formData.freeShippingThreshold ? parseFloat(formData.freeShippingThreshold) : null,
-          estimatedDaysMin: formData.estimatedDaysMin ? parseInt(formData.estimatedDaysMin) : null,
-          estimatedDaysMax: formData.estimatedDaysMax ? parseInt(formData.estimatedDaysMax) : null,
+          freeShippingThreshold: formData.freeShippingThreshold
+            ? parseFloat(formData.freeShippingThreshold)
+            : null,
+          estimatedDaysMin: formData.estimatedDaysMin
+            ? parseInt(formData.estimatedDaysMin, 10)
+            : null,
+          estimatedDaysMax: formData.estimatedDaysMax
+            ? parseInt(formData.estimatedDaysMax, 10)
+            : null,
           carrier: formData.carrier,
         },
       };
@@ -253,23 +295,35 @@ export function NewListingForm() {
     fileInputRef.current?.click();
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = event.target.files;
     if (!files) return;
 
-    const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    const validImageTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
     const maxFileSize = 10 * 1024 * 1024; // 10MB
 
     for (const file of Array.from(files)) {
       // Validate file type
       if (!validImageTypes.includes(file.type)) {
-        alert(`${file.name} is not a valid image format. Please use JPEG, PNG, WebP, or GIF.`);
+        alert(
+          `${file.name} is not a valid image format. Please use JPEG, PNG, WebP, or GIF.`,
+        );
         continue;
       }
 
       // Validate file size
       if (file.size > maxFileSize) {
-        alert(`${file.name} is too large. Please use images smaller than 10MB.`);
+        alert(
+          `${file.name} is too large. Please use images smaller than 10MB.`,
+        );
         continue;
       }
 
@@ -341,40 +395,48 @@ export function NewListingForm() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto max-w-4xl">
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <div
               key={step.number}
-              className="flex items-center cursor-pointer"
+              className="flex cursor-pointer items-center"
               onClick={() => {
                 setCurrentStep(index + 1);
                 toast.success("loading toast this is");
               }}
             >
               <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${currentStep >= step.number
-                  ? "bg-accent text-accent-foreground border-accent"
-                  : "bg-background text-muted-foreground border-border"
-                  }`}
+                className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${
+                  currentStep >= step.number
+                    ? "border-accent bg-accent text-accent-foreground"
+                    : "border-border bg-background text-muted-foreground"
+                }`}
               >
                 <step.icon className="h-5 w-5" />
               </div>
               <div className="ml-3">
                 <p
-                  className={`text-sm font-medium ${currentStep >= step.number ? "text-foreground" : "text-muted-foreground"
-                    }`}
+                  className={`font-medium text-sm ${
+                    currentStep >= step.number
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  }`}
                 >
                   Step {step.number}
                 </p>
-                <p className={`text-xs ${currentStep >= step.number ? "text-foreground" : "text-muted-foreground"}`}>
+                <p
+                  className={`text-xs ${currentStep >= step.number ? "text-foreground" : "text-muted-foreground"}`}
+                >
                   {step.title}
                 </p>
               </div>
               {index < steps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-4 ${currentStep > step.number ? "bg-accent" : "bg-border"}`} />
+                <div
+                  className={`mx-4 h-0.5 flex-1 ${currentStep > step.number ? "bg-accent" : "bg-border"}`}
+                />
               )}
             </div>
           ))}
@@ -412,10 +474,13 @@ export function NewListingForm() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="categoryId">Category *</Label>
-                  <Select value={formData.categoryId} onValueChange={(value) => handleChange("categoryId", value)}>
+                  <Select
+                    value={formData.categoryId}
+                    onValueChange={(value) => handleChange("categoryId", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -432,7 +497,10 @@ export function NewListingForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="condition">Condition *</Label>
-                  <Select value={formData.condition} onValueChange={(value) => handleChange("condition", value)}>
+                  <Select
+                    value={formData.condition}
+                    onValueChange={(value) => handleChange("condition", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select condition" />
                     </SelectTrigger>
@@ -447,7 +515,7 @@ export function NewListingForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="partNumber">Part Number</Label>
                   <Input
@@ -469,10 +537,13 @@ export function NewListingForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="material">Material</Label>
-                  <Select value={formData.material} onValueChange={(value) => handleChange("material", value)}>
+                  <Select
+                    value={formData.material}
+                    onValueChange={(value) => handleChange("material", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select material" />
                     </SelectTrigger>
@@ -488,7 +559,10 @@ export function NewListingForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="warranty">Warranty</Label>
-                  <Select value={formData.warranty} onValueChange={(value) => handleChange("warranty", value)}>
+                  <Select
+                    value={formData.warranty}
+                    onValueChange={(value) => handleChange("warranty", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select warranty" />
                     </SelectTrigger>
@@ -516,7 +590,7 @@ export function NewListingForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="weight">Weight (lbs)</Label>
                   <Input
@@ -550,10 +624,13 @@ export function NewListingForm() {
               <CardTitle>Vehicle Compatibility</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="makeId">Vehicle Make *</Label>
-                  <Select value={formData.makeId} onValueChange={(value) => handleChange("makeId", value)}>
+                  <Select
+                    value={formData.makeId}
+                    onValueChange={(value) => handleChange("makeId", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select make" />
                     </SelectTrigger>
@@ -570,7 +647,10 @@ export function NewListingForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="modelId">Vehicle Model *</Label>
-                  <Select value={formData.modelId} onValueChange={(value) => handleChange("modelId", value)}>
+                  <Select
+                    value={formData.modelId}
+                    onValueChange={(value) => handleChange("modelId", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select model" />
                     </SelectTrigger>
@@ -584,7 +664,7 @@ export function NewListingForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="yearStart">Year Start *</Label>
                   <Input
@@ -614,7 +694,7 @@ export function NewListingForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="engine">Engine</Label>
                   <Input
@@ -666,23 +746,31 @@ export function NewListingForm() {
                 onChange={handleFileSelect}
               />
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
                 {images.map((image, index) => (
-                  <div key={image.id} className="relative group">
-                    <div className="relative w-full h-32 rounded-md overflow-hidden bg-gray-100">
-                      <img src={image.preview} alt={`Part image ${index + 1}`} className="w-full h-full object-cover" />
+                  <div key={image.id} className="group relative">
+                    <div className="relative h-32 w-full overflow-hidden rounded-md bg-gray-100">
+                      <img
+                        src={image.preview}
+                        alt={`Part image ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
 
                       {/* Upload status overlay */}
                       {image.isUploading && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <Loader2 className="h-6 w-6 text-white animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <Loader2 className="h-6 w-6 animate-spin text-white" />
                         </div>
                       )}
 
                       {/* Success indicator */}
                       {image.uploaded && !image.isUploading && (
-                        <div className="absolute top-2 left-2 bg-green-500 text-white rounded-full p-1">
-                          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="absolute top-2 left-2 rounded-full bg-green-500 p-1 text-white">
+                          <svg
+                            className="h-3 w-3"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
                             <path
                               fillRule="evenodd"
                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -694,7 +782,7 @@ export function NewListingForm() {
 
                       {/* Primary image indicator */}
                       {index === 0 && (
-                        <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                        <div className="absolute bottom-2 left-2 rounded bg-blue-500 px-2 py-1 text-white text-xs">
                           Primary
                         </div>
                       )}
@@ -705,7 +793,7 @@ export function NewListingForm() {
                       type="button"
                       variant="destructive"
                       size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+                      className="absolute top-2 right-2 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
                       onClick={() => removeImage(image.id)}
                       disabled={image.isUploading}
                     >
@@ -729,22 +817,29 @@ export function NewListingForm() {
                       ) : (
                         <Upload className="h-6 w-6" />
                       )}
-                      <span className="text-sm">{uploadImageMutation.isPending ? "Uploading..." : "Add Photo"}</span>
+                      <span className="text-sm">
+                        {uploadImageMutation.isPending
+                          ? "Uploading..."
+                          : "Add Photo"}
+                      </span>
                     </div>
                   </Button>
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Add up to 8 photos. The first photo will be used as the main image.
+                <p className="text-muted-foreground text-sm">
+                  Add up to 8 photos. The first photo will be used as the main
+                  image.
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Supported formats: JPEG, PNG, WebP, GIF. Max size: 10MB per image.
+                <p className="text-muted-foreground text-xs">
+                  Supported formats: JPEG, PNG, WebP, GIF. Max size: 10MB per
+                  image.
                 </p>
                 {images.length > 0 && (
-                  <p className="text-xs text-green-600">
-                    {images.filter((img) => img.uploaded).length} of {images.length} images uploaded successfully
+                  <p className="text-green-600 text-xs">
+                    {images.filter((img) => img.uploaded).length} of{" "}
+                    {images.length} images uploaded successfully
                   </p>
                 )}
               </div>
@@ -759,7 +854,7 @@ export function NewListingForm() {
               <CardTitle>Pricing & Shipping</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="price">Price *</Label>
                   <Input
@@ -781,13 +876,18 @@ export function NewListingForm() {
                     step="0.01"
                     placeholder="120.00"
                     value={formData.originalPrice}
-                    onChange={(e) => handleChange("originalPrice", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("originalPrice", e.target.value)
+                    }
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="currency">Currency</Label>
-                  <Select value={formData.currency} onValueChange={(value) => handleChange("currency", value)}>
+                  <Select
+                    value={formData.currency}
+                    onValueChange={(value) => handleChange("currency", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
@@ -806,14 +906,16 @@ export function NewListingForm() {
                 <Checkbox
                   id="isNegotiable"
                   checked={formData.isNegotiable}
-                  onCheckedChange={(checked) => handleChange("isNegotiable", checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleChange("isNegotiable", checked as boolean)
+                  }
                 />
                 <Label htmlFor="isNegotiable">Price is negotiable</Label>
               </div>
 
               <Separator />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="shippingCost">Shipping Cost *</Label>
                   <Input
@@ -822,25 +924,31 @@ export function NewListingForm() {
                     step="0.01"
                     placeholder="12.99"
                     value={formData.shippingCost}
-                    onChange={(e) => handleChange("shippingCost", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("shippingCost", e.target.value)
+                    }
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="freeShippingThreshold">Free Shipping Threshold</Label>
+                  <Label htmlFor="freeShippingThreshold">
+                    Free Shipping Threshold
+                  </Label>
                   <Input
                     id="freeShippingThreshold"
                     type="number"
                     step="0.01"
                     placeholder="100.00"
                     value={formData.freeShippingThreshold}
-                    onChange={(e) => handleChange("freeShippingThreshold", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("freeShippingThreshold", e.target.value)
+                    }
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="space-y-2">
                   <Label htmlFor="estimatedDaysMin">Min Delivery Days</Label>
                   <Input
@@ -849,7 +957,9 @@ export function NewListingForm() {
                     min="1"
                     placeholder="3"
                     value={formData.estimatedDaysMin}
-                    onChange={(e) => handleChange("estimatedDaysMin", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("estimatedDaysMin", e.target.value)
+                    }
                   />
                 </div>
 
@@ -861,13 +971,18 @@ export function NewListingForm() {
                     min="1"
                     placeholder="5"
                     value={formData.estimatedDaysMax}
-                    onChange={(e) => handleChange("estimatedDaysMax", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("estimatedDaysMax", e.target.value)
+                    }
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="carrier">Shipping Carrier</Label>
-                  <Select value={formData.carrier} onValueChange={(value) => handleChange("carrier", value)}>
+                  <Select
+                    value={formData.carrier}
+                    onValueChange={(value) => handleChange("carrier", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select carrier" />
                     </SelectTrigger>
@@ -886,8 +1001,13 @@ export function NewListingForm() {
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex items-center justify-between mt-6">
-          <Button type="button" variant="outline" onClick={prevStep} disabled={currentStep === 1}>
+        <div className="mt-6 flex items-center justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={prevStep}
+            disabled={currentStep === 1}
+          >
             Previous
           </Button>
 

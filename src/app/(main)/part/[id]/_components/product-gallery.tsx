@@ -1,37 +1,47 @@
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
-import { ChevronLeft, ChevronRight, Expand } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ChevronLeft, ChevronRight, Expand } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface ProductGalleryProps {
-  partImages: { url: string }[]
-  title: string
+  partImages: { url: string }[];
+  title: string;
 }
 
-export function ProductGallery({ partImages = [], title }: ProductGalleryProps) {
+export function ProductGallery({
+  partImages = [],
+  title,
+}: ProductGalleryProps) {
   const images = useMemo(() => {
-    return partImages?.map((img) => img?.url)
-  }, [])
-  const [currentImage, setCurrentImage] = useState(0)
+    return partImages?.map((img) => img?.url);
+  }, [partImages?.map]);
+  const [currentImage, setCurrentImage] = useState(0);
 
   const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length)
-  }
+    setCurrentImage((prev) => (prev + 1) % images.length);
+  };
 
   const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length)
-  }
+    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-square bg-muted rounded-lg overflow-hidden group">
+      <div className="group relative aspect-square overflow-hidden rounded-lg bg-muted">
         <img
           src={images[currentImage] || "/media/placeholder.png"}
           alt={`${title} - Image ${currentImage + 1}`}
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
         />
 
         {/* Navigation Arrows */}
@@ -40,7 +50,7 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="-translate-y-1/2 absolute top-1/2 left-2 bg-background/80 opacity-0 transition-opacity group-hover:opacity-100"
               onClick={prevImage}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -48,7 +58,7 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="-translate-y-1/2 absolute top-1/2 right-2 bg-background/80 opacity-0 transition-opacity group-hover:opacity-100"
               onClick={nextImage}
             >
               <ChevronRight className="h-4 w-4" />
@@ -62,7 +72,7 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 bg-background/80  opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 bg-background/80 opacity-0 transition-opacity group-hover:opacity-100"
             >
               <Expand className="h-4 w-4" />
             </Button>
@@ -77,14 +87,14 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
             <img
               src={images[currentImage] || "/placeholder.svg"}
               alt={`${title} - Image ${currentImage + 1}`}
-              className="w-full h-auto max-h-[80vh] object-contain"
+              className="h-auto max-h-[80vh] w-full object-contain"
             />
           </DialogContent>
         </Dialog>
 
         {/* Image Counter */}
         {images.length > 1 && (
-          <div className="absolute bottom-2 right-2 bg-background/80 text-foreground px-2 py-1 rounded text-sm">
+          <div className="absolute right-2 bottom-2 rounded bg-background/80 px-2 py-1 text-foreground text-sm">
             {currentImage + 1} / {images.length}
           </div>
         )}
@@ -97,18 +107,21 @@ export function ProductGallery({ partImages = [], title }: ProductGalleryProps) 
             <button
               key={index}
               onClick={() => setCurrentImage(index)}
-              className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-colors ${index === currentImage ? "border-accent" : "border-border hover:border-accent/50"
-                }`}
+              className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
+                index === currentImage
+                  ? "border-accent"
+                  : "border-border hover:border-accent/50"
+              }`}
             >
               <img
                 src={image || "/placeholder.svg"}
                 alt={`${title} thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover"
               />
             </button>
           ))}
         </div>
       )}
     </div>
-  )
+  );
 }

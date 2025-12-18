@@ -6,7 +6,7 @@ export const priceShippingDefaults = {
   currency: "USD",
   isNegotiable: false,
   partShippingId: "",
-}
+};
 
 export const vehicleDetailsDefaults = {
   makeId: "",
@@ -16,7 +16,7 @@ export const vehicleDetailsDefaults = {
   engine: "",
   trim: "",
   brand: "",
-}
+};
 
 export const basicInfoDefaults = {
   title: "",
@@ -29,10 +29,8 @@ export const basicInfoDefaults = {
   warranty: "",
   quantity: "1",
   weight: "",
-  dimensions: ""
-}
-
-
+  dimensions: "",
+};
 
 export const steps = [
   { number: 1, title: "Basic Info", icon: Package },
@@ -40,4 +38,3 @@ export const steps = [
   { number: 3, title: "Photos", icon: Camera },
   { number: 4, title: "Pricing & Shipping", icon: DollarSign },
 ];
-

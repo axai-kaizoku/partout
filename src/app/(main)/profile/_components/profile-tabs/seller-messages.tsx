@@ -55,7 +55,7 @@ export function SellerMessages() {
         ) : (
           <Card className="flex h-full items-center justify-center">
             <CardContent>
-              <p className="text-muted-foreground text-center">
+              <p className="text-center text-muted-foreground">
                 Select a conversation to start chatting
               </p>
             </CardContent>

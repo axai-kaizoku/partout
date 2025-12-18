@@ -1,20 +1,16 @@
-'use client'
+"use client";
 
+import { MapPin, ShoppingCart } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Part } from "@/server/db/schema";
-import { MapPin, ShoppingCart } from "lucide-react";
-import Link from "next/link";
-
 
 export function PartCard({ part }: { part: Part }) {
   return (
-    <Link href={`/part/${part.id}`}
-    >
-      <Card
-        className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer min-w-0"
-      >
+    <Link href={`/part/${part.id}`}>
+      <Card className="group min-w-0 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg">
         <div className="relative">
           <img
             src={part?.partImages?.[0]?.url || "/media/placeholder.png"}
@@ -24,11 +20,14 @@ export function PartCard({ part }: { part: Part }) {
             className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute top-3 left-3 flex gap-2">
-            <Badge variant={part.condition === "New" ? "default" : "secondary"} className="text-xs">
+            <Badge
+              variant={part.condition === "New" ? "default" : "secondary"}
+              className="text-xs"
+            >
               {part.condition}
             </Badge>
             {part.isNegotiable && (
-              <Badge variant="outline" className="text-xs bg-background/90">
+              <Badge variant="outline" className="bg-background/90 text-xs">
                 Negotiable
               </Badge>
             )}
@@ -49,15 +48,22 @@ export function PartCard({ part }: { part: Part }) {
                 {part.title}
               </h3>
               <p className="text-muted-foreground text-sm">
-                {part?.brand} {part?.partCompatibility?.[0]?.model?.name} • {part?.partCompatibility?.[0]?.yearStart} {part?.partCompatibility?.[0]?.yearEnd && `- ${part?.partCompatibility?.[0]?.yearEnd}`}
+                {part?.brand} {part?.partCompatibility?.[0]?.model?.name} •{" "}
+                {part?.partCompatibility?.[0]?.yearStart}{" "}
+                {part?.partCompatibility?.[0]?.yearEnd &&
+                  `- ${part?.partCompatibility?.[0]?.yearEnd}`}
               </p>
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-foreground text-lg">${part.price}</span>
+                <span className="font-bold text-foreground text-lg">
+                  ${part.price}
+                </span>
                 {part.originalPrice && (
-                  <span className="text-muted-foreground text-sm line-through">${part.originalPrice}</span>
+                  <span className="text-muted-foreground text-sm line-through">
+                    ${part.originalPrice}
+                  </span>
                 )}
               </div>
             </div>
@@ -65,7 +71,9 @@ export function PartCard({ part }: { part: Part }) {
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-1">
                 {/* <pre>{JSON.stringify(part?.seller, null, 2)}</pre> */}
-                <span className="text-muted-foreground capitalize">{part?.seller?.name}</span>
+                <span className="text-muted-foreground capitalize">
+                  {part?.seller?.name}
+                </span>
                 {part?.seller?.verified && (
                   <Badge variant="outline" className="px-1 py-0 text-xs">
                     ✓
@@ -80,7 +88,10 @@ export function PartCard({ part }: { part: Part }) {
 
             <div className="flex items-center gap-1 text-muted-foreground text-xs">
               <MapPin className="h-3 w-3" />
-              <span>{part?.seller?.addresses?.[0]?.city}, {part?.seller?.addresses?.[0]?.state}</span>
+              <span>
+                {part?.seller?.addresses?.[0]?.city},{" "}
+                {part?.seller?.addresses?.[0]?.state}
+              </span>
             </div>
 
             <Button className="w-full" size="sm">
@@ -91,14 +102,14 @@ export function PartCard({ part }: { part: Part }) {
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }
 
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function PartCardSkeleton() {
   return (
-    <Card className="overflow-hidden min-w-0">
+    <Card className="min-w-0 overflow-hidden">
       {/* Image */}
       <div className="relative">
         <Skeleton className="h-48 w-full" />

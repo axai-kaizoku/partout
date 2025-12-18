@@ -1,9 +1,9 @@
 "use client";
 
+import { Send } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MessageInputProps {
@@ -12,7 +12,11 @@ interface MessageInputProps {
   className?: string;
 }
 
-export function MessageInput({ onSend, disabled, className }: MessageInputProps) {
+export function MessageInput({
+  onSend,
+  disabled,
+  className,
+}: MessageInputProps) {
   const [message, setMessage] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,7 +45,7 @@ export function MessageInput({ onSend, disabled, className }: MessageInputProps)
         onKeyDown={handleKeyDown}
         placeholder="Type a message..."
         disabled={disabled}
-        className="min-h-[60px] max-h-[120px] resize-none"
+        className="max-h-[120px] min-h-[60px] resize-none"
       />
       <Button
         type="submit"

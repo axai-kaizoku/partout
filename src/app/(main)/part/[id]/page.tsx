@@ -7,53 +7,53 @@ import { RelatedParts } from "./_components/related-parts";
 import { SellerInfo } from "./_components/seller-info";
 
 export const metadata: Metadata = {
-	title: "Part Details",
-	description:
-		"Explore detailed information about this part, including specifications, compatibility, and seller details on Partout.",
+  title: "Part Details",
+  description:
+    "Explore detailed information about this part, including specifications, compatibility, and seller details on Partout.",
 };
 
 export default async function ProductDetailPage({
-	params,
+  params,
 }: {
-	params: Promise<{ id: string }>;
+  params: Promise<{ id: string }>;
 }) {
-	const id = (await params).id;
+  const id = (await params).id;
 
-	const part = await api.part.getPartById(id);
+  const part = await api.part.getPartById(id);
 
-	if (!part) {
-		return <div>Part not found</div>;
-	}
+  if (!part) {
+    return <div>Part not found</div>;
+  }
 
-	return (
-		<main className="pb-20">
-			<div className="max-w-6xl mx-auto px-4 py-6">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-					{/* Product Gallery */}
-					<ProductGallery partImages={part?.partImages} title={part?.title} />
+  return (
+    <main className="pb-20">
+      <div className="mx-auto max-w-6xl px-4 py-6">
+        <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+          {/* Product Gallery */}
+          <ProductGallery partImages={part?.partImages} title={part?.title} />
 
-					{/* Product Info */}
-					<ProductInfo part={part} />
-				</div>
+          {/* Product Info */}
+          <ProductInfo part={part} />
+        </div>
 
-				{/* Seller Info */}
-				<div className="mb-8">
-					<SellerInfo seller={part?.seller} />
-				</div>
+        {/* Seller Info */}
+        <div className="mb-8">
+          <SellerInfo seller={part?.seller} />
+        </div>
 
-				{/* Compatibility Table */}
-				<div className="mb-8">
-					<CompatibilityTable compatibility={part?.partCompatibility} />
-				</div>
+        {/* Compatibility Table */}
+        <div className="mb-8">
+          <CompatibilityTable compatibility={part?.partCompatibility} />
+        </div>
 
-				{/* Reviews */}
-				<div className="mb-8">
-					{/* <ProductReviews reviews={part?.reviews} rating={part?.seller?.rating} /> */}
-				</div>
+        {/* Reviews */}
+        <div className="mb-8">
+          {/* <ProductReviews reviews={part?.reviews} rating={part?.seller?.rating} /> */}
+        </div>
 
-				{/* Related Parts */}
-				<RelatedParts currentPartId={part.id} category={part?.categoryId} />
-			</div>
-		</main>
-	);
+        {/* Related Parts */}
+        <RelatedParts currentPartId={part.id} category={part?.categoryId} />
+      </div>
+    </main>
+  );
 }

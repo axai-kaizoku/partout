@@ -14,14 +14,20 @@ export async function uploadToSupabaseStorage({
   bucket: (typeof STORAGE_BUCKETS)[keyof typeof STORAGE_BUCKETS];
 }) {
   try {
-    const supabaseAdmin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
+    const supabaseAdmin = createClient(
+      env.NEXT_PUBLIC_SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: { autoRefreshToken: false, persistSession: false },
+      },
+    );
 
-    const uploadResult = await supabaseAdmin.storage.from(bucket).upload(filePath, content, {
-      contentType,
-      upsert: true,
-    });
+    const uploadResult = await supabaseAdmin.storage
+      .from(bucket)
+      .upload(filePath, content, {
+        contentType,
+        upsert: true,
+      });
     if (uploadResult.error) {
       throw new Error(`Failed to upload to supabase`);
     }

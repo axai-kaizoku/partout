@@ -1,23 +1,30 @@
-'use client';
+"use client";
 
-import { useState } from "react";
 import { ArrowRight, CheckCircle2, MapPin, Package } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { toast } from "sonner";
 import { AddressForm } from "@/components/seller/address-form/address-form";
 import { ShippingProfilesForm } from "@/components/seller/shipping-profiles-form/shipping-profiles-form";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { api } from "@/trpc/react";
-import { toast } from "sonner";
 
-type OnboardingStep = 'welcome' | 'address' | 'shipping' | 'complete';
+type OnboardingStep = "welcome" | "address" | "shipping" | "complete";
 
 export function SellerOnboarding() {
-  const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
+  const [currentStep, setCurrentStep] = useState<OnboardingStep>("welcome");
   const utils = api.useUtils();
 
   const addresses = api.address.getAllAddresses.useQuery();
   const shippingProfiles = api.shipping.getAllShippingProfiles.useQuery();
-  const { mutateAsync: updateSellerStatus } = api.user.updateSellerStatus.useMutation();
+  const { mutateAsync: updateSellerStatus } =
+    api.user.updateSellerStatus.useMutation();
 
   const hasAddress = (addresses.data?.length ?? 0) > 0;
   const hasShipping = (shippingProfiles.data?.length ?? 0) > 0;
@@ -30,7 +37,7 @@ export function SellerOnboarding() {
     if (hasShipping) {
       completeOnboarding();
     } else {
-      setCurrentStep('shipping');
+      setCurrentStep("shipping");
     }
   };
 
@@ -46,7 +53,7 @@ export function SellerOnboarding() {
     try {
       await updateSellerStatus({ isSeller: true });
       await utils.user.getUser.invalidate();
-      setCurrentStep('complete');
+      setCurrentStep("complete");
       toast.success("Welcome to selling on Partout!");
 
       // Reload the page after a short delay to show completion message
@@ -60,15 +67,15 @@ export function SellerOnboarding() {
 
   const handleGetStarted = () => {
     if (!hasAddress) {
-      setCurrentStep('address');
+      setCurrentStep("address");
     } else if (!hasShipping) {
-      setCurrentStep('shipping');
+      setCurrentStep("shipping");
     } else {
       completeOnboarding();
     }
   };
 
-  if (currentStep === 'complete') {
+  if (currentStep === "complete") {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Card className="w-full max-w-md text-center">
@@ -86,13 +93,14 @@ export function SellerOnboarding() {
     );
   }
 
-  if (currentStep === 'address') {
+  if (currentStep === "address") {
     return (
       <div>
         <div className="mb-6">
           <h2 className="font-bold text-2xl">Add Your Address</h2>
           <p className="text-muted-foreground">
-            Let buyers know where you're located. This will be your default address.
+            Let buyers know where you're located. This will be your default
+            address.
           </p>
         </div>
         <AddressForm onSuccess={handleAddressSuccess} />
@@ -100,13 +108,14 @@ export function SellerOnboarding() {
     );
   }
 
-  if (currentStep === 'shipping') {
+  if (currentStep === "shipping") {
     return (
       <div>
         <div className="mb-6">
           <h2 className="font-bold text-2xl">Set Up Shipping</h2>
           <p className="text-muted-foreground">
-            Configure your shipping options for buyers. This will be your default shipping profile.
+            Configure your shipping options for buyers. This will be your
+            default shipping profile.
           </p>
         </div>
         <ShippingProfilesForm onSuccess={handleShippingSuccess} />
@@ -121,7 +130,8 @@ export function SellerOnboarding() {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">Become a Seller</CardTitle>
           <CardDescription className="text-base">
-            Start selling auto parts on Partout. Complete these steps to get started.
+            Start selling auto parts on Partout. Complete these steps to get
+            started.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -162,11 +172,7 @@ export function SellerOnboarding() {
           </div>
 
           <div className="flex justify-center pt-4">
-            <Button
-              size="lg"
-              onClick={handleGetStarted}
-              className="gap-2"
-            >
+            <Button size="lg" onClick={handleGetStarted} className="gap-2">
               {hasAddress && hasShipping ? (
                 <>Complete Setup</>
               ) : (

@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { and, desc, eq, or } from "drizzle-orm";
+import { z } from "zod";
 import { db } from "@/server/db";
 import { conversations, messages } from "@/server/db/schema";
 import { createTRPCRouter, privateProcedure } from "../trpc";
@@ -11,7 +11,7 @@ export const chatRouter = createTRPCRouter({
       z.object({
         partId: z.string(),
         sellerId: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.id;
@@ -22,7 +22,7 @@ export const chatRouter = createTRPCRouter({
           and(
             eq(conv.partId, input.partId),
             eq(conv.sellerId, input.sellerId),
-            eq(conv.buyerId, userId)
+            eq(conv.buyerId, userId),
           ),
       });
 
@@ -120,7 +120,7 @@ export const chatRouter = createTRPCRouter({
         where: (conv, { and, eq, or }) =>
           and(
             eq(conv.id, conversationId),
-            or(eq(conv.sellerId, userId), eq(conv.buyerId, userId))
+            or(eq(conv.sellerId, userId), eq(conv.buyerId, userId)),
           ),
       });
 
@@ -151,7 +151,7 @@ export const chatRouter = createTRPCRouter({
       z.object({
         conversationId: z.string(),
         content: z.string().min(1),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.id;
@@ -161,7 +161,7 @@ export const chatRouter = createTRPCRouter({
         where: (conv, { and, eq, or }) =>
           and(
             eq(conv.id, input.conversationId),
-            or(eq(conv.sellerId, userId), eq(conv.buyerId, userId))
+            or(eq(conv.sellerId, userId), eq(conv.buyerId, userId)),
           ),
       });
 
@@ -187,7 +187,7 @@ export const chatRouter = createTRPCRouter({
 
       // Fetch the complete message with sender info
       const messageWithSender = await db.query.messages.findFirst({
-        where: (msg, { eq }) => eq(msg.id, newMessage!.id),
+        where: (msg, { eq }) => eq(msg.id, newMessage?.id),
         with: {
           sender: {
             columns: {
@@ -207,10 +207,10 @@ export const chatRouter = createTRPCRouter({
     .input(
       z.object({
         conversationId: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.user.id;
+      const _userId = ctx.user.id;
 
       // Update all unread messages in this conversation that were sent by the other person
       await db
@@ -224,8 +224,8 @@ export const chatRouter = createTRPCRouter({
             or(
               // User is not the sender
               // We need to check the conversation to know if they're buyer or seller
-            )
-          )
+            ),
+          ),
         );
 
       return { success: true };
@@ -256,7 +256,7 @@ export const chatRouter = createTRPCRouter({
         and(
           inArray(msg.conversationId, conversationIds),
           eq(msg.isRead, false),
-          not(eq(msg.senderId, userId))
+          not(eq(msg.senderId, userId)),
         ),
     });
 

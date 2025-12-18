@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 
 export default function Page() {
   const mutation = api.partInfo.createMockMakes.useMutation({
-    mutationKey: ["create-mock-makes"]
-  })
+    mutationKey: ["create-mock-makes"],
+  });
 
-  const makes = api.partInfo.getMakes.useQuery()
+  const makes = api.partInfo.getMakes.useQuery();
   return (
     <div>
       <h1>Seed Data</h1>

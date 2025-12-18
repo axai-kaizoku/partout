@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 interface CartItem {
   id: number;
@@ -104,7 +110,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const existingItem = prev.find((item) => item.id === newItem.id);
       if (existingItem) {
-        return prev.map((item) => (item.id === newItem.id ? { ...item, quantity: item.quantity + 1 } : item));
+        return prev.map((item) =>
+          item.id === newItem.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        );
       }
       return [...prev, { ...newItem, quantity: 1 }];
     });
@@ -119,7 +129,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem(id);
       return;
     }
-    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity } : item)),
+    );
   };
 
   const clearCart = () => {
@@ -143,14 +155,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const getSellerGroups = () => {
-    return items.reduce((groups, item) => {
-      const sellerId = item.seller.id.toString();
-      if (!groups[sellerId]) {
-        groups[sellerId] = [];
-      }
-      groups[sellerId].push(item);
-      return groups;
-    }, {} as Record<string, CartItem[]>);
+    return items.reduce(
+      (groups, item) => {
+        const sellerId = item.seller.id.toString();
+        if (!groups[sellerId]) {
+          groups[sellerId] = [];
+        }
+        groups[sellerId].push(item);
+        return groups;
+      },
+      {} as Record<string, CartItem[]>,
+    );
   };
 
   return (

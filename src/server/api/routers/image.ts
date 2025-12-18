@@ -13,14 +13,17 @@ export const imageRouter = createTRPCRouter({
         imageData: z.string(), // base64 encoded image
         fileName: z.string(),
         contentType: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const startTime = Date.now();
       console.log(`[upload-temp-image] Processing image: ${input.fileName}`);
 
       // Convert base64 to buffer
-      const base64Data = input.imageData.replace(/^data:image\/\w+;base64,/, "");
+      const base64Data = input.imageData.replace(
+        /^data:image\/\w+;base64,/,
+        "",
+      );
       const imageBuffer = Buffer.from(base64Data, "base64");
 
       const res = await uploadToSupabaseStorage({
@@ -30,7 +33,9 @@ export const imageRouter = createTRPCRouter({
         content: imageBuffer,
       });
 
-      console.log(`[upload-temp-image] Upload completed in ${Date.now() - startTime}ms`);
+      console.log(
+        `[upload-temp-image] Upload completed in ${Date.now() - startTime}ms`,
+      );
 
       if (res.error) {
         throw new Error(`Failed to upload image: ${res.error.message}`);
@@ -52,7 +57,7 @@ export const imageRouter = createTRPCRouter({
         altText: z.string().optional(),
         sortOrder: z.number(),
         isPrimary: z.boolean().default(false),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const result = await db.insert(partImages).values({

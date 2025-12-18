@@ -1,7 +1,7 @@
-import { db } from "@/server/db";
-import { createTRPCRouter, publicProcedure } from "../trpc";
-import { categories, vehicleMakes, vehicleModels } from "@/server/db/schema";
 import z from "zod";
+import { db } from "@/server/db";
+import { categories, vehicleMakes, vehicleModels } from "@/server/db/schema";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const partInfoRouter = createTRPCRouter({
   // Queries
@@ -222,21 +222,32 @@ export const partInfoRouter = createTRPCRouter({
     ]);
   }),
 
-  createModelForMake: publicProcedure.input(z.object({ makeId: z.string(), name: z.string(), yearStart: z.number().optional().nullable(), yearEnd: z.number().optional().nullable() })).mutation(async ({ input }) => {
-    const [model] = await db.insert(vehicleModels).values({
-      name: input.name,
-      makeId: input.makeId,
-      slug: input.name.toLowerCase().replace(" ", "-"),
-      yearStart: input.yearStart,
-      yearEnd: input.yearEnd,
-      isActive: true,
-    }).returning()
+  createModelForMake: publicProcedure
+    .input(
+      z.object({
+        makeId: z.string(),
+        name: z.string(),
+        yearStart: z.number().optional().nullable(),
+        yearEnd: z.number().optional().nullable(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const [model] = await db
+        .insert(vehicleModels)
+        .values({
+          name: input.name,
+          makeId: input.makeId,
+          slug: input.name.toLowerCase().replace(" ", "-"),
+          yearStart: input.yearStart,
+          yearEnd: input.yearEnd,
+          isActive: true,
+        })
+        .returning();
 
-    if (model) {
-      return model.id
-    }
+      if (model) {
+        return model.id;
+      }
 
-    return null
-  })
-
-})
+      return null;
+    }),
+});

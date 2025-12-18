@@ -5,7 +5,8 @@ import { SubmitButton } from "./submit-button";
 import { TextField } from "./text-field";
 import { TextAreaField } from "./textarea-field";
 
-export const { fieldContext, useFieldContext, formContext, useFormContext } = createFormHookContexts();
+export const { fieldContext, useFieldContext, formContext, useFormContext } =
+  createFormHookContexts();
 
 export const { useAppForm } = createFormHook({
   fieldComponents: {

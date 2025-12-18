@@ -1,11 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Package, Truck, CheckCircle, Clock, RotateCcw } from "lucide-react";
+import { CheckCircle, Clock, Package, RotateCcw, Truck } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export function OrderHistory() {
   // const mockOrders = [
@@ -97,11 +97,15 @@ export function OrderHistory() {
 
   // if (mockOrders.length === 0) {
   return (
-    <div className="text-center py-12">
-      <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-      <h3 className="font-playfair text-xl font-bold text-foreground mb-2">Orders</h3>
-      <p className="text-muted-foreground mb-4">Coming Soon !</p>
-      <Button asChild><Link href="/parts">Browse Parts</Link></Button>
+    <div className="py-12 text-center">
+      <Package className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+      <h3 className="mb-2 font-bold font-playfair text-foreground text-xl">
+        Orders
+      </h3>
+      <p className="mb-4 text-muted-foreground">Coming Soon !</p>
+      <Button asChild>
+        <Link href="/parts">Browse Parts</Link>
+      </Button>
     </div>
   );
   // }
@@ -118,9 +122,11 @@ export function OrderHistory() {
                 <span className="ml-1 capitalize">{order.status}</span>
               </Badge>
             </div>
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center justify-between text-muted-foreground text-sm">
               <span>Placed on {new Date(order.date).toLocaleDateString()}</span>
-              <span className="font-medium text-foreground">${order.total.toFixed(2)}</span>
+              <span className="font-medium text-foreground">
+                ${order.total.toFixed(2)}
+              </span>
             </div>
           </CardHeader>
 
@@ -131,18 +137,28 @@ export function OrderHistory() {
                   <img
                     src={"/media/placeholder.png"}
                     alt={item.title}
-                    className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                    className="h-16 w-16 flex-shrink-0 rounded-md object-cover"
                   />
                   <div className="flex-1">
-                    <h4 className="font-medium text-foreground line-clamp-2">{item.title}</h4>
-                    <p className="text-sm text-muted-foreground">Sold by {item.seller}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-sm text-muted-foreground">Qty: {item.quantity}</span>
-                      <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                    <h4 className="line-clamp-2 font-medium text-foreground">
+                      {item.title}
+                    </h4>
+                    <p className="text-muted-foreground text-sm">
+                      Sold by {item.seller}
+                    </p>
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-muted-foreground text-sm">
+                        Qty: {item.quantity}
+                      </span>
+                      <span className="font-medium">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>
-                {index < order.items.length - 1 && <Separator className="mt-4" />}
+                {index < order.items.length - 1 && (
+                  <Separator className="mt-4" />
+                )}
               </div>
             ))}
 
@@ -152,13 +168,13 @@ export function OrderHistory() {
               <div className="flex gap-2">
                 {order.status === "delivered" && (
                   <Button variant="outline" size="sm">
-                    <RotateCcw className="h-4 w-4 mr-2" />
+                    <RotateCcw className="mr-2 h-4 w-4" />
                     Return Items
                   </Button>
                 )}
                 {order.tracking && (
                   <Button variant="outline" size="sm">
-                    <Truck className="h-4 w-4 mr-2" />
+                    <Truck className="mr-2 h-4 w-4" />
                     Track Package
                   </Button>
                 )}

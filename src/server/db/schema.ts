@@ -2,7 +2,17 @@
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
 import { relations } from "drizzle-orm";
-import { boolean, decimal, index, integer, jsonb, pgTableCreator, text, timestamp, unique } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  decimal,
+  index,
+  integer,
+  jsonb,
+  pgTableCreator,
+  text,
+  timestamp,
+  unique,
+} from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
 /**
@@ -53,7 +63,7 @@ export const profiles = createTable(
     index("profile_name_idx").on(t.name),
     index("profile_seller_idx").on(t.isSeller),
     index("profile_verified_idx").on(t.isVerified),
-  ]
+  ],
 );
 
 // Categories for auto parts
@@ -75,7 +85,7 @@ export const categories = createTable(
     index("category_parent_idx").on(t.parentId),
     index("category_active_idx").on(t.isActive),
     index("category_sort_idx").on(t.sortOrder),
-  ]
+  ],
 );
 
 // Vehicle makes (BMW, Mercedes, etc.)
@@ -93,7 +103,7 @@ export const vehicleMakes = createTable(
     unique("make_slug_unique").on(t.slug),
     index("make_name_idx").on(t.name),
     index("make_active_idx").on(t.isActive),
-  ]
+  ],
 );
 
 // Vehicle models (E46, C-Class, etc.)
@@ -117,7 +127,7 @@ export const vehicleModels = createTable(
     index("model_name_idx").on(t.name),
     index("model_year_idx").on(t.yearStart, t.yearEnd),
     index("model_active_idx").on(t.isActive),
-  ]
+  ],
 );
 
 // Main parts/products table
@@ -167,7 +177,7 @@ export const parts = createTable(
     index("part_status_idx").on(t.status),
     index("part_part_number_idx").on(t.partNumber),
     index("part_created_idx").on(t.createdAt),
-  ]
+  ],
 );
 
 export type Part = typeof parts.$inferSelect;
@@ -190,7 +200,7 @@ export const partImages = createTable(
     index("part_image_part_idx").on(t.partId),
     index("part_image_sort_idx").on(t.partId, t.sortOrder),
     index("part_image_primary_idx").on(t.partId, t.isPrimary),
-  ]
+  ],
 );
 
 // Vehicle compatibility for parts
@@ -214,11 +224,18 @@ export const partCompatibility = createTable(
     createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
   },
   (t) => [
-    unique("part_compatibility_unique").on(t.partId, t.makeId, t.modelId, t.yearStart, t.yearEnd, t.engine),
+    unique("part_compatibility_unique").on(
+      t.partId,
+      t.makeId,
+      t.modelId,
+      t.yearStart,
+      t.yearEnd,
+      t.engine,
+    ),
     index("compatibility_part_idx").on(t.partId),
     index("compatibility_make_model_idx").on(t.makeId, t.modelId),
     index("compatibility_year_idx").on(t.yearStart, t.yearEnd),
-  ]
+  ],
 );
 
 // Shipping profiles for sellers
@@ -231,7 +248,10 @@ export const shippingProfiles = createTable(
       .references(() => profiles.id),
     name: text("name").notNull(), // "Standard", "Express", etc.
     baseCost: decimal("base_cost", { precision: 8, scale: 2 }).notNull(),
-    freeShippingThreshold: decimal("free_shipping_threshold", { precision: 10, scale: 2 }),
+    freeShippingThreshold: decimal("free_shipping_threshold", {
+      precision: 10,
+      scale: 2,
+    }),
     estimatedDaysMin: integer("estimated_days_min"),
     estimatedDaysMax: integer("estimated_days_max"),
     carrier: text("carrier"), // "UPS", "FedEx", "USPS"
@@ -243,7 +263,7 @@ export const shippingProfiles = createTable(
     index("shipping_seller_idx").on(t.sellerId),
     index("shipping_default_idx").on(t.sellerId, t.isDefault),
     index("shipping_active_idx").on(t.isActive),
-  ]
+  ],
 );
 
 export type ShippingProfile = typeof shippingProfiles.$inferSelect;
@@ -265,7 +285,7 @@ export const partShipping = createTable(
     unique("part_shipping_unique").on(t.partId, t.shippingProfileId),
     index("part_shipping_part_idx").on(t.partId),
     index("part_shipping_profile_idx").on(t.shippingProfileId),
-  ]
+  ],
 );
 
 // Reviews for parts/sellers
@@ -298,7 +318,7 @@ export const reviews = createTable(
     index("review_rating_idx").on(t.rating),
     index("review_verified_idx").on(t.isVerifiedPurchase),
     index("review_created_idx").on(t.createdAt),
-  ]
+  ],
 );
 
 // User addresses
@@ -331,10 +351,10 @@ export const addresses = createTable(
     index("address_type_idx").on(t.userId, t.type),
     index("address_default_idx").on(t.userId, t.isDefault),
     index("address_postal_idx").on(t.postalCode),
-  ]
+  ],
 );
 
-export type Address = typeof addresses.$inferSelect
+export type Address = typeof addresses.$inferSelect;
 
 // User favorites/watchlist
 export const favorites = createTable(
@@ -354,7 +374,7 @@ export const favorites = createTable(
     index("favorite_user_idx").on(t.userId),
     index("favorite_part_idx").on(t.partId),
     index("favorite_created_idx").on(t.createdAt),
-  ]
+  ],
 );
 
 // Seller ratings aggregation (for performance)
@@ -368,7 +388,9 @@ export const sellerStats = createTable(
     averageRating: decimal("average_rating", { precision: 3, scale: 2 }),
     totalReviews: integer("total_reviews").default(0),
     totalSales: integer("total_sales").default(0),
-    totalRevenue: decimal("total_revenue", { precision: 12, scale: 2 }).default("0"),
+    totalRevenue: decimal("total_revenue", { precision: 12, scale: 2 }).default(
+      "0",
+    ),
     responseRate: decimal("response_rate", { precision: 5, scale: 2 }), // percentage
     onTimeShipping: decimal("on_time_shipping", { precision: 5, scale: 2 }), // percentage
     updatedAt: commonTimeStampSchema("updated_at")
@@ -380,7 +402,7 @@ export const sellerStats = createTable(
     unique("seller_stats_seller_unique").on(t.sellerId),
     index("seller_stats_rating_idx").on(t.averageRating),
     index("seller_stats_sales_idx").on(t.totalSales),
-  ]
+  ],
 );
 
 // Note: Relations can be added later in a separate file if needed for query building
@@ -400,14 +422,14 @@ export const partRelations = relations(parts, ({ one, many }) => ({
     fields: [parts.sellerId],
     references: [sellerStats.sellerId],
   }),
-}))
+}));
 
 export const partImageRelations = relations(partImages, ({ one }) => ({
   part: one(parts, {
     fields: [partImages.partId],
     references: [parts.id],
   }),
-}))
+}));
 
 export const profileRelations = relations(profiles, ({ one, many }) => ({
   part: one(parts, {
@@ -416,37 +438,40 @@ export const profileRelations = relations(profiles, ({ one, many }) => ({
   }),
   addresses: many(addresses),
   shippingProfiles: many(shippingProfiles),
-}))
+}));
 
 export const addressRelations = relations(addresses, ({ one }) => ({
   profile: one(profiles, {
     fields: [addresses.userId],
     references: [profiles.id],
   }),
-}))
+}));
 
-export const partCompatibilityRelations = relations(partCompatibility, ({ one }) => ({
-  part: one(parts, {
-    fields: [partCompatibility.partId],
-    references: [parts.id],
+export const partCompatibilityRelations = relations(
+  partCompatibility,
+  ({ one }) => ({
+    part: one(parts, {
+      fields: [partCompatibility.partId],
+      references: [parts.id],
+    }),
+    make: one(vehicleMakes, {
+      fields: [partCompatibility.makeId],
+      references: [vehicleMakes.id],
+    }),
+    model: one(vehicleModels, {
+      fields: [partCompatibility.modelId],
+      references: [vehicleModels.id],
+    }),
   }),
-  make: one(vehicleMakes, {
-    fields: [partCompatibility.makeId],
-    references: [vehicleMakes.id],
-  }),
-  model: one(vehicleModels, {
-    fields: [partCompatibility.modelId],
-    references: [vehicleModels.id],
-  }),
-}))
+);
 
 export const makeRelations = relations(vehicleMakes, ({ many }) => ({
   partCompatibility: many(partCompatibility),
-}))
+}));
 
 export const modelRelations = relations(vehicleModels, ({ many }) => ({
   partCompatibility: many(partCompatibility),
-}))
+}));
 
 export const partShippingRelations = relations(partShipping, ({ one }) => ({
   part: one(parts, {
@@ -457,7 +482,7 @@ export const partShippingRelations = relations(partShipping, ({ one }) => ({
     fields: [partShipping.shippingProfileId],
     references: [shippingProfiles.id],
   }),
-}))
+}));
 
 // Chat/Messaging system
 export const conversations = createTable(
@@ -486,7 +511,7 @@ export const conversations = createTable(
     index("conversation_seller_idx").on(t.sellerId),
     index("conversation_buyer_idx").on(t.buyerId),
     index("conversation_last_message_idx").on(t.lastMessageAt),
-  ]
+  ],
 );
 
 export type Conversation = typeof conversations.$inferSelect;
@@ -510,29 +535,32 @@ export const messages = createTable(
     index("message_sender_idx").on(t.senderId),
     index("message_created_idx").on(t.conversationId, t.createdAt),
     index("message_read_idx").on(t.conversationId, t.isRead),
-  ]
+  ],
 );
 
 export type Message = typeof messages.$inferSelect;
 
 // Chat relations
-export const conversationRelations = relations(conversations, ({ one, many }) => ({
-  part: one(parts, {
-    fields: [conversations.partId],
-    references: [parts.id],
+export const conversationRelations = relations(
+  conversations,
+  ({ one, many }) => ({
+    part: one(parts, {
+      fields: [conversations.partId],
+      references: [parts.id],
+    }),
+    seller: one(profiles, {
+      fields: [conversations.sellerId],
+      references: [profiles.id],
+      relationName: "sellerConversations",
+    }),
+    buyer: one(profiles, {
+      fields: [conversations.buyerId],
+      references: [profiles.id],
+      relationName: "buyerConversations",
+    }),
+    messages: many(messages),
   }),
-  seller: one(profiles, {
-    fields: [conversations.sellerId],
-    references: [profiles.id],
-    relationName: "sellerConversations",
-  }),
-  buyer: one(profiles, {
-    fields: [conversations.buyerId],
-    references: [profiles.id],
-    relationName: "buyerConversations",
-  }),
-  messages: many(messages),
-}));
+);
 
 export const messageRelations = relations(messages, ({ one }) => ({
   conversation: one(conversations, {

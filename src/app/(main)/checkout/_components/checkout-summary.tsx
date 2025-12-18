@@ -1,13 +1,19 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditCard, Package, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Package, Shield, CreditCard } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 
 export function CheckoutSummary() {
-  const { items, getTotalItems, getTotalPrice, getShippingTotal, getSellerGroups } = useCart();
+  const {
+    items,
+    getTotalItems,
+    getTotalPrice,
+    getShippingTotal,
+    getSellerGroups,
+  } = useCart();
   const sellerGroups = getSellerGroups();
 
   const subtotal = getTotalPrice();
@@ -43,7 +49,9 @@ export function CheckoutSummary() {
                   <div key={item.id} className="flex justify-between text-sm">
                     <div className="flex-1">
                       <p className="line-clamp-1">{item.title}</p>
-                      <p className="text-muted-foreground">Qty: {item.quantity}</p>
+                      <p className="text-muted-foreground">
+                        Qty: {item.quantity}
+                      </p>
                     </div>
                     <span>${(item.price * item.quantity).toFixed(2)}</span>
                   </div>
@@ -79,16 +87,16 @@ export function CheckoutSummary() {
         </div>
 
         {/* Trust Indicators */}
-        <div className="space-y-2 pt-4 border-t border-border">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="space-y-2 border-border border-t pt-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs">
             <Shield className="h-3 w-3" />
             <span>Secure SSL encrypted checkout</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs">
             <CreditCard className="h-3 w-3" />
             <span>We accept all major credit cards</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs">
             <Package className="h-3 w-3" />
             <span>30-day return policy</span>
           </div>

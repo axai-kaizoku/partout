@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import {
+  type ChatNotificationOptions,
   getNotificationPermission,
   requestNotificationPermission,
   showChatNotification,
-  type ChatNotificationOptions,
 } from "@/lib/notifications";
 
 export function useNotifications() {
-  const [permission, setPermission] = useState(() => getNotificationPermission());
+  const [permission, setPermission] = useState(() =>
+    getNotificationPermission(),
+  );
 
   // Update permission state when it changes
   useEffect(() => {

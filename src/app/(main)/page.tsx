@@ -1,10 +1,21 @@
+import {
+  Car,
+  CreditCard,
+  Disc,
+  PenLine as Engine,
+  Settings,
+  Shield,
+  Star,
+  Truck,
+  Wrench,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import { Suspense } from "react";
 import { PartCard } from "@/components/parts/part-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { api } from "@/trpc/server";
-import { Car, CreditCard, Disc, PenLine as Engine, Settings, Shield, Star, Truck, Wrench, Zap } from "lucide-react";
-import Link from "next/link";
-import { Suspense } from "react";
 
 export default async function Home() {
   return (
@@ -12,8 +23,12 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="px-4 py-6">
         <div className="mx-auto max-w-4xl text-center">
-          <h1 className="mb-4 font-bold font-playfair text-3xl text-foreground md:text-4xl">Find Quality Auto Parts</h1>
-          <p className="mb-6 text-lg text-muted-foreground">Browse thousands of parts from trusted sellers</p>
+          <h1 className="mb-4 font-bold font-playfair text-3xl text-foreground md:text-4xl">
+            Find Quality Auto Parts
+          </h1>
+          <p className="mb-6 text-lg text-muted-foreground">
+            Browse thousands of parts from trusted sellers
+          </p>
           <TrustBadges />
         </div>
       </section>
@@ -24,9 +39,7 @@ export default async function Home() {
       </section>
 
       {/* Parts Grid */}
-      <section className="px-4">
-        {await PartsGrid()}
-      </section>
+      <section className="px-4">{await PartsGrid()}</section>
     </div>
   );
 }
@@ -54,7 +67,10 @@ export function TrustBadges() {
   return (
     <div className="flex flex-wrap justify-center gap-4 md:gap-6">
       {badges.map((badge) => (
-        <div key={badge.text} className="flex items-center gap-2 text-muted-foreground text-sm">
+        <div
+          key={badge.text}
+          className="flex items-center gap-2 text-muted-foreground text-sm"
+        >
           <badge.icon className="h-4 w-4 text-blue-500" />
           <span>{badge.text}</span>
         </div>
@@ -75,17 +91,26 @@ export function FeaturedCategories() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h2 className="mb-6 font-bold font-playfair text-2xl text-foreground">Shop by Category</h2>
+      <h2 className="mb-6 font-bold font-playfair text-2xl text-foreground">
+        Shop by Category
+      </h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {categories.map((category) => (
-          <Card key={category.name} className="p-4 hover:shadow-md transition-shadow cursor-pointer group">
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="p-3 rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
+          <Card
+            key={category.name}
+            className="group cursor-pointer p-4 transition-shadow hover:shadow-md"
+          >
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="rounded-full bg-blue-500/10 p-3 transition-colors group-hover:bg-blue-500/20">
                 <category.icon className="h-6 w-6 text-blue-500" />
               </div>
               <div>
-                <h3 className="font-medium text-sm text-foreground">{category.name}</h3>
-                <p className="text-xs text-muted-foreground">{category.count} parts</p>
+                <h3 className="font-medium text-foreground text-sm">
+                  {category.name}
+                </h3>
+                <p className="text-muted-foreground text-xs">
+                  {category.count} parts
+                </p>
               </div>
             </div>
           </Card>
@@ -96,8 +121,7 @@ export function FeaturedCategories() {
 }
 
 export async function PartsGrid() {
-
-  const mockParts = [
+  const _mockParts = [
     {
       id: 1,
       title: "BMW E46 Brake Pads - Front Set",
@@ -133,7 +157,11 @@ export async function PartsGrid() {
         location: "Miami, FL",
       },
       negotiable: false,
-      compatibility: ["Honda Civic Si", "Honda Civic Type R", "Honda Civic Sport"],
+      compatibility: [
+        "Honda Civic Si",
+        "Honda Civic Type R",
+        "Honda Civic Sport",
+      ],
     },
     {
       id: 3,
@@ -151,7 +179,11 @@ export async function PartsGrid() {
         location: "Dallas, TX",
       },
       negotiable: true,
-      compatibility: ["Ford F-150 XLT", "Ford F-150 Lariat", "Ford F-150 King Ranch"],
+      compatibility: [
+        "Ford F-150 XLT",
+        "Ford F-150 Lariat",
+        "Ford F-150 King Ranch",
+      ],
     },
     {
       id: 4,
@@ -206,24 +238,28 @@ export async function PartsGrid() {
         location: "Denver, CO",
       },
       negotiable: false,
-      compatibility: ["Jeep Wrangler Sport", "Jeep Wrangler Sahara", "Jeep Wrangler Rubicon"],
+      compatibility: [
+        "Jeep Wrangler Sport",
+        "Jeep Wrangler Sahara",
+        "Jeep Wrangler Rubicon",
+      ],
     },
   ];
 
-  const parts = await api.part.getHomePageParts()
+  const parts = await api.part.getHomePageParts();
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-playfair text-2xl font-bold text-foreground">Featured Parts</h2>
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="font-bold font-playfair text-2xl text-foreground">
+            Featured Parts
+          </h2>
           <Button variant="outline" size="sm" asChild>
-            <Link href={"/parts"}>
-              View All
-            </Link>
+            <Link href={"/parts"}>View All</Link>
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {parts?.map((part) => (
             <PartCard key={part.id} part={part} />
           ))}

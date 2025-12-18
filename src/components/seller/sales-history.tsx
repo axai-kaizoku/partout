@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { DollarSign } from "lucide-react"
+import { DollarSign } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function SalesHistory() {
   const sales = [
@@ -30,22 +30,22 @@ export function SalesHistory() {
       dateSold: "2024-01-10",
       status: "completed",
     },
-  ]
+  ];
 
-  const getStatusColor = (status: string) => {
+  const _getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "shipped":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "processing":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
-  const totalSales = sales.reduce((sum, sale) => sum + sale.price, 0)
+  const _totalSales = sales.reduce((sum, sale) => sum + sale.price, 0);
 
   return (
     <div className="space-y-6">
@@ -58,7 +58,7 @@ export function SalesHistory() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Coming Soon !</p>
+          <p className="text-muted-foreground text-sm">Coming Soon !</p>
           {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Sales</p>
@@ -112,5 +112,5 @@ export function SalesHistory() {
         ))}
       </div> */}
     </div>
-  )
+  );
 }

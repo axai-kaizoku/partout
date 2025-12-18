@@ -1,13 +1,15 @@
-'use client';
-import { ShippingProfilesForm } from "@/components/seller/shipping-profiles-form/shipping-profiles-form";
+"use client";
 import { useRouter } from "next/navigation";
+import { ShippingProfilesForm } from "@/components/seller/shipping-profiles-form/shipping-profiles-form";
 
 export default function Page() {
-  const router = useRouter()
+  const router = useRouter();
   return (
     <main className="pb-20">
       <div className="mx-auto max-w-4xl px-4 py-6">
-        <h1 className="mb-6 font-bold font-playfair text-2xl text-foreground md:text-3xl">Add your new shipping profile</h1>
+        <h1 className="mb-6 font-bold font-playfair text-2xl text-foreground md:text-3xl">
+          Add your new shipping profile
+        </h1>
         <ShippingProfilesForm onSuccess={() => router.back()} />
       </div>
     </main>

@@ -1,16 +1,21 @@
 "use client";
 
+import { CreditCard, Loader2, MapPin, Truck } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type React from "react";
-
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { CreditCard, MapPin, Truck, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCart } from "@/hooks/use-cart";
 
 export function CheckoutForm() {
@@ -127,11 +132,19 @@ export function CheckoutForm() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="city">City</Label>
-              <Input id="city" value={formData.city} onChange={(e) => handleChange("city", e.target.value)} required />
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => handleChange("city", e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="state">State</Label>
-              <Select value={formData.state} onValueChange={(value) => handleChange("state", value)}>
+              <Select
+                value={formData.state}
+                onValueChange={(value) => handleChange("state", value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select state" />
                 </SelectTrigger>
@@ -160,7 +173,9 @@ export function CheckoutForm() {
             <Checkbox
               id="saveAddress"
               checked={formData.saveAddress}
-              onCheckedChange={(checked) => handleChange("saveAddress", checked as boolean)}
+              onCheckedChange={(checked) =>
+                handleChange("saveAddress", checked as boolean)
+              }
             />
             <Label htmlFor="saveAddress" className="text-sm">
               Save this address for future orders
@@ -179,10 +194,12 @@ export function CheckoutForm() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 border border-border rounded-md bg-accent/5">
+            <div className="flex items-center justify-between rounded-md border border-border bg-accent/5 p-3">
               <div>
                 <p className="font-medium">Standard Shipping</p>
-                <p className="text-sm text-muted-foreground">5-7 business days</p>
+                <p className="text-muted-foreground text-sm">
+                  5-7 business days
+                </p>
               </div>
               <span className="font-medium">Calculated at checkout</span>
             </div>
@@ -247,7 +264,9 @@ export function CheckoutForm() {
             <Checkbox
               id="sameAsBilling"
               checked={formData.sameAsBilling}
-              onCheckedChange={(checked) => handleChange("sameAsBilling", checked as boolean)}
+              onCheckedChange={(checked) =>
+                handleChange("sameAsBilling", checked as boolean)
+              }
             />
             <Label htmlFor="sameAsBilling" className="text-sm">
               Billing address same as shipping address

@@ -1,8 +1,10 @@
-import z from "zod"
+import z from "zod";
 
 export const basicInfoSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters long"),
-  description: z.string().min(10, "Description must be at least 10 characters long"),
+  description: z
+    .string()
+    .min(10, "Description must be at least 10 characters long"),
   categoryId: z.string().min(1, "Category is required"),
   condition: z.string().min(1, "Condition is required"),
   partNumber: z.string().min(1, "Part number is required"),
@@ -12,7 +14,7 @@ export const basicInfoSchema = z.object({
   quantity: z.string().min(1, "Quantity is required"),
   weight: z.string().optional(),
   dimensions: z.string().optional(),
-})
+});
 
 export const vehicleDetailsSchema = z.object({
   makeId: z.string().optional(),
@@ -22,7 +24,7 @@ export const vehicleDetailsSchema = z.object({
   engine: z.string().optional(),
   trim: z.string().optional(),
   brand: z.string().optional(),
-})
+});
 
 export const pricingShippingSchema = z.object({
   price: z.string().min(1, "Price is required"),
@@ -30,4 +32,4 @@ export const pricingShippingSchema = z.object({
   currency: z.string().min(1, "Currency is required"),
   isNegotiable: z.boolean().optional(),
   partShippingId: z.string().min(1, "Shipping is required"),
-})
+});

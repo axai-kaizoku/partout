@@ -10,4 +10,4 @@ export const addressSchema = z.object({
   country: z.string().default("US"),
   phone: z.string(),
   isDefault: z.boolean().default(false),
-})
+});

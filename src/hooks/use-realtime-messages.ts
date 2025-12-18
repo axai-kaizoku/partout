@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import { useEffect } from "react";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 import type { Message } from "@/server/db/schema";
 
@@ -39,11 +39,13 @@ export function useRealtimeMessages({
               // Convert createdAt string to Date object
               const message = {
                 ...payload.new,
-                createdAt: new Date(payload.new.created_at || payload.new.createdAt),
+                createdAt: new Date(
+                  payload.new.created_at || payload.new.createdAt,
+                ),
               } as Message;
               onNewMessage(message);
             }
-          }
+          },
         )
         .subscribe();
     };
