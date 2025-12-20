@@ -43,6 +43,59 @@ export const chatRouter = createTRPCRouter({
       return newConversation;
     }),
 
+  // Get a single conversation by ID
+  getConversation: privateProcedure
+    .input(z.string())
+    .query(async ({ ctx, input: conversationId }) => {
+      const userId = ctx.user.id;
+
+      const conversation = await db.query.conversations.findFirst({
+        where: (conv, { and, eq, or }) =>
+          and(
+            eq(conv.id, conversationId),
+            or(eq(conv.sellerId, userId), eq(conv.buyerId, userId)),
+          ),
+        with: {
+          part: {
+            columns: {
+              id: true,
+              title: true,
+              price: true,
+            },
+          },
+          seller: {
+            columns: {
+              id: true,
+              name: true,
+              imageUrl: true,
+            },
+          },
+          buyer: {
+            columns: {
+              id: true,
+              name: true,
+              imageUrl: true,
+            },
+          },
+        },
+      });
+
+      if (!conversation) {
+        throw new Error("Conversation not found or unauthorized");
+      }
+
+      const isUserSeller = conversation.sellerId === userId;
+      const otherUser = isUserSeller ? conversation.buyer : conversation.seller;
+
+      return {
+        id: conversation.id,
+        partId: conversation.partId,
+        part: conversation.part,
+        otherUser,
+        createdAt: conversation.createdAt,
+      };
+    }),
+
   // Get all conversations for the current user
   getConversations: privateProcedure.query(async ({ ctx }) => {
     const userId = ctx.user.id;
@@ -179,6 +232,10 @@ export const chatRouter = createTRPCRouter({
         })
         .returning();
 
+      if (!newMessage) {
+        throw new Error("Failed to create message");
+      }
+
       // Update conversation's lastMessageAt
       await db
         .update(conversations)
@@ -187,7 +244,7 @@ export const chatRouter = createTRPCRouter({
 
       // Fetch the complete message with sender info
       const messageWithSender = await db.query.messages.findFirst({
-        where: (msg, { eq }) => eq(msg.id, newMessage?.id),
+        where: (msg, { eq }) => eq(msg.id, newMessage.id),
         with: {
           sender: {
             columns: {

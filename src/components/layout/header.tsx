@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Box,
-  LogOut,
-  MessageCircle,
-  Package,
-  Search,
-  ShoppingCart,
-  User,
-} from "lucide-react";
+import { LogOut, MessageCircle, Package, Search, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -26,6 +18,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useUser } from "@/hooks/use-user";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 import { api } from "@/trpc/react";
+import { MobileSearch } from "./mobile-search";
 
 export function Header() {
   const router = useRouter();
@@ -126,14 +119,9 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => router.push("/parts")}
-          >
-            <Search className="h-5 w-5" />
-          </Button>
+          <div className="md:hidden">
+            <MobileSearch term={term} setTerm={setTerm} />
+          </div>
 
           {/* Messages Button with Notification Badge */}
           {user && (

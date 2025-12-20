@@ -1,21 +1,11 @@
 "use client";
 
-import {
-  Heart,
-  MessageCircle,
-  Share2,
-  Shield,
-  ShoppingCart,
-  Star,
-  Truck,
-} from "lucide-react";
+import { MessageCircle, Share2, Shield, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/hooks/use-user";
 import { api } from "@/trpc/react";
 
@@ -29,8 +19,8 @@ export function ProductInfo({ part }: ProductInfoProps) {
 
   const createConversationMutation =
     api.chat.getOrCreateConversation.useMutation({
-      onSuccess: () => {
-        router.push("/messages");
+      onSuccess: (conversation) => {
+        router.push(`/messages?conversationId=${conversation?.id || ""}`);
         toast.success("Redirecting to messages...");
       },
       onError: (error) => {

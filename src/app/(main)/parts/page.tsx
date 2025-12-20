@@ -1,5 +1,3 @@
-// "use client";
-
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { urlParamsToFilters } from "@/lib/url-params";
@@ -30,7 +28,7 @@ export default async function SearchPage({
   const { filters, sortBy } = urlParamsToFilters(urlSearchParams);
   const searchQuery = urlSearchParams.get("q") ?? "";
 
-  // console.log({ filters, sortBy })
+  // console.log({ filters, sortBy });
 
   const data = await api.part.getSearchResults({
     filters: {
