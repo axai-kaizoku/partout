@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,21 +8,40 @@ import { cn, getInitials } from "@/lib/utils";
 import { api } from "@/trpc/react";
 
 interface ChatListProps {
-  onSelectConversation: (
+  selectedConversationId?: string;
+  onSelectConversation?: (
     conversationId: string,
     otherUserName: string,
     otherUserImage: string | null,
     partTitle: string,
   ) => void;
-  selectedConversationId?: string;
 }
 
 export function ChatList({
-  onSelectConversation,
   selectedConversationId,
+  onSelectConversation,
 }: ChatListProps) {
+  const router = useRouter();
   const { data: conversations, isLoading } =
     api.chat.getConversations.useQuery();
+
+  const handleConversationClick = (
+    conversationId: string,
+    otherUserName: string,
+    otherUserImage: string | null,
+    partTitle: string,
+  ) => {
+    if (onSelectConversation) {
+      onSelectConversation(
+        conversationId,
+        otherUserName,
+        otherUserImage,
+        partTitle,
+      );
+    } else {
+      router.push(`/messages?conversationId=${conversationId}`);
+    }
+  };
 
   const formatLastMessageTime = (date: Date | null) => {
     if (!date) return "";
@@ -93,7 +113,7 @@ export function ChatList({
           <button
             key={conversation.id}
             onClick={() =>
-              onSelectConversation(
+              handleConversationClick(
                 conversation.id,
                 conversation.otherUser.name || "Unknown User",
                 conversation.otherUser.imageUrl,

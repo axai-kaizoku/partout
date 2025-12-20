@@ -1,12 +1,10 @@
 import {
   Car,
-  CreditCard,
   Disc,
   PenLine as Engine,
   Settings,
   Shield,
   Star,
-  Truck,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -54,14 +52,14 @@ export function TrustBadges() {
       icon: Star,
       text: "Quality Guaranteed",
     },
-    {
-      icon: Truck,
-      text: "Fast Shipping",
-    },
-    {
-      icon: CreditCard,
-      text: "Secure Payment",
-    },
+    // {
+    //   icon: Truck,
+    //   text: "Fast Shipping",
+    // },
+    // {
+    //   icon: CreditCard,
+    //   text: "Secure Payment",
+    // },
   ];
 
   return (
@@ -81,12 +79,42 @@ export function TrustBadges() {
 
 export function FeaturedCategories() {
   const categories = [
-    { name: "Engine Parts", icon: Engine, count: "2.5k+" },
-    { name: "Brake System", icon: Disc, count: "1.8k+" },
-    { name: "Electrical", icon: Zap, count: "3.2k+" },
-    { name: "Body Parts", icon: Car, count: "4.1k+" },
-    { name: "Tools", icon: Wrench, count: "890+" },
-    { name: "Accessories", icon: Settings, count: "1.5k+" },
+    {
+      name: "Engine Parts",
+      icon: Engine,
+      count: "2.5k+",
+      href: "/parts?category=Engine+Parts",
+    },
+    {
+      name: "Brake System",
+      icon: Disc,
+      count: "1.8k+",
+      href: "/parts?category=Brake+System",
+    },
+    {
+      name: "Electrical",
+      icon: Zap,
+      count: "3.2k+",
+      href: "/parts?category=Electrical",
+    },
+    {
+      name: "Body Parts",
+      icon: Car,
+      count: "4.1k+",
+      href: "/parts?category=Body+Parts",
+    },
+    {
+      name: "Tools",
+      icon: Wrench,
+      count: "890+",
+      href: "/parts?category=Tools",
+    },
+    {
+      name: "Accessories",
+      icon: Settings,
+      count: "1.5k+",
+      href: "/parts?category=Accessories",
+    },
   ];
 
   return (
@@ -96,24 +124,23 @@ export function FeaturedCategories() {
       </h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {categories.map((category) => (
-          <Card
-            key={category.name}
-            className="group cursor-pointer p-4 transition-shadow hover:shadow-md"
-          >
-            <div className="flex flex-col items-center gap-3 text-center">
-              <div className="rounded-full bg-blue-500/10 p-3 transition-colors group-hover:bg-blue-500/20">
-                <category.icon className="h-6 w-6 text-blue-500" />
+          <Link href={category.href} key={category.name}>
+            <Card className="group cursor-pointer p-4 transition-shadow hover:shadow-md">
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="rounded-full bg-blue-500/10 p-3 transition-colors group-hover:bg-blue-500/20">
+                  <category.icon className="h-6 w-6 text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground text-sm">
+                    {category.name}
+                  </h3>
+                  {/* <p className="text-muted-foreground text-xs">
+                    {category.count} parts
+                  </p> */}
+                </div>
               </div>
-              <div>
-                <h3 className="font-medium text-foreground text-sm">
-                  {category.name}
-                </h3>
-                <p className="text-muted-foreground text-xs">
-                  {category.count} parts
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>

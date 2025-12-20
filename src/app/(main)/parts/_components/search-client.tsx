@@ -23,7 +23,9 @@ import {
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -108,6 +110,7 @@ export const SearchPageClient = ({
 
   const clearFilters = useCallback(() => {
     setFilters(defaultFilters);
+    router.replace(`/parts`);
   }, []);
 
   const activeFiltersCount = useMemo(() => {
@@ -177,26 +180,26 @@ export const SearchPageClient = ({
                         size="sm"
                         className="h-9 bg-background"
                       >
-                        <SlidersHorizontal className="mr-2 h-4 w-4" />
+                        <SlidersHorizontal className="mr-1 h-4 w-4" />
                         Filters
-                        {/* {activeFiltersCount > 0 && ( */}
-                        <Badge
-                          variant="secondary"
-                          className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs"
-                        >
-                          {/* {activeFiltersCount} */}2
-                        </Badge>
-                        {/* )} */}
+                        {activeFiltersCount > 0 ? (
+                          <Badge
+                            variant="secondary"
+                            className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs"
+                          >
+                            {activeFiltersCount}
+                          </Badge>
+                        ) : null}
                       </Button>
                     </SheetTrigger>
                     <SheetContent
                       side="bottom"
-                      className="h-[85vh] rounded-t-xl"
+                      className="h-[70vh] rounded-t-xl"
                     >
                       <SheetHeader className="border-border border-b pb-4">
                         <div className="flex items-center justify-between">
                           <SheetTitle>Filters</SheetTitle>
-                          {activeFiltersCount > 0 && (
+                          {/* {activeFiltersCount > 0 && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -205,7 +208,7 @@ export const SearchPageClient = ({
                             >
                               Clear all
                             </Button>
-                          )}
+                          )} */}
                         </div>
                       </SheetHeader>
                       {/* {activeFilterBadges.length > 0 && (
@@ -233,19 +236,32 @@ export const SearchPageClient = ({
                           activeFiltersCount={activeFiltersCount}
                         />
                       </div> */}
-                      <SearchFilters
-                        filters={filters}
-                        updateFilter={updateFilter}
-                        clearFilters={clearFilters}
-                        activeFiltersCount={activeFiltersCount}
-                        className="p-0"
-                      />
+                      <div className="overflow-y-auto p-4">
+                        <SearchFilters
+                          filters={filters}
+                          updateFilter={updateFilter}
+                          clearFilters={clearFilters}
+                          activeFiltersCount={activeFiltersCount}
+                          className="p-0"
+                        />
+                      </div>
+                      <SheetFooter>
+                        <SheetClose asChild>
+                          <Button
+                            variant="outline"
+                            // size="sm"
+                            className="w-full"
+                          >
+                            Close
+                          </Button>
+                        </SheetClose>
+                      </SheetFooter>
                     </SheetContent>
                   </Sheet>
 
                   <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger className="h-9 w-[130px] bg-background">
-                      <ArrowUpDown className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+                      <ArrowUpDown className="mr-1 h-3.5 w-3.5 text-muted-foreground" />
                       <SelectValue placeholder="Sort" />
                     </SelectTrigger>
                     <SelectContent>
@@ -270,7 +286,9 @@ export const SearchPageClient = ({
               <p className="mb-4 text-muted-foreground">
                 No parts found matching your criteria
               </p>
-              <Button variant="outline">Clear Filters</Button>
+              <Button variant="outline" onClick={clearFilters}>
+                Clear Filters
+              </Button>
             </div>
           ) : (
             <div

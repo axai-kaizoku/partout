@@ -68,9 +68,10 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 
 ## TODO - My end
 
-- [ ] home page shop by category
+- [x] home page shop by category
+- [x] search in mobile
 - [ ] seller's store
-- [ ] messages by id page
+- [x] messages by id page
 - [ ] active listings in seller side
 - [ ] in add part form, he can add multiple models
   - [ ] or fetch models using VIN number

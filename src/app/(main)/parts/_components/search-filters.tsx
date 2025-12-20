@@ -147,6 +147,9 @@ function CategoryFilter({
     api.partInfo.getCategories
       .useQuery()
       .data?.map((category) => category.name) ?? [];
+
+  console.log({ categories });
+
   return (
     <div className="space-y-3">
       <Label className="font-medium text-sm">Category</Label>
