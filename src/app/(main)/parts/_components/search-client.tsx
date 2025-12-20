@@ -15,19 +15,20 @@ import { PartCard, PartCardSkeleton } from "@/components/parts/part-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
 import { sortOptions } from "@/lib/constants/dropdown-data";
 import {
   type Filters,
@@ -169,8 +170,8 @@ export const SearchPageClient = ({
 
                 {/* Mobile: Filter + Sort buttons */}
                 <div className="flex items-center gap-2 md:hidden">
-                  <Dialog>
-                    <DialogTrigger asChild>
+                  <Sheet>
+                    <SheetTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
@@ -187,11 +188,14 @@ export const SearchPageClient = ({
                         </Badge>
                         {/* )} */}
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="h-[85vh] rounded-t-xl">
-                      <DialogHeader className="border-border border-b pb-4">
+                    </SheetTrigger>
+                    <SheetContent
+                      side="bottom"
+                      className="h-[85vh] rounded-t-xl"
+                    >
+                      <SheetHeader className="border-border border-b pb-4">
                         <div className="flex items-center justify-between">
-                          <DialogTitle>Filters</DialogTitle>
+                          <SheetTitle>Filters</SheetTitle>
                           {activeFiltersCount > 0 && (
                             <Button
                               variant="ghost"
@@ -203,7 +207,7 @@ export const SearchPageClient = ({
                             </Button>
                           )}
                         </div>
-                      </DialogHeader>
+                      </SheetHeader>
                       {/* {activeFilterBadges.length > 0 && (
                         <div className="py-3 border-b border-border">
                           <div className="flex flex-wrap gap-2">
@@ -236,8 +240,8 @@ export const SearchPageClient = ({
                         activeFiltersCount={activeFiltersCount}
                         className="p-0"
                       />
-                    </DialogContent>
-                  </Dialog>
+                    </SheetContent>
+                  </Sheet>
 
                   <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger className="h-9 w-[130px] bg-background">
@@ -285,7 +289,6 @@ export const SearchPageClient = ({
   );
 };
 
-import { Skeleton } from "@/components/ui/skeleton";
 export function SearchPageSkeleton() {
   return (
     <div className="flex">

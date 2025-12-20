@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { useAppForm } from "@/components/form";
 import { Button, LoadingButton } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { validatePhone } from "@/lib/utils";
 import type { Address } from "@/server/db/schema";
 import { api } from "@/trpc/react";
 import { addressSchema } from "./validations";
@@ -97,14 +96,11 @@ export const AddressForm = ({
               </addressForm.AppField>
               <addressForm.AppField name="phone">
                 {(field) => (
-                  <field.TextField
+                  <field.PhoneField
                     label="Phone *"
                     placeholder="e.g., 123-456-7890"
                     required
-                    onChange={(e) =>
-                      validatePhone(e.target.value, field.handleChange)
-                    }
-                    maxLength={10}
+                    {...field.state}
                   />
                 )}
               </addressForm.AppField>

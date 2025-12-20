@@ -75,4 +75,4 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 - [ ] in add part form, he can add multiple models
   - [ ] or fetch models using VIN number
 - [ ] oauth callback url
-- [ ] phone number country code
+- [x] phone number country code
