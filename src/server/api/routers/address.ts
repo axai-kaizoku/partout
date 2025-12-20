@@ -65,7 +65,6 @@ export const addressRouter = createTRPCRouter({
               ),
             )
             .returning();
-          console.log(updatedAddresses);
         }
 
         const [updated] = await tx

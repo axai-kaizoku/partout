@@ -1,10 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-export default function ErrorPage() {
-  const router = useRouter();
+export default function ErrorPage({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  console.error(error);
   return (
     <div className="flex h-full min-h-[90dvh] w-full flex-col items-center justify-center gap-0">
       <div className="text-9xl text-neutral-800/10">Error</div>
@@ -17,11 +22,7 @@ export default function ErrorPage() {
         or go back to safety.
       </p>
 
-      <Button
-        onClick={() => router.refresh()}
-        size={"sm"}
-        className="mt-4 mb-3"
-      >
+      <Button onClick={reset} size={"sm"} className="mt-4 mb-3">
         Reload
       </Button>
     </div>
