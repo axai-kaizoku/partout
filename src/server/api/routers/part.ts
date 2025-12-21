@@ -406,6 +406,7 @@ export const partRouter = createTRPCRouter({
             columns: {
               url: true,
             },
+            orderBy: (orderBy, { asc }) => asc(orderBy.sortOrder),
           },
           seller: {
             columns: {
@@ -470,8 +471,8 @@ export const partRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const data = await db.transaction((tx) => {
         const part = tx.query.parts.findMany({
-          where: (part, { ne, and, eq }) =>
-            and(
+          where: (part, { ne, and, or, eq }) =>
+            or(
               ne(part.id, input.partId),
               eq(part.categoryId, input.categoryId),
             ),
@@ -646,5 +647,40 @@ export const partRouter = createTRPCRouter({
       }
 
       return null;
+    }),
+
+  createPartCompatibilities: privateProcedure
+    .input(
+      z.object({
+        partId: z.string(),
+        compatibilities: z.array(
+          z.object({
+            makeId: z.string(),
+            modelId: z.string(),
+            yearStart: z.number().optional().nullable(),
+            yearEnd: z.number().optional().nullable(),
+            engine: z.string().optional(),
+            trim: z.string().optional(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const results = await db
+        .insert(partCompatibility)
+        .values(
+          input.compatibilities.map((compat) => ({
+            partId: input.partId,
+            makeId: compat.makeId,
+            modelId: compat.modelId,
+            yearStart: compat.yearStart,
+            yearEnd: compat.yearEnd,
+            engine: compat.engine,
+            trim: compat.trim,
+          })),
+        )
+        .returning();
+
+      return results.map((r) => r.id);
     }),
 });

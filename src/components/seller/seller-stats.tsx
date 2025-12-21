@@ -3,12 +3,12 @@
 import { DollarSign, Eye, Package, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export function SellerStats() {
+export function SellerStats({ listings }: { listings: number }) {
   const stats = [
     {
       title: "Active Listings",
-      value: "12",
-      change: "+2 this week",
+      value: listings,
+      // change: "+2 this week",
       icon: Package,
       color: "text-blue-600",
     },

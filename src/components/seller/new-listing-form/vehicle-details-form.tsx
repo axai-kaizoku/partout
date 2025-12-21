@@ -1,89 +1,101 @@
-import { api } from "@/trpc/react";
+"use client";
+
+import { useAppForm } from "@/components/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  type ModelCompatibility,
+  modelCompatibilityEntryDefaults,
+} from "./form-defaults";
+import { ModelCompatibilityForm } from "./model-compatibility-form";
+import { ModelCompatibilityList } from "./model-compatibility-list";
+import { modelCompatibilityEntrySchema } from "./validations";
 
 export function VehicleDetailsForm({
   vehicleDetailsForm,
 }: {
   vehicleDetailsForm: any;
 }) {
-  const { data: makes } = api.partInfo.getMakesForDropdown.useQuery();
+  const entryForm = useAppForm({
+    defaultValues: modelCompatibilityEntryDefaults,
+    validators: {
+      onChange: modelCompatibilityEntrySchema,
+    },
+    onSubmit: () => {
+      // Form submission is handled by the ModelCompatibilityForm component
+    },
+  });
+
+  const handleAddCompatibility = (compat: ModelCompatibility) => {
+    const currentCompatibilities =
+      vehicleDetailsForm.state.values.compatibleModels || [];
+    vehicleDetailsForm.setFieldValue("compatibleModels", [
+      ...currentCompatibilities,
+      compat,
+    ]);
+  };
+
+  const handleRemoveCompatibility = (id: string) => {
+    const currentCompatibilities =
+      vehicleDetailsForm.state.values.compatibleModels || [];
+    vehicleDetailsForm.setFieldValue(
+      "compatibleModels",
+      currentCompatibilities.filter((c: ModelCompatibility) => c.id !== id),
+    );
+  };
+
   return (
-    <>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <vehicleDetailsForm.AppField name="makeId">
-          {(field) => (
-            <field.SelectField
-              label="Vehicle Make*"
-              placeholder="Select a vehicle make"
-              options={
-                makes?.map((make) => ({
-                  value: make.id,
-                  label: make.name,
-                })) ?? []
-              }
-            />
-          )}
-        </vehicleDetailsForm.AppField>
-        <vehicleDetailsForm.AppField name="modelId">
-          {(field) => (
-            <field.TextField
-              label="Vehicle Model*"
-              placeholder="Enter the model"
-            />
-          )}
-        </vehicleDetailsForm.AppField>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <vehicleDetailsForm.AppField name="yearStart">
-          {(field) => (
-            <field.TextField
-              label="Year Start *"
-              placeholder="1999"
-              type="number"
-              min={0}
-              max={new Date().getFullYear()}
-            />
-          )}
-        </vehicleDetailsForm.AppField>
-        <vehicleDetailsForm.AppField name="yearEnd">
-          {(field) => (
-            <field.TextField
-              label="Year End *"
-              placeholder="2024"
-              type="number"
-              min={0}
-              max={new Date().getFullYear()}
-            />
-          )}
-        </vehicleDetailsForm.AppField>
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <vehicleDetailsForm.AppField name="engine">
-          {(field) => (
-            <field.TextField
-              label="Engine "
-              placeholder="e.g., 2.5L, 3.0L V6"
-            />
-          )}
-        </vehicleDetailsForm.AppField>
-        <vehicleDetailsForm.AppField name="trim">
-          {(field) => (
-            <field.TextField
-              label="Trim Level"
-              placeholder="e.g., Base, Sport, M3"
-            />
-          )}
-        </vehicleDetailsForm.AppField>
-      </div>
-
+    <div className="space-y-6">
       <vehicleDetailsForm.AppField name="brand">
         {(field) => (
           <field.TextField
-            label="Part Brand "
+            label="Part Brand"
             placeholder="e.g., BMW, Bosch, Brembo"
           />
         )}
       </vehicleDetailsForm.AppField>
-    </>
+
+      <vehicleDetailsForm.AppField name="compatibleModels">
+        {(field) => (
+          <div className="space-y-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Vehicle Compatibility*</CardTitle>
+                <p className="text-muted-foreground text-sm">
+                  Add the vehicles that this part is compatible with. You can
+                  add multiple models.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ModelCompatibilityForm
+                  entryForm={entryForm}
+                  onAdd={handleAddCompatibility}
+                  existingCompatibilities={
+                    vehicleDetailsForm.state.values.compatibleModels || []
+                  }
+                />
+
+                <div className="pt-4">
+                  <h3 className="mb-3 font-medium text-sm">
+                    Compatible Models
+                  </h3>
+                  <ModelCompatibilityList
+                    compatibilities={
+                      vehicleDetailsForm.state.values.compatibleModels || []
+                    }
+                    onRemove={handleRemoveCompatibility}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            {field.state.meta.isTouched &&
+              field.state.meta.errors.length > 0 && (
+                <p className="font-medium text-destructive text-sm">
+                  {field.state.meta.errors[0].message}
+                </p>
+              )}
+          </div>
+        )}
+      </vehicleDetailsForm.AppField>
+    </div>
   );
 }

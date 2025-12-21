@@ -1,5 +1,18 @@
 import { Camera, Car, DollarSign, Package } from "lucide-react";
 
+export type ModelCompatibility = {
+  id: string;
+  makeId: string;
+  makeName: string;
+  modelId: string | null;
+  modelName: string;
+  yearStart: string;
+  yearEnd: string;
+  engine?: string;
+  trim?: string;
+  isNewModel: boolean;
+};
+
 export const priceShippingDefaults = {
   price: "",
   originalPrice: "",
@@ -9,13 +22,18 @@ export const priceShippingDefaults = {
 };
 
 export const vehicleDetailsDefaults = {
+  brand: "",
+  compatibleModels: [] as ModelCompatibility[],
+};
+
+export const modelCompatibilityEntryDefaults = {
   makeId: "",
   modelId: "",
+  modelName: "",
   yearStart: "",
   yearEnd: "",
   engine: "",
   trim: "",
-  brand: "",
 };
 
 export const basicInfoDefaults = {

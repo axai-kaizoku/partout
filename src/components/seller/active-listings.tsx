@@ -2,6 +2,7 @@
 
 import { Edit, Eye, MoreHorizontal, Package, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,10 +13,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/date";
-import { api } from "@/trpc/react";
+import type { Part } from "@/server/db/schema";
 import { Skeleton } from "../ui/skeleton";
 
-export function ActiveListings() {
+export function ActiveListings({
+  isPending,
+  listings,
+}: {
+  isPending: boolean;
+  listings: Part[];
+}) {
+  const router = useRouter();
   // const [listings, setListings] = useState([
   //   {
   //     id: 1,
@@ -62,11 +70,6 @@ export function ActiveListings() {
   //     datePosted: "2024-01-08",
   //   },
   // ])
-
-  const { data: listings, isPending } = api.part.getPartsByUserId.useQuery(
-    undefined,
-    { staleTime: 30 * 1000 },
-  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -148,17 +151,19 @@ export function ActiveListings() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {/* <DropdownMenuItem>
-												<Eye className="h-4 w-4 mr-2" />
-												View Listing
-											</DropdownMenuItem> */}
+                      <DropdownMenuItem
+                        onSelect={() => router.push(`/part/${listing.id}`)}
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Listing
+                      </DropdownMenuItem>
                       {/* <DropdownMenuItem>
 												<Edit className="h-4 w-4 mr-2" />
 												Edit Listing
 											</DropdownMenuItem> */}
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem>
                         <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-                        Delete Listing
+                        <span className="text-destructive">Delete Listing</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

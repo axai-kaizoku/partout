@@ -46,6 +46,11 @@ export function SellerDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("listings");
 
+  const { data: listings, isPending } = api.part.getPartsByUserId.useQuery(
+    undefined,
+    { staleTime: 30 * 1000 },
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -65,7 +70,7 @@ export function SellerDashboard() {
       </div>
 
       {/* Stats Overview */}
-      <SellerStats />
+      <SellerStats listings={listings?.length ?? 0} />
 
       {/* Main Content */}
       <Tabs
@@ -98,7 +103,7 @@ export function SellerDashboard() {
         </Select>
 
         <TabsContent value="listings" className="mt-6">
-          <ActiveListings />
+          <ActiveListings isPending={isPending} listings={listings} />
         </TabsContent>
 
         <TabsContent value="sales" className="mt-6">

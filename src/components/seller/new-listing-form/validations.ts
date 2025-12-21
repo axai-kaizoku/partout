@@ -16,14 +16,52 @@ export const basicInfoSchema = z.object({
   dimensions: z.string().optional(),
 });
 
-export const vehicleDetailsSchema = z.object({
-  makeId: z.string().optional(),
-  modelId: z.string().optional(),
+const modelCompatibilitySchema = z.object({
+  id: z.string(),
+  makeId: z.string().min(1, "Make is required"),
+  makeName: z.string(),
+  modelId: z.string().nullable(),
+  modelName: z.string().min(1, "Model is required"),
   yearStart: z.string().optional(),
   yearEnd: z.string().optional(),
   engine: z.string().optional(),
   trim: z.string().optional(),
-  brand: z.string().optional(),
+  isNewModel: z.boolean(),
+});
+
+export const vehicleDetailsSchema = z
+  .object({
+    brand: z.string().min(1, "Brand is required"),
+    compatibleModels: z
+      .array(modelCompatibilitySchema)
+      .min(1, "At least one model is required"),
+  })
+  .refine(
+    (data) => {
+      // Validate year ranges for all compatibility entries
+      return (
+        data.compatibleModels?.every((compat) => {
+          if (compat.yearStart && compat.yearEnd) {
+            return parseInt(compat.yearStart) <= parseInt(compat.yearEnd);
+          }
+          return true;
+        }) ?? true
+      );
+    },
+    {
+      message: "Year start must be before or equal to year end",
+      path: ["compatibleModels"],
+    },
+  );
+
+export const modelCompatibilityEntrySchema = z.object({
+  makeId: z.string().min(1, "Make is required"),
+  modelId: z.string().optional(),
+  modelName: z.string().min(1, "Model is required"),
+  yearStart: z.string().optional(),
+  yearEnd: z.string().optional(),
+  engine: z.string().optional(),
+  trim: z.string().optional(),
 });
 
 export const pricingShippingSchema = z.object({

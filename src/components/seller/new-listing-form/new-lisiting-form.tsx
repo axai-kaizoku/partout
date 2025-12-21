@@ -49,6 +49,9 @@ export function NewListingForm() {
   const { mutateAsync: createPartCompatibility } =
     api.part.createPartCompatibility.useMutation();
 
+  const { mutateAsync: createPartCompatibilities } =
+    api.part.createPartCompatibilities.useMutation();
+
   const { mutateAsync: createPart } = api.part.createPart.useMutation();
 
   const { mutateAsync: createPartImage } =
@@ -116,8 +119,7 @@ export function NewListingForm() {
         weight,
       } = basicInfoForm.state.values;
 
-      const { brand, makeId, modelId, yearStart, yearEnd, engine } =
-        vehicleDetailsForm.state.values;
+      const { brand, compatibleModels } = vehicleDetailsForm.state.values;
 
       const { price, originalPrice, currency, isNegotiable } =
         pricingShippingFormValues;
@@ -146,21 +148,39 @@ export function NewListingForm() {
             shippingProfileId: pricingShippingFormValues.partShippingId,
           });
 
-          if (makeId && modelId) {
-            const createdModelId = await createModelForMake({
-              makeId: makeId,
-              name: modelId,
-              yearEnd: yearEnd ? parseInt(yearEnd, 10) : null,
-              yearStart: yearStart ? parseInt(yearStart, 10) : null,
-            });
+          // Process model compatibilities
+          if (compatibleModels && compatibleModels.length > 0) {
+            // 1. Create new models first
+            const modelsToCreate = compatibleModels.filter(
+              (c) => c.isNewModel
+            );
+            const modelIdMap = new Map<string, string>();
 
-            await createPartCompatibility({
-              partId: partId,
-              makeId: makeId,
-              modelId: createdModelId,
-              yearStart: yearStart ? parseInt(yearStart, 10) : null,
-              yearEnd: yearEnd ? parseInt(yearEnd, 10) : null,
-              engine,
+            for (const compat of modelsToCreate) {
+              const createdModelId = await createModelForMake({
+                makeId: compat.makeId,
+                name: compat.modelName,
+                yearStart: compat.yearStart
+                  ? parseInt(compat.yearStart, 10)
+                  : null,
+                yearEnd: compat.yearEnd ? parseInt(compat.yearEnd, 10) : null,
+              });
+              modelIdMap.set(compat.id, createdModelId);
+            }
+
+            // 2. Create all part compatibilities
+            const compatibilitiesToCreate = compatibleModels.map((c) => ({
+              makeId: c.makeId,
+              modelId: c.isNewModel ? modelIdMap.get(c.id)! : c.modelId!,
+              yearStart: c.yearStart ? parseInt(c.yearStart, 10) : null,
+              yearEnd: c.yearEnd ? parseInt(c.yearEnd, 10) : null,
+              engine: c.engine || undefined,
+              trim: c.trim || undefined,
+            }));
+
+            await createPartCompatibilities({
+              partId,
+              compatibilities: compatibilitiesToCreate,
             });
           }
 

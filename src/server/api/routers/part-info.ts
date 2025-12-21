@@ -1,4 +1,5 @@
 import z from "zod";
+import { and, eq, ilike } from "drizzle-orm";
 import { db } from "@/server/db";
 import { categories, vehicleMakes, vehicleModels } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
@@ -30,6 +31,19 @@ export const partInfoRouter = createTRPCRouter({
       },
     });
   }),
+
+  getModelsByMake: publicProcedure
+    .input(z.object({ makeId: z.string() }))
+    .query(async ({ input }) => {
+      return await db.query.vehicleModels.findMany({
+        where: (model, { eq }) => eq(model.makeId, input.makeId),
+        columns: {
+          id: true,
+          name: true,
+        },
+        orderBy: (model, { asc }) => asc(model.name),
+      });
+    }),
 
   // Mutations
   createMockCategories: publicProcedure.mutation(async () => {
@@ -232,6 +246,20 @@ export const partInfoRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      // Check if model already exists for this make
+      const existingModel = await db.query.vehicleModels.findFirst({
+        where: (model, { and, eq, ilike }) =>
+          and(
+            eq(model.makeId, input.makeId),
+            ilike(model.name, input.name)
+          ),
+      });
+
+      if (existingModel) {
+        return existingModel.id;
+      }
+
+      // Create new model if it doesn't exist
       const [model] = await db
         .insert(vehicleModels)
         .values({
