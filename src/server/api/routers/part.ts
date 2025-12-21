@@ -411,6 +411,7 @@ export const partRouter = createTRPCRouter({
             columns: {
               name: true,
               createdAt: true,
+              id: true,
             },
             with: {
               addresses: {

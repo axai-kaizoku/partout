@@ -432,10 +432,7 @@ export const partImageRelations = relations(partImages, ({ one }) => ({
 }));
 
 export const profileRelations = relations(profiles, ({ one, many }) => ({
-  part: one(parts, {
-    fields: [profiles.id],
-    references: [parts.sellerId],
-  }),
+  part: many(parts),
   addresses: many(addresses),
   shippingProfiles: many(shippingProfiles),
 }));

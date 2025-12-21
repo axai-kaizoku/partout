@@ -70,9 +70,9 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 
 - [x] home page shop by category
 - [x] search in mobile
-- [ ] seller's store
+- [x] seller's store
 - [x] messages by id page
-- [ ] active listings in seller side
+- [x] active listings in seller side
 - [ ] in add part form, he can add multiple models
   - [ ] or fetch models using VIN number
 - [-] oauth callback url

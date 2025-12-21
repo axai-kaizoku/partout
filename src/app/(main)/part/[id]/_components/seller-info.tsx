@@ -1,6 +1,8 @@
-import { MapPin, Shield } from "lucide-react";
+import { MapPin, MessageCircle, Shield, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/date";
 
@@ -73,16 +75,18 @@ export function SellerInfo({ seller }: SellerInfoProps) {
               </div>
             </div>
 
-            {/* <div className="flex gap-2">
-							<Button variant="outline" size="sm">
-								<MessageCircle className="h-4 w-4 mr-2" />
-								Contact Seller
-							</Button>
-							<Button variant="outline" size="sm">
-								<ShoppingBag className="h-4 w-4 mr-2" />
-								View Store
-							</Button>
-						</div> */}
+            <div className="flex gap-2">
+              {/* <Button variant="outline" size="sm">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Contact Seller
+              </Button> */}
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/seller/${seller?.id}`}>
+                  <ShoppingBag className="mr-2 h-4 w-4" />
+                  View Store
+                </Link>
+              </Button>
+            </div>
           </div>
           <div>
             <p className="text-muted-foreground text-sm">Member since</p>
