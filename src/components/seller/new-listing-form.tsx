@@ -30,6 +30,7 @@ import {
   Package,
   Upload,
   X,
+  Search,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -195,6 +196,32 @@ export function NewListingForm() {
     },
   });
 
+  // VIN decoder mutation
+  const vinDecoderMutation = api.partInfo.decodeVinAndFetchModels.useMutation({
+    onSuccess: (data) => {
+      if (data.success && data.data) {
+        // Auto-populate the vehicle compatibility fields
+        setFormData((prev) => ({
+          ...prev,
+          makeId: data.data.makeId,
+          modelId: data.data.modelId,
+          yearStart: data.data.yearStart.toString(),
+          yearEnd: data.data.yearEnd.toString(),
+          engine: data.data.engine ?? prev.engine,
+          trim: data.data.trim ?? prev.trim,
+        }));
+
+        toast.success(
+          `VIN decoded successfully: ${data.data.makeName} ${data.data.modelName} (${data.data.year})`,
+        );
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to decode VIN:", error);
+      toast.error(`Failed to decode VIN: ${error.message}`);
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -289,6 +316,22 @@ export function NewListingForm() {
 
   const handleChange = (field: string, value: string | boolean | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleDecodeVin = () => {
+    const vin = formData.partNumber.trim();
+
+    if (!vin) {
+      toast.error("Please enter a VIN number");
+      return;
+    }
+
+    if (vin.length !== 17) {
+      toast.error("VIN must be exactly 17 characters");
+      return;
+    }
+
+    vinDecoderMutation.mutate({ vin });
   };
 
   const addImage = () => {
@@ -517,13 +560,31 @@ export function NewListingForm() {
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="partNumber">Part Number</Label>
-                  <Input
-                    id="partNumber"
-                    placeholder="e.g., 34116761280"
-                    value={formData.partNumber}
-                    onChange={(e) => handleChange("partNumber", e.target.value)}
-                  />
+                  <Label htmlFor="partNumber">VIN Number</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="partNumber"
+                      placeholder="e.g., 1HGBH41JXMN109186"
+                      value={formData.partNumber}
+                      onChange={(e) => handleChange("partNumber", e.target.value)}
+                      maxLength={17}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleDecodeVin}
+                      disabled={vinDecoderMutation.isPending || formData.partNumber.length !== 17}
+                    >
+                      {vinDecoderMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    Enter the 17-character VIN to auto-fill vehicle compatibility
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -622,6 +683,11 @@ export function NewListingForm() {
           <Card>
             <CardHeader>
               <CardTitle>Vehicle Compatibility</CardTitle>
+              {formData.makeId && formData.modelId && (
+                <p className="text-muted-foreground text-sm">
+                  Vehicle information has been auto-populated from VIN
+                </p>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

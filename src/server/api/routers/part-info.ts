@@ -3,6 +3,7 @@ import { and, eq, ilike } from "drizzle-orm";
 import { db } from "@/server/db";
 import { categories, vehicleMakes, vehicleModels } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { decodeVin } from "@/lib/vin-decoder";
 
 export const partInfoRouter = createTRPCRouter({
   // Queries
@@ -277,5 +278,93 @@ export const partInfoRouter = createTRPCRouter({
       }
 
       return null;
+    }),
+
+  /**
+   * Decode VIN and fetch compatible models
+   * This mutation:
+   * 1. Validates and decodes the VIN using NHTSA API
+   * 2. Finds or creates the make in the database
+   * 3. Finds or creates the model in the database
+   * 4. Returns compatibility information to be added to the part
+   */
+  decodeVinAndFetchModels: publicProcedure
+    .input(z.object({ vin: z.string().length(17) }))
+    .mutation(async ({ input }) => {
+      // Decode VIN using NHTSA API
+      const decoded = await decodeVin(input.vin);
+
+      if (decoded.errorCode) {
+        throw new Error(decoded.errorText ?? 'Failed to decode VIN');
+      }
+
+      if (!decoded.make || !decoded.model || !decoded.modelYear) {
+        throw new Error('Could not extract vehicle information from VIN');
+      }
+
+      // Find or create the make
+      let make = await db.query.vehicleMakes.findFirst({
+        where: (m, { ilike }) => ilike(m.name, decoded.make!),
+      });
+
+      if (!make) {
+        const [newMake] = await db
+          .insert(vehicleMakes)
+          .values({
+            name: decoded.make,
+            slug: decoded.make.toLowerCase().replace(/\s+/g, '-'),
+            isActive: true,
+          })
+          .returning();
+        make = newMake;
+      }
+
+      if (!make) {
+        throw new Error('Failed to create or find vehicle make');
+      }
+
+      // Find or create the model
+      let model = await db.query.vehicleModels.findFirst({
+        where: (m, { and, eq, ilike }) =>
+          and(
+            eq(m.makeId, make.id),
+            ilike(m.name, decoded.model!)
+          ),
+      });
+
+      if (!model) {
+        const [newModel] = await db
+          .insert(vehicleModels)
+          .values({
+            name: decoded.model,
+            makeId: make.id,
+            slug: decoded.model.toLowerCase().replace(/\s+/g, '-'),
+            yearStart: decoded.modelYear,
+            yearEnd: decoded.modelYear,
+            isActive: true,
+          })
+          .returning();
+        model = newModel;
+      }
+
+      if (!model) {
+        throw new Error('Failed to create or find vehicle model');
+      }
+
+      // Return the compatibility information
+      return {
+        success: true,
+        data: {
+          makeId: make.id,
+          makeName: make.name,
+          modelId: model.id,
+          modelName: model.name,
+          year: decoded.modelYear,
+          yearStart: decoded.modelYear,
+          yearEnd: decoded.modelYear,
+          engine: decoded.engine,
+          trim: decoded.trim,
+        },
+      };
     }),
 });

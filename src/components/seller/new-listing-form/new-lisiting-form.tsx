@@ -357,6 +357,42 @@ export function NewListingForm() {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+  const handleVinDecoded = (data: {
+    makeId: string;
+    makeName: string;
+    modelId: string;
+    modelName: string;
+    year: number;
+    yearStart: number;
+    yearEnd: number;
+    engine?: string | null;
+    trim?: string | null;
+  }) => {
+    // Add the decoded vehicle to the compatible models list
+    const newCompatibility = {
+      id: `vin-${Date.now()}`,
+      makeId: data.makeId,
+      makeName: data.makeName,
+      modelId: data.modelId,
+      modelName: data.modelName,
+      yearStart: data.yearStart.toString(),
+      yearEnd: data.yearEnd.toString(),
+      engine: data.engine ?? "",
+      trim: data.trim ?? "",
+      isNewModel: false, // The model already exists in the database
+    };
+
+    // Add to the vehicle details form
+    const currentCompatibilities =
+      vehicleDetailsForm.state.values.compatibleModels || [];
+    vehicleDetailsForm.setFieldValue("compatibleModels", [
+      ...currentCompatibilities,
+      newCompatibility,
+    ]);
+
+    toast.success("Vehicle compatibility added automatically");
+  };
+
   return (
     <div className="mx-auto max-w-4xl">
       {/* Progress Steps */}
@@ -382,7 +418,10 @@ export function NewListingForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {currentStep === 1 ? (
-              <BasicInfoForm basicInfoForm={basicInfoForm} />
+              <BasicInfoForm
+                basicInfoForm={basicInfoForm}
+                onVinDecoded={handleVinDecoded}
+              />
             ) : currentStep === 2 ? (
               <VehicleDetailsForm vehicleDetailsForm={vehicleDetailsForm} />
             ) : currentStep === 3 ? (
