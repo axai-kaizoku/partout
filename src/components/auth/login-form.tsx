@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { APP_URL } from "@/lib/constants/global";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
@@ -135,7 +136,7 @@ export function LoginForm() {
         className="w-full"
         disabled={isLoading}
         onClick={() => {
-          const redirectUrl = `/`;
+          const redirectUrl = `${APP_URL}/api/auth/callback?next=${redirectPath}`;
           supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
