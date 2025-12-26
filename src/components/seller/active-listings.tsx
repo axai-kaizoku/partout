@@ -1,10 +1,13 @@
 "use client";
 
 import { Edit, Eye, MoreHorizontal, Package, Trash2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, LoadingButton } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -14,6 +17,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/date";
 import type { Part } from "@/server/db/schema";
+import { api } from "@/trpc/react";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "../ui/responsive-dialog";
 import { Skeleton } from "../ui/skeleton";
 
 export function ActiveListings({
@@ -24,52 +35,22 @@ export function ActiveListings({
   listings: Part[];
 }) {
   const router = useRouter();
-  // const [listings, setListings] = useState([
-  //   {
-  //     id: 1,
-  //     title: "BMW E46 Brake Pads - Front Set",
-  //     price: 89.99,
-  //     condition: "New",
-  //     views: 234,
-  //     watchers: 12,
-  //     image: "/placeholder.svg?height=80&width=80&text=BMW+Brake+Pads",
-  //     status: "active",
-  //     datePosted: "2024-01-15",
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Honda Civic Engine Air Filter",
-  //     price: 24.99,
-  //     condition: "New",
-  //     views: 156,
-  //     watchers: 8,
-  //     image: "/honda-air-filter.jpg",
-  //     status: "active",
-  //     datePosted: "2024-01-12",
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Ford F-150 LED Headlight Assembly",
-  //     price: 299.99,
-  //     condition: "Used - Excellent",
-  //     views: 89,
-  //     watchers: 15,
-  //     image: "/ford-f150-led-headlight.jpg",
-  //     status: "pending",
-  //     datePosted: "2024-01-10",
-  //   },
-  //   {
-  //     id: 4,
-  //     title: "Toyota Camry Alternator",
-  //     price: 159.99,
-  //     condition: "Refurbished",
-  //     views: 67,
-  //     watchers: 5,
-  //     image: "/toyota-alternator.jpg",
-  //     status: "sold",
-  //     datePosted: "2024-01-08",
-  //   },
-  // ])
+  const [deletingListingId, setDeletingListingId] = useState<string | null>(
+    null,
+  );
+  const utils = api.useUtils();
+
+  const { mutateAsync: deleteListing, isPending: deletingListingPending } =
+    api.part.deletePart.useMutation({
+      onSuccess: () => {
+        utils.part.invalidate();
+        setDeletingListingId(null);
+        toast.success("Listing deleted successfully");
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to delete listing");
+      },
+    });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -84,9 +65,6 @@ export function ActiveListings({
     }
   };
 
-  // const deleteListing = (id: number) => {
-  //   setListings((prev) => prev.filter((listing) => listing.id !== id))
-  // }
   if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center gap-4">
@@ -117,12 +95,50 @@ export function ActiveListings({
 
   return (
     <div className="space-y-4">
+      <ResponsiveDialog
+        open={deletingListingId !== null}
+        onOpenChange={() => setDeletingListingId(null)}
+      >
+        <ResponsiveDialogContent>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Delete Listing</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
+              Delete your listing.
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
+          <div>
+            <p>Are you sure you want to delete this listing?</p>
+            <p>{deletingListingId}</p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDeletingListingId(null)}
+              disabled={deletingListingPending}
+              type="button"
+              className="w-full"
+            >
+              Cancel
+            </Button>
+          </div>
+          <LoadingButton
+            loading={deletingListingPending}
+            onClick={() => deleteListing(deletingListingId!)}
+            disabled={deletingListingPending}
+            className="w-full"
+          >
+            Delete
+          </LoadingButton>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
       {listings?.map((listing) => (
         <Card key={listing.id}>
           <CardContent className="p-6">
             <div className="flex gap-4">
-              <img
+              <Image
                 src={listing?.partImages?.[0]?.url || "/media/placeholder.png"}
+                width={80}
+                height={80}
                 alt={listing.title}
                 className="h-20 w-20 flex-shrink-0 rounded-md object-cover"
               />
@@ -161,7 +177,9 @@ export function ActiveListings({
 												<Edit className="h-4 w-4 mr-2" />
 												Edit Listing
 											</DropdownMenuItem> */}
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setDeletingListingId(listing.id)}
+                      >
                         <Trash2 className="mr-2 h-4 w-4 text-destructive" />
                         <span className="text-destructive">Delete Listing</span>
                       </DropdownMenuItem>

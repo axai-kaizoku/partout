@@ -6,12 +6,20 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  experimental: {
-    authInterrupts: true,
-  },
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "*.supabase.co",
+			},
+		],
+	},
+	typescript: {
+		ignoreBuildErrors: true,
+	},
+	experimental: {
+		authInterrupts: true,
+	},
 };
 
 export default config;

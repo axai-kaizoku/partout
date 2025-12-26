@@ -82,8 +82,10 @@ export function SalesHistory() {
           <Card key={sale.id}>
             <CardContent className="p-6">
               <div className="flex gap-4">
-                <img
+                <Image
                   src={sale.image || "/media/placeholder.png"}
+                  width={64}
+                  height={64}
                   alt={sale.title}
                   className="w-16 h-16 object-cover rounded-md flex-shrink-0"
                 />

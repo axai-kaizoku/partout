@@ -1,9 +1,8 @@
 import z from "zod";
-import { and, eq, ilike } from "drizzle-orm";
+import { decodeVin } from "@/lib/vin-decoder";
 import { db } from "@/server/db";
 import { categories, vehicleMakes, vehicleModels } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { decodeVin } from "@/lib/vin-decoder";
 
 export const partInfoRouter = createTRPCRouter({
   // Queries
@@ -250,10 +249,7 @@ export const partInfoRouter = createTRPCRouter({
       // Check if model already exists for this make
       const existingModel = await db.query.vehicleModels.findFirst({
         where: (model, { and, eq, ilike }) =>
-          and(
-            eq(model.makeId, input.makeId),
-            ilike(model.name, input.name)
-          ),
+          and(eq(model.makeId, input.makeId), ilike(model.name, input.name)),
       });
 
       if (existingModel) {
@@ -295,11 +291,11 @@ export const partInfoRouter = createTRPCRouter({
       const decoded = await decodeVin(input.vin);
 
       if (decoded.errorCode) {
-        throw new Error(decoded.errorText ?? 'Failed to decode VIN');
+        throw new Error(decoded.errorText ?? "Failed to decode VIN");
       }
 
       if (!decoded.make || !decoded.model || !decoded.modelYear) {
-        throw new Error('Could not extract vehicle information from VIN');
+        throw new Error("Could not extract vehicle information from VIN");
       }
 
       // Find or create the make
@@ -312,7 +308,7 @@ export const partInfoRouter = createTRPCRouter({
           .insert(vehicleMakes)
           .values({
             name: decoded.make,
-            slug: decoded.make.toLowerCase().replace(/\s+/g, '-'),
+            slug: decoded.make.toLowerCase().replace(/\s+/g, "-"),
             isActive: true,
           })
           .returning();
@@ -320,16 +316,13 @@ export const partInfoRouter = createTRPCRouter({
       }
 
       if (!make) {
-        throw new Error('Failed to create or find vehicle make');
+        throw new Error("Failed to create or find vehicle make");
       }
 
       // Find or create the model
       let model = await db.query.vehicleModels.findFirst({
         where: (m, { and, eq, ilike }) =>
-          and(
-            eq(m.makeId, make.id),
-            ilike(m.name, decoded.model!)
-          ),
+          and(eq(m.makeId, make.id), ilike(m.name, decoded.model!)),
       });
 
       if (!model) {
@@ -338,7 +331,7 @@ export const partInfoRouter = createTRPCRouter({
           .values({
             name: decoded.model,
             makeId: make.id,
-            slug: decoded.model.toLowerCase().replace(/\s+/g, '-'),
+            slug: decoded.model.toLowerCase().replace(/\s+/g, "-"),
             yearStart: decoded.modelYear,
             yearEnd: decoded.modelYear,
             isActive: true,
@@ -348,7 +341,7 @@ export const partInfoRouter = createTRPCRouter({
       }
 
       if (!model) {
-        throw new Error('Failed to create or find vehicle model');
+        throw new Error("Failed to create or find vehicle model");
       }
 
       // Return the compatibility information

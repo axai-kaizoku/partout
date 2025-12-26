@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus, Store, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +15,7 @@ export function CartItems() {
   return (
     <div className="space-y-6">
       {Object.entries(sellerGroups).map(([sellerId, items]) => {
-        const seller = items[0].seller;
+        const seller = items[0]?.seller;
         const sellerTotal = items.reduce(
           (total, item) => total + item.price * item.quantity,
           0,
@@ -39,10 +40,12 @@ export function CartItems() {
               {items.map((item, index) => (
                 <div key={item.id}>
                   <div className="flex gap-4">
-                    <img
+                    <Image
                       src={item.image || "/media/placeholder.png"}
                       alt={item.title}
-                      className="h-20 w-20 flex-shrink-0 rounded-md object-cover"
+                      width={80}
+                      height={80}
+                      className="h-20 w-20 shrink-0 rounded-md object-cover"
                     />
 
                     <div className="flex-1 space-y-2">

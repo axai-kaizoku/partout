@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/server/db";
 import { partCompatibility, partShipping, parts } from "@/server/db/schema";
@@ -469,56 +470,87 @@ export const partRouter = createTRPCRouter({
   getRelatedParts: publicProcedure
     .input(z.object({ partId: z.string(), categoryId: z.string() }))
     .query(async ({ input }) => {
-      const data = await db.transaction((tx) => {
-        const part = tx.query.parts.findMany({
-          where: (part, { ne, and, or, eq }) =>
-            or(
-              ne(part.id, input.partId),
-              eq(part.categoryId, input.categoryId),
-            ),
-          with: {
-            partImages: {
-              columns: {
-                url: true,
-              },
-              where: (img, { eq }) => eq(img.isPrimary, true),
+      const data = await db.transaction(async (tx) => {
+        const commonWith = {
+          partImages: {
+            columns: {
+              url: true,
             },
-            seller: {
-              columns: {
-                name: true,
-              },
-              with: {
-                addresses: {
-                  where: (address, { eq }) => eq(address.isDefault, true),
-                  columns: {
-                    city: true,
-                    state: true,
-                  },
-                },
-              },
+            where: (img, { eq }) => eq(img.isPrimary, true),
+          },
+          seller: {
+            columns: {
+              name: true,
             },
-            partCompatibility: {
-              columns: {
-                yearStart: true,
-                yearEnd: true,
-              },
-              with: {
-                make: {
-                  columns: {
-                    name: true,
-                  },
-                },
-                model: {
-                  columns: {
-                    name: true,
-                  },
+            with: {
+              addresses: {
+                where: (address, { eq }) => eq(address.isDefault, true),
+                columns: {
+                  city: true,
+                  state: true,
                 },
               },
             },
           },
+          partCompatibility: {
+            columns: {
+              yearStart: true,
+              yearEnd: true,
+            },
+            with: {
+              make: {
+                columns: {
+                  name: true,
+                },
+              },
+              model: {
+                columns: {
+                  name: true,
+                },
+              },
+            },
+          },
+        };
+
+        // First, try to get parts from the same category
+        const sameCategoryParts = await tx.query.parts.findMany({
+          where: (part, { ne, and, eq }) =>
+            and(
+              ne(part.id, input.partId),
+              eq(part.categoryId, input.categoryId),
+              eq(part.status, "active"),
+            ),
+          with: commonWith,
+          orderBy: (orderBy, { desc }) => desc(orderBy.createdAt),
           limit: 3,
         });
-        return part;
+
+        // If we have less than 3 parts, get additional parts from other categories
+        if (sameCategoryParts.length < 3) {
+          const remainingCount = 3 - sameCategoryParts.length;
+          const sameCategoryIds = sameCategoryParts.map((p) => p.id);
+          const excludeIds = [input.partId, ...sameCategoryIds];
+
+          const otherCategoryParts = await tx.query.parts.findMany({
+            where: (part, { ne, and, eq }) => {
+              const conditions = [eq(part.status, "active")];
+
+              // Exclude all IDs using multiple ne conditions
+              for (const excludeId of excludeIds) {
+                conditions.push(ne(part.id, excludeId));
+              }
+
+              return and(...conditions);
+            },
+            with: commonWith,
+            orderBy: (orderBy, { desc }) => desc(orderBy.createdAt),
+            limit: remainingCount,
+          });
+
+          return [...sameCategoryParts, ...otherCategoryParts];
+        }
+
+        return sameCategoryParts;
       });
       return data;
     }),
@@ -683,4 +715,12 @@ export const partRouter = createTRPCRouter({
 
       return results.map((r) => r.id);
     }),
+
+  deletePart: privateProcedure.input(z.string()).mutation(async ({ input }) => {
+    const [deletedPart] = await db
+      .delete(parts)
+      .where(eq(parts.id, input))
+      .returning();
+    return deletedPart;
+  }),
 });

@@ -1,8 +1,17 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Expand } from "lucide-react";
-import { useMemo, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import {
   Dialog,
   DialogContent,
@@ -25,48 +34,63 @@ export function ProductGallery({
     return partImages?.map((img) => img?.url);
   }, [partImages?.map]);
   const [currentImage, setCurrentImage] = useState(0);
+  const [api, setApi] = useState<CarouselApi | null>(null);
 
-  const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length);
-  };
+  // Listen to carousel changes to sync currentImage state
+  useEffect(() => {
+    if (!api) return;
 
-  const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
-  };
+    const onSelect = () => {
+      const selectedIndex = api.selectedScrollSnap();
+      setCurrentImage(selectedIndex);
+    };
+
+    api.on("select", onSelect);
+    onSelect(); // Set initial state
+
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
+
+  // Scroll carousel when thumbnail is clicked
+  const onThumbnailClick = useCallback(
+    (index: number) => {
+      if (api) {
+        api.scrollTo(index);
+      } else {
+        setCurrentImage(index);
+      }
+    },
+    [api],
+  );
 
   return (
     <div className="space-y-4">
       {/* Main Image */}
       <div className="group relative aspect-square overflow-hidden rounded-lg bg-muted">
-        <img
-          src={images[currentImage] || "/media/placeholder.png"}
-          alt={`${title} - Image ${currentImage + 1}`}
-          className="h-full w-full object-cover"
-        />
+        <Carousel setApi={setApi}>
+          <CarouselContent>
+            {images.map((image, index) => (
+              <CarouselItem key={index}>
+                <Image
+                  src={image || "/media/placeholder.png"}
+                  alt={`${title} - Image ${index + 1}`}
+                  width={512}
+                  height={512}
+                  className="h-full w-full object-cover"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute top-1/2 left-2 bg-background/80 opacity-0 transition-opacity group-hover:opacity-100">
+            <ChevronLeft className="h-4 w-4" />
+          </CarouselPrevious>
+          <CarouselNext className="absolute top-1/2 right-2 bg-background/80 opacity-0 transition-opacity group-hover:opacity-100">
+            <ChevronRight className="h-4 w-4" />
+          </CarouselNext>
+        </Carousel>
 
-        {/* Navigation Arrows */}
-        {images.length > 1 && (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="-translate-y-1/2 absolute top-1/2 left-2 bg-background/80 opacity-0 transition-opacity group-hover:opacity-100"
-              onClick={prevImage}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="-translate-y-1/2 absolute top-1/2 right-2 bg-background/80 opacity-0 transition-opacity group-hover:opacity-100"
-              onClick={nextImage}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </>
-        )}
-
-        {/* Expand Button */}
         <Dialog>
           <DialogTrigger asChild>
             <Button
@@ -84,8 +108,10 @@ export function ProductGallery({
                 {currentImage + 1} / {images.length}
               </DialogDescription>
             </DialogHeader>
-            <img
+            <Image
               src={images[currentImage] || "/placeholder.svg"}
+              width={512}
+              height={512}
               alt={`${title} - Image ${currentImage + 1}`}
               className="h-auto max-h-[80vh] w-full object-contain"
             />
@@ -106,15 +132,17 @@ export function ProductGallery({
           {images.map((image, index) => (
             <button
               key={index}
-              onClick={() => setCurrentImage(index)}
-              className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
+              onClick={() => onThumbnailClick(index)}
+              className={`h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
                 index === currentImage
                   ? "border-accent"
                   : "border-border hover:border-accent/50"
               }`}
             >
-              <img
+              <Image
                 src={image || "/placeholder.svg"}
+                width={64}
+                height={64}
                 alt={`${title} thumbnail ${index + 1}`}
                 className="h-full w-full object-cover"
               />

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/date";
 import { api } from "@/trpc/server";
+import Image from "next/image";
 
 export async function generateMetadata({
   params,
@@ -144,7 +145,7 @@ export default async function SellerPage({
                   <Card className="transition-shadow hover:shadow-md">
                     <CardContent className="p-6">
                       <div className="flex gap-4">
-                        <img
+                        <Image
                           src={
                             listing?.partImages?.[0]?.url ||
                             "/media/placeholder.png"

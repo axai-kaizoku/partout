@@ -1,7 +1,7 @@
 "use client";
 
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
@@ -18,7 +18,18 @@ export function ModelCompatibilityForm({
   onAdd,
   existingCompatibilities,
 }: ModelCompatibilityFormProps) {
-  const { data: makes } = api.partInfo.getMakesForDropdown.useQuery();
+  const { data: makesOptions } = api.partInfo.getMakesForDropdown.useQuery();
+
+  const makes = useMemo(
+    () =>
+      makesOptions?.map((make) => ({
+        value: make.id,
+        label: make.name,
+      })) ?? [],
+    [makesOptions],
+  );
+  console.log({ makes });
+
   const [selectedMakeId, setSelectedMakeId] = useState<string>("");
   const [pendingModels, setPendingModels] = useState<
     Array<{ id: string; name: string; makeId: string }>
@@ -86,7 +97,7 @@ export function ModelCompatibilityForm({
     }
 
     // Check for duplicates
-    const selectedMake = makes?.find((m) => m.id === values.makeId);
+    const selectedMake = makes?.find((m) => m.value === values.makeId);
     const isDuplicate = existingCompatibilities.some(
       (compat) =>
         compat.makeId === values.makeId &&
@@ -138,12 +149,7 @@ export function ModelCompatibilityForm({
                 <field.SelectField
                   label="Vehicle Make*"
                   placeholder="Select a vehicle make"
-                  options={
-                    makes?.map((make) => ({
-                      value: make.id,
-                      label: make.name,
-                    })) ?? []
-                  }
+                  options={makes}
                 />
               );
             }}

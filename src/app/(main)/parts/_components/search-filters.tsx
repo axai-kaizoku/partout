@@ -143,12 +143,11 @@ function CategoryFilter({
   filters: Filters;
   updateFilter: (key: string, value: any) => void;
 }) {
-  const categories =
-    api.partInfo.getCategories
-      .useQuery()
-      .data?.map((category) => category.name) ?? [];
-
-  console.log({ categories });
+  const { data } = api.partInfo.getCategories.useQuery();
+  const categories = useMemo(
+    () => data?.map((category) => category.name) ?? [],
+    [data],
+  );
 
   return (
     <div className="space-y-3">

@@ -1,5 +1,6 @@
 "use client";
 import { Loader2, Upload, X } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useRef, useState } from "react";
@@ -151,9 +152,7 @@ export function NewListingForm() {
           // Process model compatibilities
           if (compatibleModels && compatibleModels.length > 0) {
             // 1. Create new models first
-            const modelsToCreate = compatibleModels.filter(
-              (c) => c.isNewModel
-            );
+            const modelsToCreate = compatibleModels.filter((c) => c.isNewModel);
             const modelIdMap = new Map<string, string>();
 
             for (const compat of modelsToCreate) {
@@ -187,7 +186,7 @@ export function NewListingForm() {
           Array.from(images).forEach(async (img, index) => {
             await createPartImage({
               partId: partId,
-              url: img.uploaded?.url,
+              url: img.uploaded?.reducedUrl ?? img.uploaded?.url,
               sortOrder: index,
               isPrimary: index === 0,
             });
@@ -445,7 +444,7 @@ export function NewListingForm() {
                   {images.map((image, index) => (
                     <div key={index} className="group relative">
                       <div className="relative h-32 w-full overflow-hidden rounded-md bg-gray-100">
-                        <img
+                        <Image
                           src={image.preview}
                           alt={`Part ${index + 1}`}
                           width={128}

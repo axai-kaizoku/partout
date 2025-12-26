@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import Image from "next/image";
 
 export function FavoritesList() {
   const [favorites, setFavorites] = useState([
@@ -95,9 +96,11 @@ export function FavoritesList() {
           </Button>
 
           <div className="relative">
-            <img
+            <Image
               src={part.image || "/placeholder.svg"}
               alt={part.title}
+              width={192}
+              height={192}
               className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <div className="absolute top-3 left-3 flex gap-2">

@@ -1,10 +1,11 @@
 import { Loader2, Search } from "lucide-react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
-  conditions,
-  materials,
-  warranties,
+  conditions as conditionsOptions,
+  materials as materialsOptions,
+  warranties as warrantiesOptions,
 } from "@/lib/constants/dropdown-data";
 import { api } from "@/trpc/react";
 
@@ -25,7 +26,44 @@ export function BasicInfoForm({
     trim?: string | null;
   }) => void;
 }) {
-  const { data: categories } = api.partInfo.getCategoriesForDropdown.useQuery();
+  const { data: rawCategories } =
+    api.partInfo.getCategoriesForDropdown.useQuery();
+
+  const categories = useMemo(
+    () =>
+      rawCategories?.map((category) => ({
+        value: category.id,
+        label: category.name,
+      })) ?? [],
+    [rawCategories],
+  );
+
+  const conditions = useMemo(
+    () =>
+      conditionsOptions.map((condition) => ({
+        value: condition,
+        label: condition,
+      })),
+    [],
+  );
+
+  const materials = useMemo(
+    () =>
+      materialsOptions.map((material) => ({
+        value: material,
+        label: material,
+      })),
+    [],
+  );
+
+  const warranties = useMemo(
+    () =>
+      warrantiesOptions.map((warranty) => ({
+        value: warranty,
+        label: warranty,
+      })),
+    [],
+  );
 
   // VIN decoder mutation
   const vinDecoderMutation = api.partInfo.decodeVinAndFetchModels.useMutation({
@@ -87,12 +125,7 @@ export function BasicInfoForm({
             <field.SelectField
               label="Category *"
               placeholder="Select a category"
-              options={
-                categories?.map((category) => ({
-                  value: category.id,
-                  label: category.name,
-                })) ?? []
-              }
+              options={categories}
             />
           )}
         </basicInfoForm.AppField>
@@ -101,10 +134,7 @@ export function BasicInfoForm({
             <field.SelectField
               label="Condition *"
               placeholder="Select a condition"
-              options={conditions.map((condition) => ({
-                value: condition,
-                label: condition,
-              }))}
+              options={conditions}
             />
           )}
         </basicInfoForm.AppField>
@@ -158,10 +188,7 @@ export function BasicInfoForm({
             <field.SelectField
               label="Material "
               placeholder="Select a material"
-              options={materials.map((material) => ({
-                value: material,
-                label: material,
-              }))}
+              options={materials}
             />
           )}
         </basicInfoForm.AppField>
@@ -170,10 +197,7 @@ export function BasicInfoForm({
             <field.SelectField
               label="Warranty "
               placeholder="Select a warranty"
-              options={warranties.map((warranty) => ({
-                value: warranty,
-                label: warranty,
-              }))}
+              options={warranties}
             />
           )}
         </basicInfoForm.AppField>

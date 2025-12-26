@@ -51,6 +51,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
+import Image from "next/image";
 
 // Types for image handling
 interface ImagePreview {
@@ -816,8 +817,10 @@ export function NewListingForm() {
                 {images.map((image, index) => (
                   <div key={image.id} className="group relative">
                     <div className="relative h-32 w-full overflow-hidden rounded-md bg-gray-100">
-                      <img
+                      <Image
                         src={image.preview}
+                        width={128}
+                        height={128}
                         alt={`Part image ${index + 1}`}
                         className="h-full w-full object-cover"
                       />

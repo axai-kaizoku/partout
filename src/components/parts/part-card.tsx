@@ -12,11 +12,11 @@ export function PartCard({ part }: { part: Part }) {
     <Link href={`/part/${part.id}`}>
       <Card className="group min-w-0 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg">
         <div className="relative">
-          <img
+          <Image
             src={part?.partImages?.[0]?.url || "/media/placeholder.png"}
             alt={part.title}
-            height={192}
             width={256}
+            height={192}
             className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute top-3 left-3 flex gap-2">
@@ -106,6 +106,7 @@ export function PartCard({ part }: { part: Part }) {
 }
 
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 
 export function PartCardSkeleton() {
   return (

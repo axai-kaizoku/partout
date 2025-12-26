@@ -36,19 +36,22 @@ export async function uploadToSupabaseStorage({
       data: { publicUrl },
     } = supabaseAdmin.storage.from(bucket).getPublicUrl(uploadResult.data.path);
 
-    // const { data: reducedSizeUrlData } = supabaseAdmin.storage.from(bucket).getPublicUrl(uploadResult.data.path, {
-    //   transform: {
-    //     format: "origin",
-    //     quality: 50,
-    //     resize: "contain",
-    //     width: 1200,
-    //   },
-    // });
+    const { data: reducedSizeUrlData } = supabaseAdmin.storage
+      .from(bucket)
+      .getPublicUrl(uploadResult.data.path, {
+        transform: {
+          format: "origin",
+          quality: 80,
+          resize: "contain",
+          width: 512,
+          height: 512,
+        },
+      });
 
     return {
       publicUrl,
       key: uploadResult.data.path,
-      // reducedSizeUrlData: reducedSizeUrlData.publicUrl,
+      reducedSizeUrlData: reducedSizeUrlData.publicUrl,
     };
   } catch (err) {
     if (err instanceof Error) {

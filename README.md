@@ -73,7 +73,7 @@ https://kfsxoftfoftadpaqdbke.supabase.co/auth/v1/callback
 - [x] seller's store
 - [x] messages by id page
 - [x] active listings in seller side
-- [ ] in add part form, he can add multiple models
-  - [ ] or fetch models using VIN number
+- [x] in add part form, he can add multiple models
+  - [x] or fetch models using VIN number
 - [-] oauth callback url
 - [x] phone number country code

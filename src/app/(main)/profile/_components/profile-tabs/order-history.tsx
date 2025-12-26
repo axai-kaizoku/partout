@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 
 export function OrderHistory() {
   // const mockOrders = [
@@ -134,9 +135,11 @@ export function OrderHistory() {
             {order.items.map((item, index) => (
               <div key={item.id}>
                 <div className="flex gap-4">
-                  <img
+                  <Image
                     src={"/media/placeholder.png"}
                     alt={item.title}
+                    width={64}
+                    height={64}
                     className="h-16 w-16 flex-shrink-0 rounded-md object-cover"
                   />
                   <div className="flex-1">

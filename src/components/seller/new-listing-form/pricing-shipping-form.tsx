@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { currencies } from "@/lib/constants/dropdown-data";
 import { api } from "@/trpc/react";
 
@@ -6,7 +7,16 @@ export function PricingShippingForm({
 }: {
   pricingShippingForm: any;
 }) {
-  const { data: shipping } = api.shipping.getAllShippingProfiles.useQuery();
+  const { data: shippingProfilesOptions } =
+    api.shipping.getAllShippingProfiles.useQuery();
+  const shipping = useMemo(() => {
+    return (
+      shippingProfilesOptions?.map((option) => ({
+        value: option.id,
+        label: option.name,
+      })) ?? []
+    );
+  }, [shippingProfilesOptions]);
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -51,12 +61,7 @@ export function PricingShippingForm({
           <field.SelectField
             label="Shipping *"
             placeholder="Select a shipping"
-            options={
-              shipping?.map((shipping) => ({
-                value: shipping.id,
-                label: shipping.name,
-              })) ?? []
-            }
+            options={shipping}
           />
         )}
       </pricingShippingForm.AppField>
