@@ -7,6 +7,9 @@ import { partInfoRouter } from "./routers/part-info";
 import { sellerRouter } from "./routers/seller";
 import { shippingRouter } from "./routers/shipping";
 import { userRouter } from "./routers/user";
+import { orderRouter } from "./routers/order";
+import { shipmentRouter } from "./routers/shipment";
+import { paymentRouter } from "./routers/payment";
 
 /**
  * This is the primary router for your server.
@@ -22,6 +25,9 @@ export const appRouter = createTRPCRouter({
   shipping: shippingRouter,
   partInfo: partInfoRouter,
   chat: chatRouter,
+  order: orderRouter,
+  shipment: shipmentRouter,
+  payment: paymentRouter,
 });
 
 // export type definition of API

@@ -52,6 +52,12 @@ export const profiles = createTable(
     responseTime: text("response_time"), // "< 1 hour", "1-2 hours", etc.
     totalSales: integer("total_sales").default(0),
     totalPurchases: integer("total_purchases").default(0),
+    // Stripe Connect fields for seller payouts
+    stripeConnectedAccountId: text("stripe_connected_account_id"),
+    stripeOnboardingComplete: boolean("stripe_onboarding_complete").default(
+      false,
+    ),
+    stripePayoutsEnabled: boolean("stripe_payouts_enabled").default(false),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: commonTimeStampSchema("updated_at")
       .defaultNow()
@@ -405,6 +411,361 @@ export const sellerStats = createTable(
   ],
 );
 
+// Orders - master order records
+export const orders = createTable(
+  "orders",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    orderNumber: text("order_number").notNull().unique(), // ORD-XXXXXX format
+    buyerId: text("buyer_id")
+      .notNull()
+      .references(() => profiles.id),
+
+    // Totals
+    subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+    shippingTotal: decimal("shipping_total", { precision: 10, scale: 2 })
+      .notNull()
+      .default("0"),
+    taxTotal: decimal("tax_total", { precision: 10, scale: 2 }).default("0"),
+    total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+
+    // Status
+    status: text("status").notNull().default("pending"),
+    // pending, payment_processing, paid, processing, partially_shipped, shipped, delivered, cancelled, refunded
+
+    // Payment info (denormalized for quick access)
+    paymentStatus: text("payment_status").notNull().default("pending"),
+    // pending, processing, succeeded, failed, refunded, partially_refunded
+    paymentIntentId: text("payment_intent_id"), // Stripe Payment Intent ID
+
+    // Shipping address (snapshot at order time)
+    shippingAddress: jsonb("shipping_address").notNull(), // Store full address object
+    billingAddress: jsonb("billing_address"), // Optional if different from shipping
+
+    // Metadata
+    customerNotes: text("customer_notes"),
+    internalNotes: text("internal_notes"), // Admin/seller notes
+
+    // Timestamps
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+    updatedAt: commonTimeStampSchema("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+    paidAt: commonTimeStampSchema("paid_at"),
+    cancelledAt: commonTimeStampSchema("cancelled_at"),
+  },
+  (t) => [
+    index("order_buyer_idx").on(t.buyerId),
+    index("order_status_idx").on(t.status),
+    index("order_payment_status_idx").on(t.paymentStatus),
+    index("order_number_idx").on(t.orderNumber),
+    index("order_created_idx").on(t.createdAt),
+  ],
+);
+
+export type Order = typeof orders.$inferSelect;
+
+// Order Items - individual parts within orders
+export const orderItems = createTable(
+  "order_items",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    partId: text("part_id")
+      .notNull()
+      .references(() => parts.id),
+    sellerId: text("seller_id")
+      .notNull()
+      .references(() => profiles.id),
+
+    // Item details (snapshot at order time - prices can change)
+    title: text("title").notNull(),
+    partNumber: text("part_number"),
+    condition: text("condition").notNull(),
+
+    // Pricing
+    unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+    quantity: integer("quantity").notNull().default(1),
+    subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(), // unitPrice * quantity
+
+    // Shipping (calculated per seller group)
+    shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 })
+      .notNull()
+      .default("0"),
+
+    // Status (independent tracking per item)
+    status: text("status").notNull().default("pending"),
+    // pending, processing, shipped, delivered, cancelled, returned, refunded
+
+    // Item metadata
+    imageUrl: text("image_url"), // Primary image snapshot
+
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+    updatedAt: commonTimeStampSchema("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("order_item_order_idx").on(t.orderId),
+    index("order_item_seller_idx").on(t.sellerId),
+    index("order_item_part_idx").on(t.partId),
+    index("order_item_status_idx").on(t.status),
+  ],
+);
+
+export type OrderItem = typeof orderItems.$inferSelect;
+
+// Shipments - groups items by seller for shipping
+export const shipments = createTable(
+  "shipments",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    sellerId: text("seller_id")
+      .notNull()
+      .references(() => profiles.id),
+
+    // Shippo data
+    shippoShipmentId: text("shippo_shipment_id"), // Shippo shipment object ID
+    shippoRateId: text("shippo_rate_id"), // Selected rate ID
+    shippoTransactionId: text("shippo_transaction_id"), // Purchase transaction ID
+
+    // Carrier info
+    carrier: text("carrier").notNull(), // USPS, UPS, FedEx, DHL
+    service: text("service").notNull(), // e.g., "Priority Mail", "Ground"
+
+    // Tracking
+    trackingNumber: text("tracking_number"),
+    trackingUrl: text("tracking_url"),
+    trackingStatus: text("tracking_status").default("unknown"),
+    // unknown, pre_transit, transit, delivered, returned, failure
+
+    // Label
+    labelUrl: text("label_url"), // PDF label URL from Shippo
+    labelFormat: text("label_format").default("PDF"), // PDF, PNG, ZPLII
+
+    // Shipping details
+    shippingCost: decimal("shipping_cost", { precision: 8, scale: 2 }).notNull(),
+    estimatedDaysMin: integer("estimated_days_min"),
+    estimatedDaysMax: integer("estimated_days_max"),
+
+    // Addresses (from Shippo)
+    fromAddress: jsonb("from_address").notNull(), // Seller address
+    toAddress: jsonb("to_address").notNull(), // Buyer address
+
+    // Package details
+    weight: decimal("weight", { precision: 8, scale: 2 }).notNull(), // lbs
+    dimensions: jsonb("dimensions").notNull(), // { length, width, height } in inches
+
+    // Status
+    status: text("status").notNull().default("pending"),
+    // pending, label_created, in_transit, delivered, failed, cancelled
+
+    // Timestamps
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+    updatedAt: commonTimeStampSchema("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+    shippedAt: commonTimeStampSchema("shipped_at"),
+    deliveredAt: commonTimeStampSchema("delivered_at"),
+  },
+  (t) => [
+    index("shipment_order_idx").on(t.orderId),
+    index("shipment_seller_idx").on(t.sellerId),
+    index("shipment_tracking_idx").on(t.trackingNumber),
+    index("shipment_status_idx").on(t.status),
+    index("shipment_created_idx").on(t.createdAt),
+  ],
+);
+
+export type Shipment = typeof shipments.$inferSelect;
+
+// Shipment Items - link between shipments and order items
+export const shipmentItems = createTable(
+  "shipment_items",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    shipmentId: text("shipment_id")
+      .notNull()
+      .references(() => shipments.id, { onDelete: "cascade" }),
+    orderItemId: text("order_item_id")
+      .notNull()
+      .references(() => orderItems.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    unique("shipment_item_unique").on(t.shipmentId, t.orderItemId),
+    index("shipment_item_shipment_idx").on(t.shipmentId),
+    index("shipment_item_order_item_idx").on(t.orderItemId),
+  ],
+);
+
+// Payments - track all payment transactions
+export const payments = createTable(
+  "payments",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => orders.id),
+
+    // Stripe data
+    stripePaymentIntentId: text("stripe_payment_intent_id")
+      .notNull()
+      .unique(),
+    stripeChargeId: text("stripe_charge_id"),
+    stripeCustomerId: text("stripe_customer_id"),
+
+    // Payment details
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    currency: text("currency").notNull().default("USD"),
+
+    // Status
+    status: text("status").notNull().default("pending"),
+    // pending, processing, succeeded, failed, cancelled, refunded, partially_refunded
+
+    // Payment method
+    paymentMethod: text("payment_method"), // card, bank_transfer, etc.
+    paymentMethodDetails: jsonb("payment_method_details"), // Last4, brand, etc.
+
+    // Failure handling
+    failureCode: text("failure_code"),
+    failureMessage: text("failure_message"),
+
+    // Metadata
+    metadata: jsonb("metadata"), // Additional Stripe metadata
+
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+    updatedAt: commonTimeStampSchema("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+    succeededAt: commonTimeStampSchema("succeeded_at"),
+    failedAt: commonTimeStampSchema("failed_at"),
+  },
+  (t) => [
+    index("payment_order_idx").on(t.orderId),
+    index("payment_stripe_pi_idx").on(t.stripePaymentIntentId),
+    index("payment_status_idx").on(t.status),
+    index("payment_created_idx").on(t.createdAt),
+  ],
+);
+
+export type Payment = typeof payments.$inferSelect;
+
+// Refunds - track refund transactions
+export const refunds = createTable(
+  "refunds",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    paymentId: text("payment_id")
+      .notNull()
+      .references(() => payments.id),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => orders.id),
+    orderItemId: text("order_item_id").references(() => orderItems.id), // Null for full refund
+
+    // Stripe data
+    stripeRefundId: text("stripe_refund_id").notNull().unique(),
+
+    // Refund details
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    reason: text("reason"), // duplicate, fraudulent, requested_by_customer
+    description: text("description"),
+
+    // Status
+    status: text("status").notNull().default("pending"),
+    // pending, succeeded, failed, cancelled
+
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+    processedAt: commonTimeStampSchema("processed_at"),
+  },
+  (t) => [
+    index("refund_payment_idx").on(t.paymentId),
+    index("refund_order_idx").on(t.orderId),
+    index("refund_stripe_idx").on(t.stripeRefundId),
+    index("refund_status_idx").on(t.status),
+  ],
+);
+
+export type Refund = typeof refunds.$inferSelect;
+
+// Seller Payouts - track seller payments (Stripe Connect)
+export const sellerPayouts = createTable(
+  "seller_payouts",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    sellerId: text("seller_id")
+      .notNull()
+      .references(() => profiles.id),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => orders.id),
+
+    // Stripe Connect data
+    stripeTransferId: text("stripe_transfer_id"), // Stripe Transfer ID
+    stripeConnectedAccountId: text("stripe_connected_account_id"), // Seller's Stripe account
+
+    // Payout details
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    platformFee: decimal("platform_fee", { precision: 10, scale: 2 }).notNull(), // Partout commission
+    netAmount: decimal("net_amount", { precision: 10, scale: 2 }).notNull(), // amount - platformFee
+    currency: text("currency").notNull().default("USD"),
+
+    // Status
+    status: text("status").notNull().default("pending"),
+    // pending, processing, paid, failed, cancelled
+
+    failureReason: text("failure_reason"),
+
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+    processedAt: commonTimeStampSchema("processed_at"),
+  },
+  (t) => [
+    index("payout_seller_idx").on(t.sellerId),
+    index("payout_order_idx").on(t.orderId),
+    index("payout_status_idx").on(t.status),
+    index("payout_created_idx").on(t.createdAt),
+  ],
+);
+
+export type SellerPayout = typeof sellerPayouts.$inferSelect;
+
+// Tracking Events - webhook events from Shippo
+export const trackingEvents = createTable(
+  "tracking_events",
+  {
+    id: commonIdSchema("id").primaryKey(),
+    shipmentId: text("shipment_id")
+      .notNull()
+      .references(() => shipments.id, { onDelete: "cascade" }),
+
+    // Event details
+    status: text("status").notNull(), // From Shippo tracking status
+    statusDetails: text("status_details"),
+    location: text("location"), // City, State
+
+    // Timestamps
+    occurredAt: commonTimeStampSchema("occurred_at").notNull(),
+    createdAt: commonTimeStampSchema("created_at").defaultNow().notNull(),
+  },
+  (t) => [
+    index("tracking_event_shipment_idx").on(t.shipmentId),
+    index("tracking_event_occurred_idx").on(t.occurredAt),
+  ],
+);
+
+export type TrackingEvent = typeof trackingEvents.$inferSelect;
+
 // Note: Relations can be added later in a separate file if needed for query building
 export const partRelations = relations(parts, ({ one, many }) => ({
   partImages: many(partImages),
@@ -567,5 +928,98 @@ export const messageRelations = relations(messages, ({ one }) => ({
   sender: one(profiles, {
     fields: [messages.senderId],
     references: [profiles.id],
+  }),
+}));
+
+// Order relations
+export const orderRelations = relations(orders, ({ one, many }) => ({
+  buyer: one(profiles, {
+    fields: [orders.buyerId],
+    references: [profiles.id],
+  }),
+  orderItems: many(orderItems),
+  payments: many(payments),
+  shipments: many(shipments),
+  refunds: many(refunds),
+  sellerPayouts: many(sellerPayouts),
+}));
+
+export const orderItemRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderItems.orderId],
+    references: [orders.id],
+  }),
+  part: one(parts, {
+    fields: [orderItems.partId],
+    references: [parts.id],
+  }),
+  seller: one(profiles, {
+    fields: [orderItems.sellerId],
+    references: [profiles.id],
+  }),
+}));
+
+export const shipmentRelations = relations(shipments, ({ one, many }) => ({
+  order: one(orders, {
+    fields: [shipments.orderId],
+    references: [orders.id],
+  }),
+  seller: one(profiles, {
+    fields: [shipments.sellerId],
+    references: [profiles.id],
+  }),
+  shipmentItems: many(shipmentItems),
+  trackingEvents: many(trackingEvents),
+}));
+
+export const shipmentItemRelations = relations(shipmentItems, ({ one }) => ({
+  shipment: one(shipments, {
+    fields: [shipmentItems.shipmentId],
+    references: [shipments.id],
+  }),
+  orderItem: one(orderItems, {
+    fields: [shipmentItems.orderItemId],
+    references: [orderItems.id],
+  }),
+}));
+
+export const paymentRelations = relations(payments, ({ one, many }) => ({
+  order: one(orders, {
+    fields: [payments.orderId],
+    references: [orders.id],
+  }),
+  refunds: many(refunds),
+}));
+
+export const refundRelations = relations(refunds, ({ one }) => ({
+  payment: one(payments, {
+    fields: [refunds.paymentId],
+    references: [payments.id],
+  }),
+  order: one(orders, {
+    fields: [refunds.orderId],
+    references: [orders.id],
+  }),
+  orderItem: one(orderItems, {
+    fields: [refunds.orderItemId],
+    references: [orderItems.id],
+  }),
+}));
+
+export const sellerPayoutRelations = relations(sellerPayouts, ({ one }) => ({
+  seller: one(profiles, {
+    fields: [sellerPayouts.sellerId],
+    references: [profiles.id],
+  }),
+  order: one(orders, {
+    fields: [sellerPayouts.orderId],
+    references: [orders.id],
+  }),
+}));
+
+export const trackingEventRelations = relations(trackingEvents, ({ one }) => ({
+  shipment: one(shipments, {
+    fields: [trackingEvents.shipmentId],
+    references: [shipments.id],
   }),
 }));

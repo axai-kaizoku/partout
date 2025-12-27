@@ -1,11 +1,18 @@
 "use client";
 
-import { MessageCircle, Share2, Shield, Truck } from "lucide-react";
+import {
+  MessageCircle,
+  Share2,
+  Shield,
+  ShoppingCart,
+  Truck,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCart } from "@/hooks/use-cart";
 import { useUser } from "@/hooks/use-user";
 import { api } from "@/trpc/react";
 
@@ -16,6 +23,7 @@ interface ProductInfoProps {
 export function ProductInfo({ part }: ProductInfoProps) {
   const router = useRouter();
   const user = useUser();
+  const { addItem } = useCart();
 
   const createConversationMutation =
     api.chat.getOrCreateConversation.useMutation({
@@ -161,10 +169,32 @@ export function ProductInfo({ part }: ProductInfoProps) {
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        {/* <Button className="w-full" size="lg">
-          <ShoppingCart className="h-5 w-5 mr-2" />
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={() => {
+            addItem({
+              id: part.id,
+              title: part.title,
+              price: part.price,
+              condition: part.condition,
+              brand: part.brand,
+              model: part.model,
+              year: part.year,
+              image: part.image,
+              seller: {
+                id: part.sellerId,
+                name: part.sellerName,
+                location: part.sellerLocation,
+                verified: part.sellerVerified,
+              },
+            });
+            router.push(`/cart`);
+          }}
+        >
+          <ShoppingCart className="mr-2 h-5 w-5" />
           Add to Cart
-        </Button> */}
+        </Button>
         <div className="flex gap-2">
           <Button
             className="w-full"

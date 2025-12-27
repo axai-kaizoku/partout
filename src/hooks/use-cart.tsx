@@ -7,9 +7,10 @@ import {
   useEffect,
   useState,
 } from "react";
+import { api } from "@/trpc/react";
 
 interface CartItem {
-  id: number;
+  id: string; // Changed to string for real part IDs
   title: string;
   price: number;
   condition: string;
@@ -19,91 +20,85 @@ interface CartItem {
   image: string;
   quantity: number;
   seller: {
-    id: number;
+    id: string; // Changed to string
     name: string;
     location: string;
     verified: boolean;
   };
-  shipping: {
+  shipping?: {
     cost: number;
     estimatedDays: string;
   };
 }
 
+interface ShippingRate {
+  rateId: string;
+  carrier: string;
+  service: string;
+  amount: number;
+  currency: string;
+  estimatedDays: number;
+}
+
+interface SellerShippingRates {
+  sellerId: string;
+  sellerName: string | null | undefined;
+  rates: ShippingRate[];
+  selectedRateId?: string;
+}
+
 interface CartContextType {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
   getShippingTotal: () => number;
   getSellerGroups: () => Record<string, CartItem[]>;
+  // New shipping-related methods
+  shippingRates: SellerShippingRates[];
+  calculateShipping: (addressId: string) => Promise<void>;
+  selectShippingRate: (sellerId: string, rateId: string) => void;
+  getSelectedShippingRate: (sellerId: string) => ShippingRate | null;
+  isCalculatingShipping: boolean;
+  shippingError: string | null;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [shippingRates, setShippingRates] = useState<SellerShippingRates[]>(
+    [],
+  );
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState<string | null>(null);
+
+  // tRPC mutation for calculating shipping
+  const calculateShippingMutation = api.order.calculateShipping.useMutation();
 
   useEffect(() => {
     // Load cart from localStorage on mount
     const storedCart = localStorage.getItem("partout_cart");
     if (storedCart) {
-      setItems(JSON.parse(storedCart));
-    } else {
-      // Add some mock items for demo
-      setItems([
-        {
-          id: 1,
-          title: "BMW E46 Brake Pads - Front Set",
-          price: 89.99,
-          condition: "New",
-          brand: "BMW",
-          model: "E46 3 Series",
-          year: "1999-2006",
-          image: "/placeholder.svg?height=200&width=200&text=BMW+Brake+Pads",
-          quantity: 1,
-          seller: {
-            id: 1,
-            name: "AutoParts Pro",
-            location: "Los Angeles, CA",
-            verified: true,
-          },
-          shipping: {
-            cost: 12.99,
-            estimatedDays: "3-5 business days",
-          },
-        },
-        {
-          id: 2,
-          title: "Honda Civic Engine Air Filter",
-          price: 24.99,
-          condition: "New",
-          brand: "Honda",
-          model: "Civic",
-          year: "2016-2021",
-          image: "/honda-air-filter.jpg",
-          quantity: 2,
-          seller: {
-            id: 2,
-            name: "Civic Specialist",
-            location: "Miami, FL",
-            verified: true,
-          },
-          shipping: {
-            cost: 8.99,
-            estimatedDays: "2-4 business days",
-          },
-        },
-      ]);
+      try {
+        setItems(JSON.parse(storedCart));
+      } catch (error) {
+        console.error("Failed to parse cart from localStorage:", error);
+        setItems([]);
+      }
     }
   }, []);
 
   useEffect(() => {
     // Save cart to localStorage whenever items change
-    localStorage.setItem("partout_cart", JSON.stringify(items));
+    if (items.length > 0) {
+      localStorage.setItem("partout_cart", JSON.stringify(items));
+    } else {
+      localStorage.removeItem("partout_cart");
+    }
   }, [items]);
 
   const addItem = (newItem: Omit<CartItem, "quantity">) => {
@@ -120,11 +115,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeItem = (id: number) => {
+  const removeItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
+    // Clear shipping rates when cart changes
+    setShippingRates([]);
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
       removeItem(id);
       return;
@@ -132,10 +129,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, quantity } : item)),
     );
+    // Clear shipping rates when quantities change
+    setShippingRates([]);
   };
 
   const clearCart = () => {
     setItems([]);
+    setShippingRates([]);
+    setShippingError(null);
   };
 
   const getTotalItems = () => {
@@ -147,17 +148,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const getShippingTotal = () => {
-    // Group by seller and calculate shipping per seller
-    const sellerGroups = getSellerGroups();
-    return Object.values(sellerGroups).reduce((total, sellerItems) => {
-      return total + sellerItems[0].shipping.cost;
+    // Calculate total shipping based on selected rates
+    return shippingRates.reduce((total, sellerRates) => {
+      const selectedRate = sellerRates.rates.find(
+        (r) => r.rateId === sellerRates.selectedRateId,
+      );
+      return total + (selectedRate?.amount ?? 0);
     }, 0);
   };
 
   const getSellerGroups = () => {
     return items.reduce(
       (groups, item) => {
-        const sellerId = item.seller.id.toString();
+        const sellerId = item.seller.id;
         if (!groups[sellerId]) {
           groups[sellerId] = [];
         }
@@ -165,6 +168,73 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return groups;
       },
       {} as Record<string, CartItem[]>,
+    );
+  };
+
+  /**
+   * Calculate shipping rates from Shippo for all items
+   * Must be called with a valid shipping address
+   */
+  const calculateShipping = async (addressId: string) => {
+    if (items.length === 0) {
+      setShippingError("Cart is empty");
+      return;
+    }
+
+    setIsCalculatingShipping(true);
+    setShippingError(null);
+
+    try {
+      const rates = await calculateShippingMutation.mutateAsync({
+        items: items.map((item) => ({
+          partId: item.id,
+          quantity: item.quantity,
+        })),
+        shippingAddressId: addressId,
+      });
+
+      // Auto-select cheapest rate for each seller
+      const ratesWithSelection: SellerShippingRates[] = rates.map((r) => ({
+        ...r,
+        selectedRateId: r.rates[0]?.rateId, // Auto-select cheapest
+      }));
+
+      setShippingRates(ratesWithSelection);
+    } catch (error) {
+      console.error("Failed to calculate shipping:", error);
+      setShippingError(
+        error instanceof Error
+          ? error.message
+          : "Failed to calculate shipping rates",
+      );
+    } finally {
+      setIsCalculatingShipping(false);
+    }
+  };
+
+  /**
+   * Select a specific shipping rate for a seller
+   */
+  const selectShippingRate = (sellerId: string, rateId: string) => {
+    setShippingRates((prev) =>
+      prev.map((sellerRates) =>
+        sellerRates.sellerId === sellerId
+          ? { ...sellerRates, selectedRateId: rateId }
+          : sellerRates,
+      ),
+    );
+  };
+
+  /**
+   * Get the selected shipping rate for a seller
+   */
+  const getSelectedShippingRate = (sellerId: string): ShippingRate | null => {
+    const sellerRates = shippingRates.find((r) => r.sellerId === sellerId);
+    if (!sellerRates || !sellerRates.selectedRateId) return null;
+
+    return (
+      sellerRates.rates.find((r) => r.rateId === sellerRates.selectedRateId) ??
+      null
     );
   };
 
@@ -180,6 +250,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         getTotalPrice,
         getShippingTotal,
         getSellerGroups,
+        // Shipping calculation
+        shippingRates,
+        calculateShipping,
+        selectShippingRate,
+        getSelectedShippingRate,
+        isCalculatingShipping,
+        shippingError,
       }}
     >
       {children}

@@ -15,9 +15,9 @@ export function CartItems() {
   return (
     <div className="space-y-6">
       {Object.entries(sellerGroups).map(([sellerId, items]) => {
-        const seller = items[0]?.seller;
-        const sellerTotal = items.reduce(
-          (total, item) => total + item.price * item.quantity,
+        const seller = items?.[0]?.seller;
+        const sellerTotal = items?.reduce(
+          (total, item) => total + item?.price * item.quantity,
           0,
         );
 
@@ -26,14 +26,16 @@ export function CartItems() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Store className="h-5 w-5" />
-                {seller.name}
-                {seller.verified && (
+                {seller?.name}
+                {seller?.verified && (
                   <Badge variant="outline" className="text-xs">
                     ✓ Verified
                   </Badge>
                 )}
               </CardTitle>
-              <p className="text-muted-foreground text-sm">{seller.location}</p>
+              <p className="text-muted-foreground text-sm">
+                {seller?.location}
+              </p>
             </CardHeader>
 
             <CardContent className="space-y-4">
@@ -41,8 +43,8 @@ export function CartItems() {
                 <div key={item.id}>
                   <div className="flex gap-4">
                     <Image
-                      src={item.image || "/media/placeholder.png"}
-                      alt={item.title}
+                      src={item?.image || "/media/placeholder.png"}
+                      alt={item?.title}
                       width={80}
                       height={80}
                       className="h-20 w-20 shrink-0 rounded-md object-cover"
@@ -51,10 +53,10 @@ export function CartItems() {
                     <div className="flex-1 space-y-2">
                       <div>
                         <h3 className="line-clamp-2 font-medium text-foreground">
-                          {item.title}
+                          {item?.title}
                         </h3>
                         <p className="text-muted-foreground text-sm">
-                          {item.brand} {item.model} • {item.year}
+                          {item?.brand} {item?.model} • {item?.year}
                         </p>
                         <Badge variant="secondary" className="mt-1 text-xs">
                           {item.condition}
@@ -68,20 +70,20 @@ export function CartItems() {
                             size="icon"
                             className="h-8 w-8 bg-transparent"
                             onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
+                              updateQuantity(item?.id, item?.quantity - 1)
                             }
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
                           <span className="w-8 text-center">
-                            {item.quantity}
+                            {item?.quantity}
                           </span>
                           <Button
                             variant="outline"
                             size="icon"
                             className="h-8 w-8 bg-transparent"
                             onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
+                              updateQuantity(item?.id, item?.quantity + 1)
                             }
                           >
                             <Plus className="h-3 w-3" />
@@ -90,7 +92,7 @@ export function CartItems() {
 
                         <div className="text-right">
                           <p className="font-medium">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ${(item?.price * item?.quantity).toFixed(2)}
                           </p>
                           <p className="text-muted-foreground text-sm">
                             ${item.price} each
@@ -107,13 +109,13 @@ export function CartItems() {
                       </div>
 
                       <div className="text-muted-foreground text-xs">
-                        Shipping: ${item.shipping.cost} •{" "}
-                        {item.shipping.estimatedDays}
+                        Shipping: ${item?.shipping?.cost} •{" "}
+                        {item?.shipping?.estimatedDays}
                       </div>
                     </div>
                   </div>
 
-                  {index < items.length - 1 && <Separator className="mt-4" />}
+                  {index < items?.length - 1 && <Separator className="mt-4" />}
                 </div>
               ))}
 
@@ -121,7 +123,7 @@ export function CartItems() {
 
               <div className="flex items-center justify-between pt-2">
                 <span className="font-medium">Seller Subtotal:</span>
-                <span className="font-bold">${sellerTotal.toFixed(2)}</span>
+                <span className="font-bold">${sellerTotal?.toFixed(2)}</span>
               </div>
             </CardContent>
           </Card>
